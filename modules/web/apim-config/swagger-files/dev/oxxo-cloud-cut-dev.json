@@ -1,0 +1,596 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Oxxo.Cloud.Cut - DEV",
+    "description": "API tec Oxxo.Cloud.Cut - DEV",
+    "version": "1.0"
+  },
+  "paths": {
+    "/api/v{version}/Cuts/POST": {
+      "post": {
+        "tags": [
+          "Cuts-DEV"
+        ],
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CutXZDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CutXZDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CutXZDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostResponse"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error"
+          },
+          "502": {
+            "description": "Server Error"
+          },
+          "504": {
+            "description": "Server Error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CutXZDto": {
+        "type": "object",
+        "properties": {
+          "crPlace": {
+            "type": "string",
+            "nullable": true
+          },
+          "crStore": {
+            "type": "string",
+            "nullable": true
+          },
+          "outXZInfo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutXZInfoDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "OutXZCancellationsDto": {
+        "type": "object",
+        "properties": {
+          "cancellatioN_COUNT": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cancellatioN_AMOUNT": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OutXZCommissionsInfoDto": {
+        "type": "object",
+        "properties": {
+          "commissioN_AMOUNT": {
+            "type": "number",
+            "format": "double"
+          },
+          "taX_COMMISSION_AMOUNT": {
+            "type": "number",
+            "format": "double"
+          },
+          "grosS_COMMISSION_AMOUNT": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OutXZHeaderInfoDto": {
+        "type": "object",
+        "properties": {
+          "ouT_NUMBER": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "typE_OUT": {
+            "type": "string",
+            "nullable": true
+          },
+          "casH_NUMBER": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "exchangE_RATE": {
+            "type": "number",
+            "format": "double"
+          },
+          "z_OUT_LAST_TIME": {
+            "type": "string",
+            "nullable": true
+          },
+          "z_OUT_LAST_DATE": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "OutXZInfoDto": {
+        "type": "object",
+        "properties": {
+          "outXZHeaderInfo": {
+            "$ref": "#/components/schemas/OutXZHeaderInfoDto"
+          },
+          "outXZIntEndInfo": {
+            "$ref": "#/components/schemas/OutXZIntEndInfoDto"
+          },
+          "itemReturns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutXZItemReturnInfoDto"
+            },
+            "nullable": true
+          },
+          "totaL_REFUND": {
+            "type": "number",
+            "format": "double"
+          },
+          "outXZPromoDetailInfo": {
+            "$ref": "#/components/schemas/OutXZPromoDetailInfoDto"
+          },
+          "keys": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutXZKeyInfoDto"
+            },
+            "nullable": true
+          },
+          "keysTotal": {
+            "type": "number",
+            "format": "double"
+          },
+          "wayPays": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutXZWayPayInfoDto"
+            },
+            "nullable": true
+          },
+          "voucherS_COUNT": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "outXZCancellations": {
+            "$ref": "#/components/schemas/OutXZCancellationsDto"
+          },
+          "customerS_COUNT": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "outXZSalesTaxesInfo": {
+            "$ref": "#/components/schemas/OutXZSalesTaxesInfoDto"
+          },
+          "outXZCommissionsInfo": {
+            "$ref": "#/components/schemas/OutXZCommissionsInfoDto"
+          },
+          "outXZTotalServicesInfo": {
+            "$ref": "#/components/schemas/OutXZTotalServicesInfoDto"
+          },
+          "outXZWithdrawalsInfo": {
+            "$ref": "#/components/schemas/OutXZWithdrawalsInfoDto"
+          },
+          "services": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutXZServiceInfoDto"
+            },
+            "nullable": true
+          },
+          "outXZServicesDelInfo": {
+            "$ref": "#/components/schemas/OutXZServicesDelInfoDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OutXZIntEndInfoDto": {
+        "type": "object",
+        "properties": {
+          "starT_OPERATION": {
+            "type": "string",
+            "nullable": true
+          },
+          "enD_OPERATION": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "OutXZItemReturnInfoDto": {
+        "type": "object",
+        "properties": {
+          "iteM_RETURN": {
+            "type": "string",
+            "nullable": true
+          },
+          "returN_QUANTITY": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "returN_AMOUNT": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OutXZKeyInfoDto": {
+        "type": "object",
+        "properties": {
+          "keY_NAME": {
+            "type": "string",
+            "nullable": true
+          },
+          "keY_TOTAL": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OutXZPromoDetailInfoDto": {
+        "type": "object",
+        "properties": {
+          "giftS_AMOUNT": {
+            "type": "number",
+            "format": "double"
+          },
+          "bonuseS_AMOUNT": {
+            "type": "number",
+            "format": "double"
+          },
+          "gifT_RETURN_AMOUNT": {
+            "type": "number",
+            "format": "double"
+          },
+          "bonuseS_RETURN_AMOUNT": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OutXZSalesTaxesInfoDto": {
+        "type": "object",
+        "properties": {
+          "saleS_AMOUNT": {
+            "type": "number",
+            "format": "double"
+          },
+          "taX_SALES_AMOUNT": {
+            "type": "number",
+            "format": "double"
+          },
+          "grosS_SALES": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OutXZServiceDetailInfoDto": {
+        "type": "object",
+        "properties": {
+          "number": {
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number",
+            "format": "double"
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "sendmoney": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "OutXZServiceInfoDto": {
+        "type": "object",
+        "properties": {
+          "iteM_DESCRIPTION": {
+            "type": "string",
+            "nullable": true
+          },
+          "iteM_SKU": {
+            "type": "string",
+            "nullable": true
+          },
+          "counT_SERVICE": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totaL_SERVICE": {
+            "type": "number",
+            "format": "double"
+          },
+          "taX_SERVICE": {
+            "type": "number",
+            "format": "double"
+          },
+          "counT_SERVICE_CANCEL": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totaL_SERVICE_CANCEL": {
+            "type": "number",
+            "format": "double"
+          },
+          "taX_SERVICE_CANCEL": {
+            "type": "number",
+            "format": "double"
+          },
+          "counT_SERVICE_CONSUL": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totaL_SERVICE_CONSUL": {
+            "type": "number",
+            "format": "double"
+          },
+          "taX_SERVICE_CONSUL": {
+            "type": "number",
+            "format": "double"
+          },
+          "line": {
+            "type": "string",
+            "nullable": true
+          },
+          "dS_ENMASK": {
+            "type": "string",
+            "nullable": true
+          },
+          "detailServices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutXZServiceDetailInfoDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "OutXZServicesDelInfoDto": {
+        "type": "object",
+        "properties": {
+          "servicE_DEL_COUNT": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "servicE_DEL_AMOUNT": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OutXZTotalServicesInfoDto": {
+        "type": "object",
+        "properties": {
+          "totaL_REVENUES": {
+            "type": "number",
+            "format": "double"
+          },
+          "totaL_SERVICES": {
+            "type": "number",
+            "format": "double"
+          },
+          "taX_SERVICES": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OutXZWayPayInfoDto": {
+        "type": "object",
+        "properties": {
+          "payMethod": {
+            "type": "string",
+            "nullable": true
+          },
+          "payAmount": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OutXZWithdrawalsInfoDto": {
+        "type": "object",
+        "properties": {
+          "totaL_Z": {
+            "type": "number",
+            "format": "double"
+          },
+          "totaL_WITHDRAWAL": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PostResponse": {
+        "type": "object",
+        "properties": {
+          "sync": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "instance": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": { }
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "apiKey",
+        "description": "JWT Authorization header using the Bearer scheme. \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: \"Bearer {token}\"",
+        "name": "Authorization",
+        "in": "header"
+      },
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "name": "Ocp-Apim-Subscription-Key",
+        "in": "header"
+      },
+      "apiKeyQuery": {
+        "type": "apiKey",
+        "name": "subscription-key",
+        "in": "query"
+      }
+    }
+  },
+  "security": [
+    {
+      "Bearer": [ ]
+    }
+  ]
+}
