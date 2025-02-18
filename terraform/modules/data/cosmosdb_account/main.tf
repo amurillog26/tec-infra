@@ -28,7 +28,7 @@ resource "azurerm_cosmosdb_account" "tec_cosmos_ac" {
   offer_type          = var.cosmos_account_offer_type
   kind                = var.cosmos_account_kind
 
-  automatic_failover_enabled     = local.account_enable_automatic_failover
+  enable_automatic_failover     = false  # Cambiado a false para serverless
   public_network_access_enabled = var.cosmos_public_access
   network_acl_bypass_for_azure_services = true
 
@@ -43,14 +43,8 @@ resource "azurerm_cosmosdb_account" "tec_cosmos_ac" {
   }
 
   geo_location {
-    location          = var.cosmos_failover_az_region
-    failover_priority = 1
-  }
-
-  geo_location {
     location          = var.main_vn_location
     failover_priority = 0
-    zone_redundant    = true
   }
 
   backup {
@@ -60,42 +54,6 @@ resource "azurerm_cosmosdb_account" "tec_cosmos_ac" {
   }
 
   tags = var.tags
-}
-
-resource "azurerm_cosmosdb_sql_database" "tec_databases" {
-  for_each            = toset(local.cosmos_databases)
-  name                = each.value
-  resource_group_name = var.main_rg_name
-  account_name        = azurerm_cosmosdb_account.tec_cosmos_ac.name
-}
-
-resource "azurerm_cosmosdb_sql_container" "tec_containers" {
-  for_each = {
-    for cn in local.cosmos_containers : "${cn.database_name}-${cn.container_name}" => cn
-  }
-
-  name                = each.value.container_name
-  resource_group_name = var.main_rg_name
-  account_name        = azurerm_cosmosdb_account.tec_cosmos_ac.name
-  database_name       = each.value.database_name
-  partition_key_paths = [each.value.partition_key]  # Convertimos el string en una lista
-  throughput          = each.value.throughput
-
-  indexing_policy {
-    indexing_mode = "consistent"
-
-    included_path {
-      path = "/*"
-    }
-
-    excluded_path {
-      path = "/\"_etag\"/?"
-    }
-  }
-
-  depends_on = [
-    azurerm_cosmosdb_sql_database.tec_databases
-  ]
 }
 
 # Private Endpoint Configuration

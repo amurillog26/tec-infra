@@ -18,35 +18,35 @@ variable "acr_name" {
   description = "Nombre de Azure Container Registry"
 }
 
-variable "acr_private_endpoint_name" {
-  type        = string
-  description = "Private Endpoint Name for ACR"
-}
+# variable "acr_private_endpoint_name" {
+#   type        = string
+#   description = "Private Endpoint Name for ACR"
+# }
 
-variable "acr_private_endpoint_subnet_id" {
-  type        = string
-  description = "Subnet Id of Private endpoint for ACR"
-}
+# variable "acr_private_endpoint_subnet_id" {
+#   type        = string
+#   description = "Subnet Id of Private endpoint for ACR"
+# }
 
-variable "acr_private_link_name" {
-  type        = string
-  description = "Name of Private Link Service Connection for Private Endpoint and ACR"
-}
+# variable "acr_private_link_name" {
+#   type        = string
+#   description = "Name of Private Link Service Connection for Private Endpoint and ACR"
+# }
 
-variable "acr_private_dns_zone" {
-  type        = string
-  description = "Private DNS Zone name"
-}
+# variable "acr_private_dns_zone" {
+#   type        = string
+#   description = "Private DNS Zone name"
+# }
 
-variable "acr_vnet_dns_link" {
-  type        = string
-  description = "Name of Virtual Network Link with Private Zone ACR"
-}
+# variable "acr_vnet_dns_link" {
+#   type        = string
+#   description = "Name of Virtual Network Link with Private Zone ACR"
+# }
 
-variable "main_vn_id" {
-  type        = string
-  description = "Virtual Network Main ID"
-}
+# variable "main_vn_id" {
+#   type        = string
+#   description = "Virtual Network Main ID"
+# }
 
 variable "acr_admin_enabled" {
   type        = bool
