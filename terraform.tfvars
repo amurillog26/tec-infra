@@ -58,23 +58,23 @@ address_space       = ["10.97.174.0/23"]
 
 subnets = {
   "snet_gpt_agw_dev" = {
-    address_prefixes = ["10.97.174.0/27"]
+    address_prefixes = ["10.97.174.0/27"]  # 32 IPs: 10.97.174.0 - 10.97.174.31
     service_endpoints = ["Microsoft.Web"]
-  }
+  },
   "snet_gpt_apim_dev" = {
-    address_prefixes = ["10.97.174.32/27"]
+    address_prefixes = ["10.97.174.32/27"]  # 32 IPs: 10.97.174.32 - 10.97.174.63
     service_endpoints = ["Microsoft.Web", "Microsoft.ContainerRegistry"]
-  }
+  },
   "snet_gpt_aks_dev" = {
-    address_prefixes = ["10.97.174.64/25"]
+    address_prefixes = ["10.97.174.64/27"]  # 128 IPs: 10.97.174.0 - 10.97.174.127
     service_endpoints = ["Microsoft.ContainerRegistry"]
-  }
+  },
   "snet_gpt_int_dev" = {
-    address_prefixes = ["10.97.174.192/27"]
+    address_prefixes = ["10.97.174.128/27"]  # 32 IPs: 10.97.174.128 - 10.97.174.159
     service_endpoints = ["Microsoft.Web"]
-  }
+  },
   "snet_gpt_vm_dev" = {
-    address_prefixes = ["10.97.174.224/27"]
+    address_prefixes = ["10.97.174.160/27"]  # 32 IPs: 10.97.174.160 - 10.97.174.191
     service_endpoints = ["Microsoft.Web"]
   }
 }
@@ -119,3 +119,31 @@ cosmos_sql_databases = [
 enable_private_endpoint     = false  # true for prod
 private_dns_zone_id        = null   # Required for prod
 log_analytics_workspace_id = "/subscriptions/xxxx/resourceGroups/rg-monitoring/providers/Microsoft.OperationalInsights/workspaces/log-analytics-workspace"
+
+# Container Registry
+acr_name           = "crgptoaidev"  # Debe ser globalmente único
+acr_admin_enabled  = true           # Habilitado para desarrollo
+acr_public         = true           # Público para desarrollo
+
+service_plans = {
+  "plan1" = {
+    name                    = "asp-gpt-api-dev"
+    sku_name               = "P1v2"
+    os_type                = "Linux"
+    worker_count           = 3
+    zone_balancing_enabled = true
+  }
+}
+
+# # Web Apps
+# web_apps = {
+#   "api" = {
+#     name            = "app-gpt-api-dev"
+#     subnet_id       = null  # Opcional
+#     app_settings = {
+#       "WEBSITES_PORT" = "8080"
+#       "API_VERSION"   = "v1"
+#     }
+#     ip_restrictions = {}  # Opcional, pero necesitamos incluirlo vacío si no lo usamos
+#   }
+# }

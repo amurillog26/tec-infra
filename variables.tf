@@ -160,3 +160,51 @@ variable "log_analytics_workspace_id" {
   type        = string
   description = "Log Analytics Workspace ID for diagnostics"
 }
+
+# Container Registry Variables
+variable "acr_name" {
+  type        = string
+  description = "Name of the Azure Container Registry"
+}
+
+variable "acr_admin_enabled" {
+  type        = bool
+  description = "Enable admin user for the Container Registry"
+  default     = false
+}
+
+variable "acr_public" {
+  type        = bool
+  description = "Enable public access to Container Registry"
+  default     = true
+}
+
+variable "service_plans" {
+  type = map(object({
+    name                    = string
+    sku_name                = string
+    os_type                 = string
+    worker_count            = number
+    zone_balancing_enabled  = bool
+  }))
+  description = "Map of service plans"
+  
+}
+
+# variable "web_apps" {
+#   type = map(object({
+#     name                   = string
+#     service_plan_id        = string
+#     subnet_id             = optional(string)
+#     vnet_route_all_enabled = optional(bool, false)
+#     app_settings          = map(string)
+#     ip_restrictions       = optional(map(object({
+#       name       = string
+#       ip_address = optional(string)
+#       subnet_id  = optional(string)
+#       priority   = number
+#       action     = string
+#     })))
+#   }))
+#   description = "Map of web apps to create"
+# }
