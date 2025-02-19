@@ -424,3 +424,15 @@ variable "managed_identity" {
   })
   description = "Managed identity configuration"
 }
+
+variable "public_ips" {
+  type = map(object({
+    name              = string
+    allocation_method = string
+    sku              = string
+    sku_tier         = optional(string)
+    zones            = optional(list(string))
+    tags             = map(string)
+  }))
+  description = "Configuración de las IPs públicas"
+}

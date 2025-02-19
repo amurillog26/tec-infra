@@ -442,3 +442,19 @@ managed_identity = {
     workload    = "oai"
   }
 }
+
+
+# Public IPs
+public_ips = {
+  "pip_agw_gpt_dev" = {
+    name              = "pip-agw-gpt-dev"
+    allocation_method = "Static"
+    sku              = "Standard"
+    sku_tier         = "Regional"
+    zones            = ["1", "2", "3"]
+    tags = {
+      environment = "dev"
+      workload    = "oai"
+    }
+  }
+}
