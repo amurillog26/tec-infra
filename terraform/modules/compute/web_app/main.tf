@@ -1,3 +1,4 @@
+# main.tf
 locals {
   is_production = var.environment != "dev"
 }
@@ -17,7 +18,8 @@ resource "azurerm_linux_web_app" "web_app" {
     always_on               = true
     minimum_tls_version     = "1.2"
     vnet_route_all_enabled  = local.is_production ? true : false
-
+    use_32_bit_worker      = false
+  
     dynamic "ip_restriction" {
       for_each = local.is_production ? (each.value.ip_restrictions != null ? each.value.ip_restrictions : {}) : {}
       content {
@@ -48,4 +50,10 @@ resource "azurerm_linux_web_app" "web_app" {
     WebApp = each.value.name
     Environment = var.environment
   })
+
+  lifecycle {
+    ignore_changes = [
+      app_settings["DOCKER_REGISTRY_SERVER_PASSWORD"]
+    ]
+  }
 }
