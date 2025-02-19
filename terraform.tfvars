@@ -135,15 +135,183 @@ service_plans = {
   }
 }
 
-# # Web Apps
-# web_apps = {
-#   "api" = {
-#     name            = "app-gpt-api-dev"
-#     subnet_id       = null  # Opcional
-#     app_settings = {
-#       "WEBSITES_PORT" = "8080"
-#       "API_VERSION"   = "v1"
-#     }
-#     ip_restrictions = {}  # Opcional, pero necesitamos incluirlo vacío si no lo usamos
-#   }
-# }
+# Web Apps
+web_apps = {
+  "api" = {
+    name            = "app-gpt-api-dev"
+    subnet_id       = null  # Opcional para ambiente dev
+    docker_image    = "mcr.microsoft.com/appsvc/staticsite"  # Ajusta según tu imagen
+    docker_image_tag = "latest"
+    app_settings = {
+      "WEBSITES_PORT" = "8080"
+      "API_VERSION"   = "v1"
+      "ENVIRONMENT"   = "development"
+      "DOCKER_ENABLE_CI" = "true"
+    }
+    ip_restrictions = {}  # Vacío para dev, pero requerido
+  }
+}
+
+
+apim = {
+  name                = "apim-gpt-api-dev"
+  publisher_name      = "GPT Dev Team"
+  publisher_email     = "admin@yourdomain.com"
+  sku_name           = "Developer_1"
+  capacity           = 1
+  subnet_id          = null  # Para dev, en prod sería el ID de la subnet
+
+  virtual_network_type = "None"  # None, External, Internal
+  protocols = {
+    enable_http2 = true
+  }
+
+  security = {
+    enable_backend_ssl30  = false
+    enable_backend_tls10  = false
+    enable_backend_tls11  = false
+    enable_frontend_ssl30 = false
+    enable_frontend_tls10 = false
+    enable_frontend_tls11 = false
+  }
+
+  identity_type = "SystemAssigned"
+
+  policy = {
+    xml_content = <<XML
+    <policies>
+      <inbound>
+        <cors>
+          <allowed-origins>
+            <origin>https://api-dev.yourdomain.com</origin>
+          </allowed-origins>
+          <allowed-methods>
+            <method>GET</method>
+            <method>POST</method>
+          </allowed-methods>
+          <allowed-headers>
+            <header>content-type</header>
+            <header>authorization</header>
+          </allowed-headers>
+        </cors>
+        <base />
+      </inbound>
+      <backend>
+        <base />
+      </backend>
+      <outbound>
+        <base />
+      </outbound>
+      <on-error>
+        <base />
+      </on-error>
+    </policies>
+    XML
+  }
+
+  # Productos predefinidos
+  products = {
+    "basic" = {
+      product_id            = "basic"
+      display_name         = "Basic"
+      description         = "Basic tier with limited calls"
+      subscription_required = true
+      approval_required    = false
+      published           = true
+      subscriptions_limit = 1
+    },
+    "standard" = {
+      product_id            = "standard"
+      display_name         = "Standard"
+      description         = "Standard tier with higher limits"
+      subscription_required = true
+      approval_required    = true
+      published           = true
+      subscriptions_limit = 1
+    }
+  }
+
+  # APIs predefinidas
+  apis = {
+    "gpt-api" = {
+      name         = "gpt-api"
+      display_name = "GPT API"
+      path         = "gpt"
+      protocols    = ["https"]
+      revision     = "1"
+      version      = "v1"
+      version_set = {
+        name = "gpt-api"
+        versioning_scheme = "Segment"
+      }
+    }
+  }
+
+  named_values = {
+    "ApiBaseUrl" = {
+      display_name = "ApiBaseUrl"
+      value        = "https://app-gpt-api-dev.azurewebsites.net"
+    },
+    "Environment" = {
+      display_name = "Environment"
+      value        = "development"
+    }
+  }
+
+  # Configuraciones adicionales
+  additional_settings = {
+    enable_sign_in = false
+    enable_sign_up = false
+  }
+
+  tags = {
+    environment = "dev"
+    workload    = "oai"
+  }
+}
+
+
+redis_cache = {
+  "redis_gpt_cache_dev" = {
+    name                = "redis-gpt-cache-dev"
+    capacity            = 1
+    family             = "C"
+    sku_name           = "Basic"
+    minimum_tls_version = "1.2"
+    
+    redis_configuration = {
+      maxmemory_policy     = "allkeys-lru"
+      maxfragmentationmemory_reserved = 50
+      maxmemory_reserved              = 50
+    }
+
+    patch_schedule = {
+      day_of_week    = "Sunday"
+      start_hour_utc = 2
+    }
+
+    private_endpoint = {
+      enabled = false  # Para dev lo dejamos en false
+      # subnet_id = module.networking.subnet_ids["snet_gpt_redis_dev"]  # Se usaría en prod
+    }
+
+    alerts = {
+      cpu_threshold = 80
+      memory_threshold = 80
+      connection_threshold = 1000
+    }
+
+    # ACLs para desarrollo
+    firewall_rules = {
+      "AllowAll" = {
+        start_ip = "0.0.0.0"
+        end_ip   = "255.255.255.255"
+      }
+    }
+
+    tags = {
+      environment = "dev"
+      workload    = "oai"
+    }
+  }
+}

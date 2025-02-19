@@ -1,14 +1,60 @@
-output "web_app_ids" {
-  description = "Map of web app names to their IDs"
-  value       = { for k, v in azurerm_linux_web_app.web_app : k => v.id }
+# variables.tf
+variable "resource_group_name" {
+  type        = string
+  description = "Resource group name"
 }
 
-output "web_app_urls" {
-  description = "Map of web app names to their default URLs"
-  value       = { for k, v in azurerm_linux_web_app.web_app : k => v.default_hostname }
+variable "location" {
+  type        = string
+  description = "Location for resources"
 }
 
-output "web_app_identities" {
-  description = "Map of web app names to their managed identities"
-  value       = { for k, v in azurerm_linux_web_app.web_app : k => v.identity[0].principal_id }
+variable "environment" {
+  type        = string
+  description = "Environment (dev, pre, prod)"
+  validation {
+    condition     = contains(["dev", "pre", "prod"], var.environment)
+    error_message = "Environment must be one of: dev, pre, prod."
+  }
+}
+
+variable "web_apps" {
+  type = map(object({
+    name              = string
+    service_plan_id   = string
+    subnet_id         = optional(string)
+    docker_image      = optional(string)
+    docker_image_tag  = optional(string)
+    app_settings      = map(string)
+    ip_restrictions   = optional(map(object({
+      name            = string
+      ip_address      = optional(string)
+      subnet_id       = optional(string)
+      priority        = number
+      action          = string
+    })))
+  }))
+  description = "Map of web apps to create"
+}
+
+variable "acr_login_server" {
+  type        = string
+  description = "ACR login server URL"
+}
+
+variable "acr_admin_username" {
+  type        = string
+  description = "ACR admin username"
+}
+
+variable "acr_admin_password" {
+  type        = string
+  description = "ACR admin password"
+  sensitive   = true
+}
+
+variable "tags" {
+  type        = map(string)
+  description = "Tags for resources"
+  default     = {}
 }
