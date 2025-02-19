@@ -315,3 +315,146 @@ redis_cache = {
     }
   }
 }
+
+application_gateway = {
+  name = "agw-gpt-web-dev"
+  sku = {
+    name     = "WAF_v2"
+    tier     = "WAF_v2"
+    capacity = 2
+  }
+
+  # Dejaremos estas configuraciones pendientes para ser establecidas en el módulo
+  gateway_ip_configurations = {
+    main = {
+      subnet_id = null  # Se establecerá en el módulo
+    }
+  }
+
+  frontend_ip_configurations = {
+    public = {
+      name                 = "frontend-public"
+      public_ip_address_id = null  # Se establecerá en el módulo
+    }
+  }
+
+  frontend_ports = {
+    "443" = {
+      name = "frontend-443"
+      port = 443
+    }
+    "80" = {
+      name = "frontend-80"
+      port = 80
+    }
+  }
+
+  ssl_certificates = {}  # Vacío para desarrollo inicial
+
+  backend_address_pools = {
+    "web-backend" = {
+      name  = "web-backend"
+      fqdns = ["app-gpt-api-dev.azurewebsites.net"]
+    }
+  }
+
+  backend_http_settings = {
+    "http-settings" = {
+      name                  = "http-settings"
+      cookie_based_affinity = "Disabled"
+      path                 = "/"
+      port                 = 80
+      protocol            = "Http"
+      request_timeout     = 60
+      probe_name         = "health-probe"
+    }
+  }
+
+  http_listeners = {
+    "http-listener" = {
+      name                           = "http-listener"
+      frontend_ip_configuration_name = "frontend-public"
+      frontend_port_name            = "frontend-80"
+      protocol                      = "Http"
+    }
+  }
+
+  probes = {
+    "health-probe" = {
+      name                = "health-probe"
+      host               = "app-gpt-api-dev.azurewebsites.net"
+      path               = "/health"
+      interval           = 30
+      timeout            = 30
+      unhealthy_threshold = 3
+      protocol           = "Http"
+      port               = 80
+      match = {
+        status_codes = ["200-399"]
+      }
+    }
+  }
+
+  request_routing_rules = {
+    "main-rule" = {
+      name                       = "main-rule"
+      rule_type                 = "Basic"
+      http_listener_name        = "http-listener"
+      backend_address_pool_name = "web-backend"
+      backend_http_settings_name = "http-settings"
+      priority                  = 100
+    }
+  }
+
+  waf_configuration = {
+    enabled                  = true
+    firewall_mode           = "Prevention"
+    rule_set_type          = "OWASP"
+    rule_set_version       = "3.2"
+    file_upload_limit_mb   = 100
+    request_body_check     = true
+    max_request_body_size_kb = 128
+    disabled_rule_groups = []
+    exclusions = []
+  }
+
+  ssl_policy = {
+    policy_type = "Predefined"
+    policy_name = "AppGwSslPolicy20170401S"
+  }
+
+  private_link_configuration = {
+    enabled = false
+  }
+
+  tags = {
+    environment = "dev"
+    workload    = "oai"
+  }
+}
+
+# Managed Identity configuration
+managed_identity = {
+  name                = "id-agw-gpt-dev-001"
+  assign_key_vault_role = true  
+  tags = {
+    environment = "dev"
+    workload    = "oai"
+  }
+}
+
+
+# Public IPs
+public_ips = {
+  "pip_agw_gpt_dev" = {
+    name              = "pip-agw-gpt-dev"
+    allocation_method = "Static"
+    sku              = "Standard"
+    sku_tier         = "Regional"
+    zones            = ["1", "2", "3"]
+    tags = {
+      environment = "dev"
+      workload    = "oai"
+    }
+  }
+}
