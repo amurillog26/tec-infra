@@ -1,61 +1,52 @@
 variable "main_rg_name" {
-  type          = string
-  description   = "Nombre de Resouce Group principal para tec"
+  description = "Nombre del grupo de recursos principal"
+  type        = string
 }
 
 variable "main_vn_location" {
-  type          = string
-  description   = "Region donde sera creada la Virtual Network principal para XPOX"
-}
-
-variable "resource_tags" {
-  type        = map(string)
-  description = "Tags de recursos"
-}
-
-variable "vm_nic_name" {
-  type          = string
-  description   = "Nombre de NIC de vm Host"
-}
-
-variable "vm_subnet_id" {
-  type          = string
-  description   = "ID de Subnet publica de vm Host"
+  description = "Ubicación de la red virtual principal"
+  type        = string
 }
 
 variable "vm_name" {
-  type          = string
-  description   = "Nombre de vm Host" 
+  description = "Nombre de la máquina virtual"
+  type        = string
 }
 
-variable "vm_size"{
-  type          = string
-  description   = "The size of the Virtual Machine"
+variable "vm_nic_name" {
+  description = "Nombre de la interfaz de red de la VM"
+  type        = string
 }
 
-variable "vm_hostname"{
-  type          = string
-  description   = "The hostname of the Virtual Machine"
+variable "vm_subnet_id" {
+  description = "ID de la subred donde se desplegará la VM"
+  type        = string
 }
 
-variable "vm_admin_username"{
-  type          = string
-  description   = "The admin username of the Virtual Machine"
-  sensitive     = true
+variable "vm_size" {
+  description = "Tamaño de la máquina virtual"
+  type        = string
+  default     = "Standard_B4ms"
 }
 
-variable "vm_admin_ssh_pub"{
-  type          = string
-  description   = "The SSH public key of the admin user"
-  sensitive     = true
+variable "vm_admin_username" {
+  description = "Nombre de usuario administrador"
+  type        = string
 }
 
-variable "vm_vm_sku" {
-  type          = string
-  description = "The version of UbuntuServer"
+variable "vm_admin_password" {
+  description = "Contraseña del usuario administrador"
+  type        = string
+  sensitive   = true
 }
 
-variable "vm_vm_offer" {
-  type          = string
-  description = "The Offer of UbuntuServer"
+variable "vm_hostname" {
+  description = "Nombre de host de la máquina virtual"
+  type        = string
+}
+
+variable "resource_tags" {
+  description = "Tags para los recursos"
+  type        = map(string)
+  default     = {}
 }

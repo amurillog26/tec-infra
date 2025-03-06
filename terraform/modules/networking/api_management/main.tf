@@ -6,7 +6,10 @@ resource "azurerm_api_management" "apim" {
   publisher_name      = var.apim.publisher_name
   publisher_email     = var.apim.publisher_email
   sku_name           = var.apim.sku_name
-
+  
+  # Según la documentación, public_ip_address_id debería estar aquí
+  public_ip_address_id = lookup(var.apim, "public_ip_address_id", null)
+  
   virtual_network_type = var.apim.virtual_network_type
   
   dynamic "virtual_network_configuration" {
@@ -50,8 +53,13 @@ resource "azurerm_api_management" "apim" {
 
 # Políticas globales
 resource "azurerm_api_management_policy" "global" {
-  api_management_id = azurerm_api_management.apim.id
-  xml_content      = var.apim.policy.xml_content
+  count               = var.apim.policy != null ? 1 : 0  # Hacemos la política opcional
+  api_management_id   = azurerm_api_management.apim.id
+  xml_content        = try(var.apim.policy.xml_content, null)
+
+  depends_on = [
+    azurerm_api_management.apim
+  ]
 }
 
 # Productos
