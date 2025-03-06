@@ -4,7 +4,7 @@ environment = "dev"
 
 storage_accounts = {
   "stgptdev001" = {
-    name = "stgptdev001"
+    name = "stgptdev00demo"
     account_tier = "Standard"
     account_replication_type = "LRS"
     
@@ -17,10 +17,6 @@ storage_accounts = {
     containers = [
       {
         name = "data"
-        access_type = "private"
-      },
-      {
-        name = "logs"
         access_type = "private"
       }
     ]
@@ -40,7 +36,7 @@ tags = {
 
 main_rg_name        = "rg_gpt_oai_dev"
 main_vn_location    = "southcentralus"
-kv_name             = "kv-gpt-oai-dev-001"
+kv_name             = "kv-gpt-oai-dev-001-demo"
 kv_sku_name         = "standard"
 
 resource_tags = {
@@ -48,44 +44,48 @@ resource_tags = {
     workload = "oai"
 }
 
-tenant_id = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
+tenant_id = "ff463ea8-92b7-4e5a-a417-cf03db333692"
 
 ########## vnet ##########
 
 
 vnet_name           = "vnet_gpt_net_dev"
-address_space       = ["10.97.174.0/23"]
+address_space       = ["10.97.174.0/23"]  # Mantiene el rango 10.97.174.0 - 10.97.175.255
 
 subnets = {
   "snet_gpt_agw_dev" = {
-    address_prefixes = ["10.97.174.0/27"]  # 32 IPs: 10.97.174.0 - 10.97.174.31
+    address_prefixes = ["10.97.174.0/27"]     # 32 IPs: 10.97.174.0 - 10.97.174.31
     service_endpoints = ["Microsoft.Web"]
   },
   "snet_gpt_apim_dev" = {
-    address_prefixes = ["10.97.174.32/27"]  # 32 IPs: 10.97.174.32 - 10.97.174.63
+    address_prefixes = ["10.97.174.32/27"]    # 32 IPs: 10.97.174.32 - 10.97.174.63
     service_endpoints = ["Microsoft.Web", "Microsoft.ContainerRegistry"]
   },
   "snet_gpt_aks_dev" = {
-    address_prefixes = ["10.97.174.64/27"]  # 128 IPs: 10.97.174.0 - 10.97.174.127
+    address_prefixes = ["10.97.175.0/24"]     # 256 IPs: 10.97.175.0 - 10.97.175.255 (subnet más grande en otro segmento)
     service_endpoints = ["Microsoft.ContainerRegistry"]
   },
   "snet_gpt_int_dev" = {
-    address_prefixes = ["10.97.174.128/27"]  # 32 IPs: 10.97.174.128 - 10.97.174.159
+    address_prefixes = ["10.97.174.128/27"]   # 32 IPs: 10.97.174.128 - 10.97.174.159
     service_endpoints = ["Microsoft.Web"]
   },
   "snet_gpt_vm_dev" = {
-    address_prefixes = ["10.97.174.160/27"]  # 32 IPs: 10.97.174.160 - 10.97.174.191
+    address_prefixes = ["10.97.174.160/27"]   # 32 IPs: 10.97.174.160 - 10.97.174.191
     service_endpoints = ["Microsoft.Web"]
+  },
+  "snet_gpt_pe_dev" = {
+    address_prefixes = ["10.97.174.192/27"]   # 32 IPs: 10.97.174.192 - 10.97.174.223
+    service_endpoints = ["Microsoft.Web", "Microsoft.Storage", "Microsoft.KeyVault", "Microsoft.ContainerRegistry", "Microsoft.AzureCosmosDB"]
+    private_endpoint_network_policies_enabled = false
   }
 }
 
-
 ########## cosmosdb ##########
 
-cosmos_account_name        = "cosmos-gpt-db-dev"
+cosmos_account_name        = "cosmos-gpt-db-dev-demo"
 cosmos_account_offer_type  = "Standard"
 cosmos_account_kind       = "GlobalDocumentDB"
-cosmos_public_access      = true  # true for dev, false for prod
+cosmos_public_access      = false  # true for dev, false for prod
 cosmos_failover_az_region = "eastus"  # región secundaria para failover
 
 cosmos_sql_databases = [
@@ -121,24 +121,24 @@ private_dns_zone_id        = null   # Required for prod
 log_analytics_workspace_id = "/subscriptions/xxxx/resourceGroups/rg-monitoring/providers/Microsoft.OperationalInsights/workspaces/log-analytics-workspace"
 
 # Container Registry
-acr_name           = "crgptoaidev"  # Debe ser globalmente único
+acr_name           = "crgptoaidevdemo"  # Debe ser globalmente único
 acr_admin_enabled  = true           # Habilitado para desarrollo
 acr_public         = true           # Público para desarrollo
 
 service_plans = {
   "plan1" = {
     name                    = "asp-gpt-api-dev"
-    sku_name               = "P1v2"
+    sku_name               = "S1"
     os_type                = "Linux"
-    worker_count           = 3
-    zone_balancing_enabled = true
+    worker_count           = 1
+    zone_balancing_enabled = false
   }
 }
 
 # Web Apps
 web_apps = {
   "api" = {
-    name            = "app-gpt-api-dev"
+    name            = "app-gpt-api-dev-demo"
     subnet_id       = null  # Opcional para ambiente dev
     docker_image    = "mcr.microsoft.com/appsvc/staticsite"  # Ajusta según tu imagen
     docker_image_tag = "latest"
@@ -154,7 +154,7 @@ web_apps = {
 
 
 apim = {
-  name                = "apim-gpt-api-dev"
+  name                = "apim-gpt-api-dev-demo"
   publisher_name      = "GPT Dev Team"
   publisher_email     = "admin@yourdomain.com"
   sku_name           = "Developer_1"
@@ -179,34 +179,34 @@ apim = {
 
   policy = {
     xml_content = <<XML
-    <policies>
-      <inbound>
+<policies>
+    <inbound>
         <cors>
-          <allowed-origins>
-            <origin>https://api-dev.yourdomain.com</origin>
-          </allowed-origins>
-          <allowed-methods>
-            <method>GET</method>
-            <method>POST</method>
-          </allowed-methods>
-          <allowed-headers>
-            <header>content-type</header>
-            <header>authorization</header>
-          </allowed-headers>
+            <allowed-origins>
+                <origin>https://api-dev.yourdomain.com</origin>
+            </allowed-origins>
+            <allowed-methods>
+                <method>GET</method>
+                <method>POST</method>
+            </allowed-methods>
+            <allowed-headers>
+                <header>content-type</header>
+                <header>authorization</header>
+            </allowed-headers>
         </cors>
         <base />
-      </inbound>
-      <backend>
+    </inbound>
+    <backend>
         <base />
-      </backend>
-      <outbound>
+    </backend>
+    <outbound>
         <base />
-      </outbound>
-      <on-error>
+    </outbound>
+    <on-error>
         <base />
-      </on-error>
-    </policies>
-    XML
+    </on-error>
+</policies>
+XML
   }
 
   # Productos predefinidos
@@ -250,7 +250,7 @@ apim = {
   named_values = {
     "ApiBaseUrl" = {
       display_name = "ApiBaseUrl"
-      value        = "https://app-gpt-api-dev.azurewebsites.net"
+      value        = "https://app-gpt-api-dev-demo.azurewebsites.net"
     },
     "Environment" = {
       display_name = "Environment"
@@ -273,7 +273,7 @@ apim = {
 
 redis_cache = {
   "redis_gpt_cache_dev" = {
-    name                = "redis-gpt-cache-dev"
+    name                = "redis-gpt-cache-dev-demo"
     capacity            = 1
     family             = "C"
     sku_name           = "Basic"
@@ -354,7 +354,7 @@ application_gateway = {
   backend_address_pools = {
     "web-backend" = {
       name  = "web-backend"
-      fqdns = ["app-gpt-api-dev.azurewebsites.net"]
+      fqdns = ["app-gpt-api-dev-demo.azurewebsites.net"]
     }
   }
 
@@ -382,7 +382,7 @@ application_gateway = {
   probes = {
     "health-probe" = {
       name                = "health-probe"
-      host               = "app-gpt-api-dev.azurewebsites.net"
+      host               = "app-gpt-api-dev-demo.azurewebsites.net"
       path               = "/health"
       interval           = 30
       timeout            = 30
@@ -456,5 +456,104 @@ public_ips = {
       environment = "dev"
       workload    = "oai"
     }
+  }
+}
+
+# Configuración de Private Endpoints
+private_endpoints = {
+  # Key Vault Private Endpoint
+  "pe-kv-gpt-oai-dev" = {
+    name              = "pe-kv-gpt-oai-dev"
+    subnet_key        = "snet_gpt_int_dev"
+    resource_id       = "/subscriptions/8ceae346-107e-495e-81a7-bc733dcf308c/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.KeyVault/vaults/kv-gpt-oai-dev-001-demo"
+    subresource_names = ["vault"]
+    private_dns_zone_ids = [
+      "/subscriptions/8ceae346-107e-495e-81a7-bc733dcf308c/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/privateDnsZones/privatelink.vaultcore.azure.net"
+    ]
+  },
+  
+  # Cosmos DB Private Endpoint
+  "pe-cosmos-gpt-db-dev" = {
+    name              = "pe-cosmos-gpt-db-dev"
+    subnet_key        = "snet_gpt_int_dev"
+    resource_id       = "/subscriptions/8ceae346-107e-495e-81a7-bc733dcf308c/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.DocumentDB/databaseAccounts/cosmos-gpt-db-dev-demo"
+    subresource_names = ["Sql"]
+    private_dns_zone_ids = [
+      "/subscriptions/8ceae346-107e-495e-81a7-bc733dcf308c/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/privateDnsZones/privatelink.documents.azure.com"
+    ]
+  },
+  
+  # Storage Account Blob Private Endpoint
+  "pe-stgptdev001-blob" = {
+    name              = "pe-stgptdev001-blob"
+    subnet_key        = "snet_gpt_int_dev"
+    resource_id       = "/subscriptions/8ceae346-107e-495e-81a7-bc733dcf308c/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Storage/storageAccounts/stgptdev001demo"
+    subresource_names = ["blob"]
+    private_dns_zone_ids = [
+      "/subscriptions/8ceae346-107e-495e-81a7-bc733dcf308c/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/privateDnsZones/privatelink.blob.core.windows.net"
+    ]
+  },
+  
+  # Redis Cache Private Endpoint
+  "pe-redis-gpt-cache-dev" = {
+    name              = "pe-redis-gpt-cache-dev"
+    subnet_key        = "snet_gpt_int_dev"
+    resource_id       = "/subscriptions/8ceae346-107e-495e-81a7-bc733dcf308c/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Cache/Redis/redis-gpt-cache-dev-demo"
+    subresource_names = ["redisCache"]
+    private_dns_zone_ids = [
+      "/subscriptions/8ceae346-107e-495e-81a7-bc733dcf308c/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/privateDnsZones/privatelink.redis.cache.windows.net"
+    ]
+  },
+  
+  # Container Registry Private Endpoint
+  "pe-crgptoaidev" = {
+    name              = "pe-crgptoaidev"
+    subnet_key        = "snet_gpt_int_dev"
+    resource_id       = "/subscriptions/{subscription_id}/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.ContainerRegistry/registries/crgptoaidevdemo"
+    subresource_names = ["registry"]
+    private_dns_zone_ids = [
+      "/subscriptions/{subscription_id}/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/privateDnsZones/privatelink.azurecr.io"
+    ]
+  },
+  
+  # API Management Private Endpoint
+  # "pe-apim-gpt-api-dev" = {
+  #   name              = "pe-apim-gpt-api-dev"
+  #   subnet_key        = "snet_gpt_int_dev"
+  #   resource_id       = "/subscriptions/{subscription_id}/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.ApiManagement/service/apim-gpt-api-dev-demo"
+  #   subresource_names = ["gateway"]
+  #   private_dns_zone_ids = [
+  #     "/subscriptions/{subscription_id}/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/privateDnsZones/privatelink.azure-api.net"
+  #   ]
+  # }
+}
+# Configuración de Private DNS Zones
+private_dns_zones = {
+  "privatelink.vaultcore.azure.net" = {
+    name = "privatelink.vaultcore.azure.net"
+  },
+  "privatelink.documents.azure.com" = {
+    name = "privatelink.documents.azure.com"
+  },
+  "privatelink.blob.core.windows.net" = {
+    name = "privatelink.blob.core.windows.net"
+  },
+  "privatelink.file.core.windows.net" = {
+    name = "privatelink.file.core.windows.net"
+  },
+  "privatelink.table.core.windows.net" = {
+    name = "privatelink.table.core.windows.net"
+  },
+  "privatelink.redis.cache.windows.net" = {
+    name = "privatelink.redis.cache.windows.net"
+  },
+  "privatelink.azurecr.io" = {
+    name = "privatelink.azurecr.io"
+  },
+  "privatelink.azure-api.net" = {
+    name = "privatelink.azure-api.net"
+  },
+  "privatelink.azurewebsites.net" = {
+    name = "privatelink.azurewebsites.net"
   }
 }

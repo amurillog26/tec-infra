@@ -18,6 +18,8 @@ variable "apim" {
     capacity           = number
     subnet_id          = string
     virtual_network_type = string
+    # Opcional: Puedes añadir explícitamente el ID de IP pública si es necesario
+    public_ip_address_id = optional(string)
     protocols = object({
       enable_http2 = bool
     })
@@ -30,9 +32,9 @@ variable "apim" {
       enable_frontend_tls11 = bool
     })
     identity_type = string
-    policy = object({
+    policy = optional(object({
       xml_content = string
-    })
+    }))
     products = map(object({
       product_id            = string
       display_name         = string

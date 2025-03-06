@@ -15,6 +15,27 @@ locals {
       bypass         = ["AzureServices"]
     }
   }
+  
+  # Procesar la lista de containers de manera segura
+  container_list = flatten([
+    for sa_key, sa in var.storage_accounts : [
+      for container in(lookup(sa, "containers", null) != null ? sa.containers : []) : {
+        storage_account_key = sa_key
+        container_name     = container.name
+        access_type       = try(container.access_type, "private")
+      }
+    ]
+  ])
+  
+  # Procesar la lista de tablas de manera segura
+  table_list = flatten([
+    for sa_key, sa in var.storage_accounts : [
+      for table in(lookup(sa, "tables", null) != null ? sa.tables : []) : {
+        storage_account_key = sa_key
+        table_name         = table.name
+      }
+    ]
+  ])
 }
 
 resource "azurerm_storage_account" "storage_accounts" {
@@ -69,15 +90,12 @@ resource "azurerm_storage_container" "containers" {
   container_access_type = try(each.value.access_type, "private")
 }
 
-# Procesar la lista de containers
-locals {
-  container_list = flatten([
-    for sa_key, sa in var.storage_accounts : [
-      for container in try(sa.containers, []) : {
-        storage_account_key = sa_key
-        container_name     = container.name
-        access_type       = try(container.access_type, "private")
-      }
-    ]
-  ])
+# Crear tablas para cada storage account
+resource "azurerm_storage_table" "tables" {
+  for_each = {
+    for table in local.table_list : "${table.storage_account_key}.${table.table_name}" => table
+  }
+
+  name                 = each.value.table_name
+  storage_account_name = azurerm_storage_account.storage_accounts[each.value.storage_account_key].name
 }

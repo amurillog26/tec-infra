@@ -21,7 +21,7 @@ variable "dns_prefix" {
 variable "kubernetes_version" {
   type        = string
   description = "Kubernetes version"
-  default     = "1.27.7"
+  default     = "1.31.5"
 }
 
 variable "default_node_pool" {
@@ -36,8 +36,8 @@ variable "default_node_pool" {
   description = "Default node pool configuration"
   default = {
     name                = "default"
-    node_count         = 1
-    vm_size            = "Standard_D2s_v3"
+    node_count         = 3
+    vm_size            = "Standard_D8ds v5"
     enable_auto_scaling = true
     min_count          = 1
     max_count          = 3
@@ -52,13 +52,13 @@ variable "subnet_id" {
 variable "availability_zones" {
   type        = list(string)
   description = "List of availability zones"
-  default     = ["1", "2", "3"]
+  default     = ["1"]
 }
 
 variable "attach_acr" {
   type        = bool
   description = "Attach Azure Container Registry"
-  default     = true
+  default     = false
 }
 
 variable "acr_id" {

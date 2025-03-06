@@ -44,50 +44,6 @@ resource "azurerm_firewall" "fw" {
   tags = var.tags
 }
 
-# Diagnostic settings
-resource "azurerm_monitor_diagnostic_setting" "fw_diag" {
-  count                      = var.enable_diagnostics ? 1 : 0
-  name                       = "${var.fw_name}-diag"
-  target_resource_id         = azurerm_firewall.fw.id
-  log_analytics_workspace_id = var.log_analytics_workspace_id
-
-  log {
-    category = "AzureFirewallApplicationRule"
-    enabled  = true
-    retention_policy {
-      enabled = true
-      days    = var.log_retention_days
-    }
-  }
-
-  log {
-    category = "AzureFirewallNetworkRule"
-    enabled  = true
-    retention_policy {
-      enabled = true
-      days    = var.log_retention_days
-    }
-  }
-
-  log {
-    category = "AzureFirewallDnsProxy"
-    enabled  = true
-    retention_policy {
-      enabled = true
-      days    = var.log_retention_days
-    }
-  }
-
-  metric {
-    category = "AllMetrics"
-    enabled  = true
-    retention_policy {
-      enabled = true
-      days    = var.log_retention_days
-    }
-  }
-}
-
 # Optional route table for forced tunneling
 resource "azurerm_route_table" "fw_route_table" {
   count               = var.create_route_table ? 1 : 0

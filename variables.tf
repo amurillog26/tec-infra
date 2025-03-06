@@ -8,25 +8,37 @@ variable "location" {
   description = "Ubicación de Azure"
 }
 
+
 variable "storage_accounts" {
   type = map(object({
-    name                     = string
+    name                      = string
     account_tier             = optional(string)
     account_replication_type = optional(string)
     account_kind            = optional(string)
+    min_tls_version         = optional(string)
+    access_tier             = optional(string)
+    is_hns_enabled         = optional(bool)
+    
     network_rules = optional(object({
       default_action = optional(string)
       ip_rules       = optional(list(string))
       bypass         = optional(list(string))
     }))
+    
     containers = optional(list(object({
       name        = string
       access_type = optional(string)
     })))
+    
+    tables = optional(list(object({
+      name = string
+    })))
+    
     tags = optional(map(string))
   }))
-  description = "Configuración de storage accounts"
+  description = "Mapa de cuentas de almacenamiento para crear"
 }
+
 
 variable "tags" {
   type        = map(string)
@@ -218,6 +230,8 @@ variable "apim" {
     capacity           = number
     subnet_id          = string
     virtual_network_type = string
+    # Opcional: Puedes añadir explícitamente el ID de IP pública si es necesario
+    public_ip_address_id = optional(string)
     protocols = object({
       enable_http2 = bool
     })
@@ -230,9 +244,9 @@ variable "apim" {
       enable_frontend_tls11 = bool
     })
     identity_type = string
-    policy = object({
+    policy = optional(object({
       xml_content = string
-    })
+    }))
     products = map(object({
       product_id            = string
       display_name         = string
@@ -435,4 +449,79 @@ variable "public_ips" {
     tags             = map(string)
   }))
   description = "Configuración de las IPs públicas"
+}
+
+variable "private_endpoints" {
+  type = map(object({
+    name                     = string
+    resource_id              = string
+    subresource_names        = list(string)
+    subnet_key               = optional(string, "snet_gpt_int_dev")  # Default subnet for private endpoints
+    is_manual_connection     = optional(bool, false)
+    private_dns_zone_ids     = optional(list(string))
+  }))
+  description = "Map of private endpoints to create"
+  default     = {}
+}
+
+variable "private_dns_zones" {
+  type = map(object({
+    name                = string
+    registration_enabled = optional(bool, false)
+  }))
+  description = "Map of private DNS zones to create"
+  default     = {}
+}
+
+variable "windows_vm" {
+  description = "Configuración de la máquina virtual Windows"
+  type = object({
+    name           = string
+    nic_name       = string
+    size           = string
+    admin_username = string
+    admin_password = string
+    hostname       = string
+    tags           = map(string)
+  })
+  default = {
+    name           = "vm-gpt-win11-dev"
+    nic_name       = "nic-gpt-win11-dev"
+    size           = "Standard_B4ms"
+    admin_username = "adminuser"
+    admin_password = null # Debe configurarse en el archivo tfvars
+    hostname       = "win11-workstation"
+    tags = {
+      type = "workstation"
+    }
+  }
+}
+
+variable "grafana" {
+  description = "Configuración del recurso Azure Managed Grafana"
+  type = object({
+    name                            = string
+    sku_name                        = string
+    api_key_enabled                 = bool
+    deterministic_outbound_ip_enabled = bool
+    public_network_access_enabled   = bool
+    zone_redundancy_enabled         = bool
+    identity_type                   = string
+    azure_monitor_workspace_id      = optional(string)
+    private_endpoint_resource_id    = optional(string)
+    private_endpoint_subresource_name = optional(string)
+    admin_principal_ids             = optional(list(string))
+    editor_principal_ids            = optional(list(string))
+    viewer_principal_ids            = optional(list(string))
+    tags                            = optional(map(string))
+  })
+  default = {
+    name                            = "grafana-gpt-dev"
+    sku_name                        = "Standard"
+    api_key_enabled                 = true
+    deterministic_outbound_ip_enabled = true
+    public_network_access_enabled   = true
+    zone_redundancy_enabled         = false
+    identity_type                   = "SystemAssigned"
+  }
 }

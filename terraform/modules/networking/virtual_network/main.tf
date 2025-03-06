@@ -29,3 +29,43 @@ resource "azurerm_subnet" "subnets" {
     }
   }
 }
+
+resource "azurerm_network_security_group" "apim_nsg" {
+  name                = "nsg-apim-dev"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+
+  security_rule {
+    name                       = "Management_Endpoint"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "3443"
+    source_address_prefix      = "ApiManagement"
+    destination_address_prefix = "VirtualNetwork"
+  }
+
+  security_rule {
+    name                       = "Allow_Load_Balancer"
+    priority                   = 110
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "AzureLoadBalancer"
+    destination_address_prefix = "VirtualNetwork"
+  }
+
+  # Reglas adicionales según los requisitos de APIM
+  # Ver: https://learn.microsoft.com/en-us/azure/api-management/api-management-using-with-vnet
+
+  tags = var.tags
+}
+
+resource "azurerm_subnet_network_security_group_association" "apim_subnet_nsg" {
+  subnet_id                 = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/virtualNetworks/vnet_gpt_net_dev/subnets/snet_gpt_int_dev"
+  network_security_group_id = azurerm_network_security_group.apim_nsg.id
+}
