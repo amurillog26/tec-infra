@@ -8,6 +8,7 @@ module "grafana" {
   
   # Configuración básica
   sku_name                        = var.grafana.sku_name
+  grafana_version                 = var.grafana.grafana_version
   api_key_enabled                 = var.grafana.api_key_enabled
   deterministic_outbound_ip_enabled = var.grafana.deterministic_outbound_ip_enabled
   public_network_access_enabled   = var.grafana.public_network_access_enabled
@@ -18,10 +19,6 @@ module "grafana" {
   
   # Integración con Azure Monitor (opcional)
   azure_monitor_workspace_id      = lookup(var.grafana, "azure_monitor_workspace_id", null)
-  
-  # Private Endpoint (opcional)
-  private_endpoint_resource_id    = lookup(var.grafana, "private_endpoint_resource_id", null)
-  private_endpoint_subresource_name = lookup(var.grafana, "private_endpoint_subresource_name", "grafana")
   
   # Asignación de roles
   admin_principal_ids             = lookup(var.grafana, "admin_principal_ids", [])

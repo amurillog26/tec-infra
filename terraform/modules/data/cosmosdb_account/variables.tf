@@ -75,3 +75,9 @@ variable "tags" {
   description = "Tags for resources"
   default     = {}
 }
+
+variable "cosmos_capabilities" {
+  type        = list(string)
+  description = "List of capabilities to enable on the Cosmos DB account"
+  default     = null
+}
