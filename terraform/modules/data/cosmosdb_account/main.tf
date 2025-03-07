@@ -29,11 +29,14 @@ resource "azurerm_cosmosdb_account" "tec_cosmos_ac" {
   kind                = var.cosmos_account_kind
 
   automatic_failover_enabled     = false  # Cambiado a false para serverless
-  public_network_access_enabled = var.cosmos_public_access
+  public_network_access_enabled = var.enable_private_endpoint ? false : var.cosmos_public_access
   network_acl_bypass_for_azure_services = true
 
-  capabilities {
-    name = "EnableServerless"
+  dynamic "capabilities" {
+    for_each = var.cosmos_capabilities != null ? var.cosmos_capabilities : []
+    content {
+      name = capabilities.value
+    }
   }
 
   consistency_policy {

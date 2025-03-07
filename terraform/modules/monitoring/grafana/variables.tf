@@ -23,6 +23,16 @@ variable "sku_name" {
   }
 }
 
+variable "grafana_version" {
+  description = "Versión de Grafana a usar"
+  type        = string
+  default     = "10"
+  validation {
+    condition     = contains(["10", "11"], var.grafana_version)
+    error_message = "La versión de Grafana debe ser 10 o 11 para el SKU Standard."
+  }
+}
+
 variable "api_key_enabled" {
   description = "Indica si se permite la creación de API keys"
   type        = bool
@@ -61,18 +71,6 @@ variable "azure_monitor_workspace_id" {
   description = "ID del espacio de trabajo de Azure Monitor para integración"
   type        = string
   default     = null
-}
-
-variable "private_endpoint_resource_id" {
-  description = "ID del recurso para el private endpoint de Grafana"
-  type        = string
-  default     = null
-}
-
-variable "private_endpoint_subresource_name" {
-  description = "Nombre del subrecurso para el private endpoint"
-  type        = string
-  default     = "grafana"
 }
 
 variable "admin_principal_ids" {

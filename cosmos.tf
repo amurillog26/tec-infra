@@ -13,5 +13,6 @@ module "cosmos_db" {
   subnet_id                 = var.enable_private_endpoint ? module.networking.subnet_ids["snet_gpt_pe_${var.environment}"] : null
   private_dns_zone_id       = var.private_dns_zone_id
   log_analytics_workspace_id = var.log_analytics_workspace_id
+  cosmos_capabilities      = var.cosmos_capabilities
   tags                      = var.tags
 }

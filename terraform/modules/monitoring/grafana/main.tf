@@ -7,8 +7,11 @@ resource "azurerm_dashboard_grafana" "grafana" {
   public_network_access_enabled     = var.public_network_access_enabled
   zone_redundancy_enabled           = var.zone_redundancy_enabled
   
-  # Cambiar la sintaxis del bloque sku a un argumento simple
+  # Especificar el SKU
   sku = var.sku_name
+  
+  # Especificar la versión de Grafana (10 o 11 para Standard SKU)
+  grafana_major_version = var.grafana_version
 
   identity {
     type = var.identity_type
@@ -29,9 +32,6 @@ resource "azurerm_dashboard_grafana" "grafana" {
     ]
   }
 }
-
-# Eliminar completamente el recurso azurerm_dashboard_grafana_managed_private_endpoint
-# que no existe en el proveedor
 
 # Asignación de roles para Grafana
 resource "azurerm_role_assignment" "grafana_admin" {

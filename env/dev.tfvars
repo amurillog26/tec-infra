@@ -48,7 +48,7 @@ tenant_id = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
 
 
 vnet_name           = "vnet_gpt_net_dev"
-address_space       = ["10.97.174.0/23"]  # Mantiene el rango 10.97.174.0 - 10.97.175.255
+address_space       = ["  /23"]  # Mantiene el rango 10.97.174.0 - 10.97.175.255
 
 subnets = {
   "snet_gpt_agw_dev" = {
@@ -85,6 +85,7 @@ cosmos_account_offer_type  = "Standard"
 cosmos_account_kind       = "GlobalDocumentDB"
 cosmos_public_access      = false  # true for dev, false for prod
 cosmos_failover_az_region = "eastus"  # región secundaria para failover
+cosmos_capabilities       = ["EnableServerless"]
 
 cosmos_sql_databases = [
   {
@@ -155,12 +156,12 @@ apim = {
   name                = "apim-gpt-api-dev-01"  # Nuevo nombre
   publisher_name      = "GPT Dev Team"
   publisher_email     = "admin@yourdomain.com"
-  sku_name           = "Developer_1"
+  sku_name           = "Standard_1"
   capacity           = 1
   
   # Para habilitar Private Endpoints, necesitamos:
   # 1. Una configuración de red virtual
-  virtual_network_type = "External"  # o "Internal" dependiendo de tus requisitos
+  virtual_network_type = "Internal"  # o "Internal" dependiendo de tus requisitos
   subnet_id = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/virtualNetworks/vnet_gpt_net_dev/subnets/snet_gpt_int_dev"  
   # 2. Otras configuraciones necesarias
   identity_type       = "SystemAssigned"
@@ -498,9 +499,13 @@ windows_vm = {
 }
 
 # Azure Managed Grafana Configuration
+# Añadir al final del archivo env/dev.tfvars
+
+# Azure Managed Grafana Configuration
 grafana = {
   name                            = "grafana-gpt-dev"
   sku_name                        = "Standard"
+  grafana_version                 = "10"
   api_key_enabled                 = true
   deterministic_outbound_ip_enabled = true
   public_network_access_enabled   = true
@@ -509,10 +514,6 @@ grafana = {
   
   # Opcional: Integración con Azure Monitor
   # azure_monitor_workspace_id    = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Monitor/accounts/monitorws-gpt-dev"
-  
-  # Opcional: Private Endpoint
-  # private_endpoint_resource_id  = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/virtualNetworks/vnet_gpt_net_dev/subnets/snet_gpt_pe_dev"
-  # private_endpoint_subresource_name = "grafana"
   
   # Asignación de roles (opcional)
   admin_principal_ids           = [
@@ -528,5 +529,32 @@ grafana = {
   tags = {
     environment = "dev"
     workload    = "monitoring"
+  }
+}
+
+# Añadir al final del archivo env/dev.tfvars
+
+# Kubernetes Configuration
+kubernetes = {
+  cluster_name       = "aks-gpt-dev-001"
+  dns_prefix         = "aks-gpt-dev"
+  kubernetes_version = "1.31.5"
+  availability_zones = ["1"]
+  
+  default_node_pool  = {
+    name                = "default01"
+    node_count          = 1
+    vm_size             = "standard_d8ds_v6"
+    enable_auto_scaling = true
+    min_count           = 1
+    max_count           = 3
+  }
+  
+  attach_acr         = true
+  
+  tags = {
+    environment = "dev"
+    workload    = "oai"
+    component   = "kubernetes"
   }
 }

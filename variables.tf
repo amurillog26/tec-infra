@@ -156,6 +156,13 @@ variable "cosmos_sql_databases" {
   description = "List of Cosmos DB databases and their containers"
 }
 
+variable "cosmos_capabilities" {
+  type        = list(string)
+  description = "List of Cosmos DB capabilities"
+  default     = null
+  
+}
+
 variable "enable_private_endpoint" {
   type        = bool
   default     = false
@@ -496,20 +503,18 @@ variable "windows_vm" {
     }
   }
 }
-
 variable "grafana" {
   description = "Configuración del recurso Azure Managed Grafana"
   type = object({
     name                            = string
     sku_name                        = string
+    grafana_version                 = string
     api_key_enabled                 = bool
     deterministic_outbound_ip_enabled = bool
     public_network_access_enabled   = bool
     zone_redundancy_enabled         = bool
     identity_type                   = string
     azure_monitor_workspace_id      = optional(string)
-    private_endpoint_resource_id    = optional(string)
-    private_endpoint_subresource_name = optional(string)
     admin_principal_ids             = optional(list(string))
     editor_principal_ids            = optional(list(string))
     viewer_principal_ids            = optional(list(string))
@@ -518,10 +523,32 @@ variable "grafana" {
   default = {
     name                            = "grafana-gpt-dev"
     sku_name                        = "Standard"
+    grafana_version                 = "10"  # Usar versión 10 o 11 para SKU Standard
     api_key_enabled                 = true
     deterministic_outbound_ip_enabled = true
     public_network_access_enabled   = true
     zone_redundancy_enabled         = false
     identity_type                   = "SystemAssigned"
   }
+}
+
+# Añadir al final del archivo variables.tf
+variable "kubernetes" {
+  description = "Configuración del clúster de Kubernetes"
+  type = object({
+    cluster_name       = string
+    dns_prefix         = string
+    kubernetes_version = string
+    availability_zones = list(string)
+    default_node_pool  = object({
+      name                = string
+      node_count          = number
+      vm_size             = string
+      enable_auto_scaling = bool
+      min_count           = number
+      max_count           = number
+    })
+    attach_acr         = bool
+    tags               = map(string)
+  })
 }
