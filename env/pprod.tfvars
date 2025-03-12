@@ -115,14 +115,14 @@ cosmos_sql_databases = [
   }
 ]
 
-enable_private_endpoint     = false  # true for prod
+enable_private_endpoint     = true  # true for prod
 private_dns_zone_id        = null   # Required for prod
 log_analytics_workspace_id = "/subscriptions/xxxx/resourceGroups/rg-monitoring/providers/Microsoft.OperationalInsights/workspaces/log-analytics-workspace"
 
 # Container Registry
 acr_name           = "crgptoaipprd01"  # Debe ser globalmente único
 acr_admin_enabled  = true           # Habilitado para desarrollo
-acr_public         = true           # Público para desarrollo
+acr_public         = false           # Público para desarrollo
 
 service_plans = {
   "plan1" = {
