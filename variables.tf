@@ -66,7 +66,7 @@ variable "kv_name" {
 variable "kv_public_access" {
   type        = bool
   description = "Enable or disable public access to the key vault"
-  default     = true
+  default     = false
   
 }
 
@@ -165,7 +165,7 @@ variable "cosmos_capabilities" {
 
 variable "enable_private_endpoint" {
   type        = bool
-  default     = false
+  default     = true
   description = "Enable private endpoint for Cosmos DB"
 }
 
@@ -195,7 +195,7 @@ variable "acr_admin_enabled" {
 variable "acr_public" {
   type        = bool
   description = "Enable public access to Container Registry"
-  default     = true
+  default     = false
 }
 
 variable "service_plans" {
