@@ -102,3 +102,9 @@ variable "additional_node_pools" {
   description = "Map of additional node pool configurations"
   default     = {}
 }
+
+variable "user_assigned_identity_id" {
+  type        = string
+  description = "User assigned identity ID for AKS"
+  default     = null  # Esto permite que sea opcional
+}
