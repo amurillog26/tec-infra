@@ -48,7 +48,7 @@ tenant_id = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
 
 
 vnet_name           = "vnet_gpt_net_dev"
-address_space       = ["  /23"]  # Mantiene el rango 10.97.174.0 - 10.97.175.255
+address_space       = ["10.97.174.0/23"]  # Mantiene el rango 10.97.174.0 - 10.97.175.255
 
 subnets = {
   "snet_gpt_agw_dev" = {
@@ -75,6 +75,16 @@ subnets = {
     address_prefixes = ["10.97.174.192/27"]   # 32 IPs: 10.97.174.192 - 10.97.174.223
     service_endpoints = ["Microsoft.Web", "Microsoft.Storage", "Microsoft.KeyVault", "Microsoft.ContainerRegistry", "Microsoft.AzureCosmosDB"]
     private_endpoint_network_policies_enabled = false
+  },
+  "snet_gpt_app_dev" = {
+    address_prefixes = ["10.97.174.64/27"]  # Elige un rango disponible
+    service_endpoints = ["Microsoft.Web", "Microsoft.Storage", "Microsoft.KeyVault", "Microsoft.ContainerRegistry"]
+    delegation = [
+      {
+        name    = "Microsoft.Web/serverFarms"
+        actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
+      }
+    ]
   }
 }
 
@@ -122,7 +132,7 @@ log_analytics_workspace_id = "/subscriptions/xxxx/resourceGroups/rg-monitoring/p
 # Container Registry
 acr_name           = "crgptoaidev01"  # Debe ser globalmente único
 acr_admin_enabled  = true           # Habilitado para desarrollo
-acr_public         = true           # Público para desarrollo
+acr_public         = false           # Público para desarrollo
 
 service_plans = {
   "plan1" = {
@@ -135,19 +145,44 @@ service_plans = {
 }
 
 # Web Apps
+# Web Apps
 web_apps = {
   "api" = {
     name            = "app-gpt-api-dev"
-    subnet_id       = null  # Opcional para ambiente dev
-    docker_image    = "mcr.microsoft.com/appsvc/staticsite"  # Ajusta según tu imagen
+    service_plan_id = null  # Se asignará dinámicamente
+    
+    # 1. Integración con VNet
+    subnet_id       = "snet_gpt_app_dev"  # Debe ser una subnet dedicada para integración
+    vnet_route_all_enabled = true  # Enruta todo el tráfico a través de la VNet
+    
+    docker_image    = "mcr.microsoft.com/appsvc/staticsite"
     docker_image_tag = "latest"
+    
     app_settings = {
       "WEBSITES_PORT" = "8080"
       "API_VERSION"   = "v1"
       "ENVIRONMENT"   = "development"
       "DOCKER_ENABLE_CI" = "true"
+      "WEBSITE_VNET_ROUTE_ALL" = "1"  # Redundante con vnet_route_all_enabled pero por si acaso
     }
-    ip_restrictions = {}  # Vacío para dev, pero requerido
+    
+    # 2. Restricciones de IP
+    ip_restrictions = {
+      # Permitir solo desde Application Gateway
+      "Allow-AppGw" = {
+        name       = "Allow-AppGw"
+        subnet_id  = "subnet_id_del_application_gateway"  # Referencia a la subnet del AppGw
+        priority   = 100
+        action     = "Allow"
+      },
+      # Permitir acceso desde subnet AKS 
+      "Allow-AKS" = {
+        name       = "Allow-AKS"
+        subnet_id  = "subnet_id_del_aks"  # Referencia a la subnet de AKS
+        priority   = 110
+        action     = "Allow"
+      }
+    }
   }
 }
 
@@ -161,9 +196,8 @@ apim = {
   
   # Para habilitar Private Endpoints, necesitamos:
   # 1. Una configuración de red virtual
-  virtual_network_type = "Internal"  # o "Internal" dependiendo de tus requisitos
-  subnet_id = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/virtualNetworks/vnet_gpt_net_dev/subnets/snet_gpt_int_dev"  
-  # 2. Otras configuraciones necesarias
+  virtual_network_type = "None" 
+  subnet_id = null
   identity_type       = "SystemAssigned"
   
   protocols = {
@@ -450,6 +484,24 @@ private_endpoints = {
     private_dns_zone_ids = [
       "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/privateDnsZones/privatelink.azure-api.net"
     ]
+  },
+  "pe-acr-gpt-dev" = {
+    name              = "pe-acr-gpt-dev"
+    subnet_key        = "snet_gpt_pe_dev"  # Subnet dedicada para Private Endpoints
+    resource_id       = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.ContainerRegistry/registries/crgptoaidev01"
+    subresource_names = ["registry"]
+    private_dns_zone_ids = [
+      "subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/privateDnsZones/privatelink.azurecr.io"
+    ]
+  },
+  "pe-webapp-api-dev" = {
+    name              = "pe-webapp-api-dev"
+    subnet_key        = "snet_gpt_pe_dev"
+    resource_id       = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Web/sites/app-gpt-api-dev"
+    subresource_names = ["sites"]
+    private_dns_zone_ids = [
+      "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/privateDnsZones/privatelink.azurewebsites.net"
+    ]
   }
 }
 # Configuración de Private DNS Zones
@@ -480,6 +532,9 @@ private_dns_zones = {
   },
   "privatelink.azurewebsites.net" = {
     name = "privatelink.azurewebsites.net"
+  },
+  "privatelink.southcentralus.azmk8s.io" = {
+    name = "privatelink.southcentralus.azmk8s.io"
   }
 }
 
@@ -508,7 +563,7 @@ grafana = {
   grafana_version                 = "10"
   api_key_enabled                 = true
   deterministic_outbound_ip_enabled = true
-  public_network_access_enabled   = true
+  public_network_access_enabled   = false
   zone_redundancy_enabled         = false
   identity_type                   = "SystemAssigned"
   
@@ -534,25 +589,51 @@ grafana = {
 
 # Añadir al final del archivo env/dev.tfvars
 
-# Kubernetes Configuration
+# Configuración de Kubernetes/AKS
 kubernetes = {
   cluster_name       = "aks-gpt-dev-001"
   dns_prefix         = "aks-gpt-dev"
-  kubernetes_version = "1.31.5"
-  availability_zones = ["1"]
+  kubernetes_version = "1.31.5"  # Ajusta a la versión deseada
+  availability_zones = ["1", "2", "3"]
   
+  # Habilitar clúster privado
+  private_cluster_enabled     = true
+  private_dns_zone_name       = "privatelink.southcentralus.azmk8s.io"
+  
+  # Nodepool para infraestructura (system)
   default_node_pool  = {
-    name                = "default01"
+    name                = "infra"
     node_count          = 1
     vm_size             = "standard_d8ds_v6"
     enable_auto_scaling = true
     min_count           = 1
     max_count           = 3
+    node_labels         = {
+      "role" = "system"
+    }
+    node_taints         = []
+  }
+  
+  # Nodepool adicional para aplicaciones de usuario
+  additional_node_pools = {
+    "user" = {
+      name                = "user"
+      node_count          = 1
+      vm_size             = "standard_d8ds_v6"
+      mode                = "User"
+      enable_auto_scaling = true
+      min_count           = 1
+      max_count           = 3
+      node_labels         = {
+        "role" = "application"
+      }
+      node_taints         = []
+    }
   }
   
   attach_acr         = true
   
-  tags = {
+  tags               = {
     environment = "dev"
     workload    = "oai"
     component   = "kubernetes"

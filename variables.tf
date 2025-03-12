@@ -534,12 +534,16 @@ variable "grafana" {
 
 # Añadir al final del archivo variables.tf
 variable "kubernetes" {
-  description = "Configuración del clúster de Kubernetes"
   type = object({
     cluster_name       = string
     dns_prefix         = string
     kubernetes_version = string
     availability_zones = list(string)
+    
+    # Nuevos campos para clúster privado
+    private_cluster_enabled     = bool
+    private_dns_zone_name       = string
+    
     default_node_pool  = object({
       name                = string
       node_count          = number
@@ -547,8 +551,25 @@ variable "kubernetes" {
       enable_auto_scaling = bool
       min_count           = number
       max_count           = number
+      node_labels         = optional(map(string), {})
+      node_taints         = optional(list(string), [])
     })
+    
+    # Nuevo campo para nodepools adicionales
+    additional_node_pools = map(object({
+      name                = string
+      node_count          = number
+      vm_size             = string
+      mode                = string
+      enable_auto_scaling = bool
+      min_count           = number
+      max_count           = number
+      node_labels         = optional(map(string), {})
+      node_taints         = optional(list(string), [])
+    }))
+    
     attach_acr         = bool
     tags               = map(string)
   })
+  description = "Configuración del clúster de Kubernetes"
 }

@@ -26,5 +26,6 @@ module "private_endpoint" {
     module.storage,
     # module.apim,
     # module.web_apps
+    module.container_registry  # Añade esta dependencia
   ]
 }

@@ -72,3 +72,33 @@ variable "tags" {
   description = "Tags to be applied to resources"
   default     = {}
 }
+
+# Añadir estas variables nuevas
+variable "private_cluster_enabled" {
+  type        = bool
+  description = "Enable private cluster for AKS"
+  default     = false
+}
+
+variable "private_dns_zone_id" {
+  type        = string
+  description = "Private DNS Zone ID for AKS API server"
+  default     = null
+}
+
+# Variable para nodepools adicionales
+variable "additional_node_pools" {
+  type = map(object({
+    name                = string
+    node_count         = number
+    vm_size            = string
+    mode               = string
+    enable_auto_scaling = bool
+    min_count          = number
+    max_count          = number
+    node_labels        = optional(map(string), {})
+    node_taints        = optional(list(string), [])
+  }))
+  description = "Map of additional node pool configurations"
+  default     = {}
+}
