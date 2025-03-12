@@ -74,7 +74,8 @@ resource "azurerm_storage_account" "storage_accounts" {
 
   lifecycle {
     ignore_changes = [
-      resource_group_name
+      resource_group_name,
+      network_rules
     ]
   }
 }

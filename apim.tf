@@ -5,4 +5,7 @@ module "apim" {
   location           = var.location
   apim               = var.apim
   tags               = var.tags
+  depends_on = [
+    module.networking
+  ]
 }

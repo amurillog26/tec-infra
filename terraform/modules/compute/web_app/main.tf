@@ -55,4 +55,11 @@ resource "azurerm_linux_web_app" "web_app" {
     WebApp = each.value.name
     Environment = var.environment
   })
+  lifecycle {
+    ignore_changes = [
+      app_settings["DOCKER_REGISTRY_SERVER_PASSWORD"],
+      app_settings["DOCKER_REGISTRY_SERVER_URL"],
+      app_settings["DOCKER_REGISTRY_SERVER_USERNAME"]
+    ]
+  }
 }

@@ -21,8 +21,8 @@ module "aks" {
   # Añadir nodepool adicional
   additional_node_pools = var.kubernetes.additional_node_pools
 
-  attach_acr         = var.kubernetes.attach_acr
-  acr_id             = module.container_registry.acr_id
+  # attach_acr         = var.kubernetes.attach_acr
+  # acr_id             = module.container_registry.acr_id
 
   tags               = merge(var.tags, var.kubernetes.tags)
 }

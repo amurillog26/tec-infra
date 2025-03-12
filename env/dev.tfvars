@@ -192,13 +192,13 @@ apim = {
   name                = "apim-gpt-api-dev-01"  # Nuevo nombre
   publisher_name      = "GPT Dev Team"
   publisher_email     = "admin@yourdomain.com"
-  sku_name           = "Standard_1"
+  sku_name           = "Premium_1"
   capacity           = 1
   
   # Para habilitar Private Endpoints, necesitamos:
   # 1. Una configuración de red virtual
-  virtual_network_type = "None" 
-  subnet_id = null
+  virtual_network_type = "Internal" 
+  subnet_id = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/virtualNetworks/vnet_gpt_net_dev/subnets/snet_gpt_apim_dev"
   identity_type       = "SystemAssigned"
   
   protocols = {
@@ -396,7 +396,7 @@ application_gateway = {
 # Managed Identity configuration
 managed_identity = {
   name                = "id-agw-gpt-dev-001"
-  assign_key_vault_role = true  
+  assign_key_vault_role = false  
   tags = {
     environment = "dev"
     workload    = "oai"
@@ -476,16 +476,16 @@ private_endpoints = {
     ]
   },
   
-  # API Management Private Endpoint
-  "pe-apim-gpt-api-dev-01" = {
-    name              = "pe-apim-gpt-api-dev-01"
-    subnet_key        = "snet_gpt_int_dev"
-    resource_id       = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.ApiManagement/service/apim-gpt-api-dev-01"
-    subresource_names = ["gateway"]
-    private_dns_zone_ids = [
-      "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/privateDnsZones/privatelink.azure-api.net"
-    ]
-  },
+  # # API Management Private Endpoint
+  # "pe-apim-gpt-api-dev-01" = {
+  #   name              = "pe-apim-gpt-api-dev-01"
+  #   subnet_key        = "snet_gpt_int_dev"
+  #   resource_id       = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.ApiManagement/service/apim-gpt-api-dev-01"
+  #   subresource_names = ["gateway"]
+  #   private_dns_zone_ids = [
+  #     "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/privateDnsZones/privatelink.azure-api.net"
+  #   ]
+  # },
   "pe-acr-gpt-dev" = {
     name              = "pe-acr-gpt-dev"
     subnet_key        = "snet_gpt_pe_dev"  # Subnet dedicada para Private Endpoints
