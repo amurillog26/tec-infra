@@ -36,6 +36,7 @@ main_rg_name        = "rg_gpt_oai_dev"
 main_vn_location    = "southcentralus"
 kv_name             = "kv-gpt-oai-dev-01"
 kv_sku_name         = "standard"
+kv_public_access = false
 
 resource_tags = {
     environment = "dev"
@@ -125,9 +126,9 @@ cosmos_sql_databases = [
   }
 ]
 
-enable_private_endpoint     = false  # true for prod
+enable_private_endpoint     = true  # true for prod
 private_dns_zone_id        = null   # Required for prod
-log_analytics_workspace_id = "/subscriptions/xxxx/resourceGroups/rg-monitoring/providers/Microsoft.OperationalInsights/workspaces/log-analytics-workspace"
+log_analytics_workspace_id = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg-monitoring/providers/Microsoft.OperationalInsights/workspaces/log-analytics-workspace"
 
 # Container Registry
 acr_name           = "crgptoaidev01"  # Debe ser globalmente único
@@ -171,14 +172,14 @@ web_apps = {
       # Permitir solo desde Application Gateway
       "Allow-AppGw" = {
         name       = "Allow-AppGw"
-        subnet_id  = "subnet_id_del_application_gateway"  # Referencia a la subnet del AppGw
+        subnet_id  = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg-gpt-oai-dev/providers/Microsoft.Network/virtualNetworks/vnet-gpt-net-dev/subnets/snet_gpt_app_dev"
         priority   = 100
         action     = "Allow"
       },
       # Permitir acceso desde subnet AKS 
       "Allow-AKS" = {
         name       = "Allow-AKS"
-        subnet_id  = "subnet_id_del_aks"  # Referencia a la subnet de AKS
+        subnet_id  = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg-gpt-oai-dev/providers/Microsoft.Network/virtualNetworks/vnet-gpt-net-dev/subnets/snet_gpt_aks_dev"
         priority   = 110
         action     = "Allow"
       }
@@ -250,8 +251,8 @@ redis_cache = {
     }
 
     private_endpoint = {
-      enabled = false  # Para dev lo dejamos en false
-      # subnet_id = module.networking.subnet_ids["snet_gpt_redis_dev"]  # Se usaría en prod
+      enabled = true  # Para dev lo dejamos en false
+      subnet_id = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/virtualNetworks/vnet_gpt_net_dev/subnets/snet_gpt_pe_dev"
     }
 
     alerts = {
@@ -491,7 +492,7 @@ private_endpoints = {
     resource_id       = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.ContainerRegistry/registries/crgptoaidev01"
     subresource_names = ["registry"]
     private_dns_zone_ids = [
-      "subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/privateDnsZones/privatelink.azurecr.io"
+      "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/privateDnsZones/privatelink.azurecr.io"
     ]
   },
   "pe-webapp-api-dev" = {
@@ -501,6 +502,15 @@ private_endpoints = {
     subresource_names = ["sites"]
     private_dns_zone_ids = [
       "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/privateDnsZones/privatelink.azurewebsites.net"
+    ]
+  },
+  "pe-grafana-dev" = {
+    name              = "pe-grafana-dev"
+    subnet_key        = "snet_gpt_pe_dev"
+    resource_id       = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Dashboard/grafana/grafana-gpt-dev"
+    subresource_names = ["grafana"]
+    private_dns_zone_ids = [
+      "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/privateDnsZones/privatelink.grafana.azure.com"
     ]
   }
 }
@@ -535,6 +545,9 @@ private_dns_zones = {
   },
   "privatelink.southcentralus.azmk8s.io" = {
     name = "privatelink.southcentralus.azmk8s.io"
+  },
+  "privatelink.grafana.azure.com" = {
+    name = "privatelink.grafana.azure.com"
   }
 }
 
