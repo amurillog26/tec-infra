@@ -6,8 +6,8 @@ resource "azurerm_kubernetes_cluster" "aks" {
   kubernetes_version = var.kubernetes_version
   
   # Configuración para clúster privado
-  private_cluster_enabled = var.private_cluster_enabled
-  private_dns_zone_id     = var.private_dns_zone_id
+  # private_cluster_enabled = var.private_cluster_enabled
+  # private_dns_zone_id     = var.private_dns_zone_id
 
   default_node_pool {
     name                = var.default_node_pool.name
@@ -33,6 +33,12 @@ resource "azurerm_kubernetes_cluster" "aks" {
 
   role_based_access_control_enabled = true
   tags = var.tags
+  lifecycle {
+    ignore_changes = [
+      default_node_pool[0].upgrade_settings,
+      # Otros atributos que quieras ignorar
+    ]
+  }
 }
 
 # Añadir nodepools adicionales
@@ -54,10 +60,10 @@ resource "azurerm_kubernetes_cluster_node_pool" "additional_pools" {
   node_taints           = each.value.node_taints
 }
 
-# Activar la asignación de rol ACR
-resource "azurerm_role_assignment" "aks_acr" {
-  count                = var.attach_acr ? 1 : 0
-  scope                = var.acr_id
-  role_definition_name = "AcrPull"
-  principal_id         = azurerm_kubernetes_cluster.aks.kubelet_identity[0].object_id
-}
+# # Activar la asignación de rol ACR
+# resource "azurerm_role_assignment" "aks_acr" {
+#   count                = var.attach_acr ? 1 : 0
+#   scope                = var.acr_id
+#   role_definition_name = "AcrPull"
+#   principal_id         = azurerm_kubernetes_cluster.aks.kubelet_identity[0].object_id
+# }

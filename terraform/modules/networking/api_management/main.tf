@@ -18,7 +18,7 @@ resource "azurerm_api_management" "apim" {
       subnet_id = var.apim.subnet_id
     }
   }
-  public_network_access_enabled = false
+  public_network_access_enabled = true
   identity {
     type = var.apim.identity_type
   }

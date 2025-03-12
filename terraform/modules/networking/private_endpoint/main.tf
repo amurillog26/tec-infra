@@ -19,4 +19,9 @@ resource "azurerm_private_endpoint" "private_endpoint" {
       private_dns_zone_ids = var.private_dns_zone_ids
     }
   }
+  lifecycle {
+    ignore_changes = [
+      private_service_connection[0].private_connection_resource_id
+    ]
+  }
 }
