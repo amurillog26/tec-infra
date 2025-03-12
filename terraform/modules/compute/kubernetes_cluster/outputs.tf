@@ -24,3 +24,8 @@ terraform {
   }
   required_version = ">=1.0.0"
 }
+
+output "additional_node_pools" {
+  value       = { for k, v in azurerm_kubernetes_cluster_node_pool.additional_pools : k => v.name }
+  description = "Names of additional node pools"
+}

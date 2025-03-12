@@ -10,15 +10,15 @@ module "aks" {
 
   subnet_id          = lookup(module.networking.subnet_ids, "snet_gpt_aks_dev", null)
   availability_zones = var.kubernetes.availability_zones
+  
+  # Configuración para clúster privado
+  private_cluster_enabled = var.kubernetes.private_cluster_enabled
+  private_dns_zone_id     = module.private_dns_zone[var.kubernetes.private_dns_zone_name].id
 
-  default_node_pool  = {
-    name                = var.kubernetes.default_node_pool.name
-    node_count          = var.kubernetes.default_node_pool.node_count
-    vm_size             = var.kubernetes.default_node_pool.vm_size
-    enable_auto_scaling = var.kubernetes.default_node_pool.enable_auto_scaling
-    min_count           = var.kubernetes.default_node_pool.min_count
-    max_count           = var.kubernetes.default_node_pool.max_count
-  }
+  default_node_pool  = var.kubernetes.default_node_pool
+  
+  # Añadir nodepool adicional
+  additional_node_pools = var.kubernetes.additional_node_pools
 
   attach_acr         = var.kubernetes.attach_acr
   acr_id             = module.container_registry.acr_id

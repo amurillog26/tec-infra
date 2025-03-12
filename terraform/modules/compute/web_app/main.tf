@@ -12,20 +12,25 @@ resource "azurerm_linux_web_app" "web_app" {
   service_plan_id     = each.value.service_plan_id
   https_only         = true
   
-  virtual_network_subnet_id = local.is_production ? each.value.subnet_id : null
-
+  # Integración con VNet
+  virtual_network_subnet_id = each.value.subnet_id
+  
   site_config {
     always_on               = true
     minimum_tls_version     = "1.2"
-    vnet_route_all_enabled  = local.is_production ? true : false
+    vnet_route_all_enabled  = each.value.vnet_route_all_enabled
     use_32_bit_worker      = false
-  
+    
+    # Configuración Docker
+    container_registry_use_managed_identity = false
+    
+    # Restricciones IP
     dynamic "ip_restriction" {
-      for_each = local.is_production ? (each.value.ip_restrictions != null ? each.value.ip_restrictions : {}) : {}
+      for_each = each.value.ip_restrictions != null ? each.value.ip_restrictions : {}
       content {
         name                      = ip_restriction.value.name
-        ip_address               = ip_restriction.value.ip_address
-        virtual_network_subnet_id = ip_restriction.value.subnet_id
+        ip_address               = lookup(ip_restriction.value, "ip_address", null)
+        virtual_network_subnet_id = lookup(ip_restriction.value, "subnet_id", null)
         priority                 = ip_restriction.value.priority
         action                   = ip_restriction.value.action
       }
@@ -41,7 +46,7 @@ resource "azurerm_linux_web_app" "web_app" {
       WEBSITES_ENABLE_APP_SERVICE_STORAGE = false
     }
   )
-
+  
   identity {
     type = "SystemAssigned"
   }
@@ -50,10 +55,4 @@ resource "azurerm_linux_web_app" "web_app" {
     WebApp = each.value.name
     Environment = var.environment
   })
-
-  lifecycle {
-    ignore_changes = [
-      app_settings["DOCKER_REGISTRY_SERVER_PASSWORD"]
-    ]
-  }
 }

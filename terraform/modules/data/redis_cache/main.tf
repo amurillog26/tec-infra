@@ -23,6 +23,7 @@ resource "azurerm_redis_cache" "redis" {
   family              = each.value.family
   sku_name            = each.value.sku_name
   minimum_tls_version = each.value.minimum_tls_version
+  public_network_access_enabled = false
 
   redis_configuration {
     maxmemory_policy               = each.value.redis_configuration.maxmemory_policy
