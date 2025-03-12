@@ -21,7 +21,8 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 
   identity {
-    type = "SystemAssigned"
+    type = "UserAssigned"
+    identity_ids = [var.user_assigned_identity_id]  # Pass managed identity from module.managed_identity
   }
 
   network_profile {

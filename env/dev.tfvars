@@ -127,7 +127,7 @@ cosmos_sql_databases = [
 ]
 
 enable_private_endpoint     = true  # true for prod
-private_dns_zone_id        = null   # Required for prod
+private_dns_zone_id        = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/privateDnsZones/privatelink.documents.azure.com"   # Required for prod
 log_analytics_workspace_id = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg-monitoring/providers/Microsoft.OperationalInsights/workspaces/log-analytics-workspace"
 
 # Container Registry
