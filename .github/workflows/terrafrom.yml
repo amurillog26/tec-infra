@@ -33,7 +33,7 @@ env:
 jobs:
   terraform-validate:
     name: Terraform Validate
-    runs-on: test2
+    runs-on: self-hosted
     steps:
       - name: Checkout código
         uses: actions/checkout@v4
@@ -58,7 +58,7 @@ jobs:
         
   security-scan:
     name: Security Scan with Checkov
-    runs-on: test2
+    runs-on: self-hosted
     steps:
       - name: Checkout código
         uses: actions/checkout@v4
@@ -76,7 +76,7 @@ jobs:
 
   terraform-plan:
     name: Terraform Plan
-    runs-on: test2
+    runs-on: self-hosted
     needs: [terraform-validate, security-scan]
     if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
     environment:
@@ -143,7 +143,7 @@ jobs:
 
   terraform-apply:
     name: Terraform Apply
-    runs-on: test2
+    runs-on: self-hosted
     needs: terraform-plan
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     environment:
