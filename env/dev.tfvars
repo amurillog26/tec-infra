@@ -153,7 +153,7 @@ web_apps = {
     service_plan_id = null  # Se asignará dinámicamente
     
     # 1. Integración con VNet
-    subnet_id       = "snet_gpt_app_dev"  # Debe ser una subnet dedicada para integración
+    subnet_id       = "snet_gpt_app_dev"
     vnet_route_all_enabled = true  # Enruta todo el tráfico a través de la VNet
     
     docker_image    = "mcr.microsoft.com/appsvc/staticsite"
@@ -546,6 +546,9 @@ private_dns_zones = {
   "privatelink.southcentralus.azmk8s.io" = {
     name = "privatelink.southcentralus.azmk8s.io"
   },
+    "privatelink.southcentralus.kubeap.io" = {
+    name = "privatelink.southcentralus.kubeap.io"
+  },
   "privatelink.grafana.azure.com" = {
     name = "privatelink.grafana.azure.com"
   }
@@ -611,7 +614,7 @@ kubernetes = {
   
   # Habilitar clúster privado
   private_cluster_enabled     = true
-  private_dns_zone_name       = "privatelink.southcentralus.azmk8s.io"
+  private_dns_zone_name       = "System"
   
   # Nodepool para infraestructura (system)
   default_node_pool  = {

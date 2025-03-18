@@ -13,7 +13,7 @@ module "aks" {
   
   # Configuración para clúster privado
   private_cluster_enabled = var.kubernetes.private_cluster_enabled
-  private_dns_zone_id     = module.private_dns_zone[var.kubernetes.private_dns_zone_name].id
+  private_dns_zone_id     = var.kubernetes.private_dns_zone_name
   user_assigned_identity_id = module.managed_identity.id
 
   default_node_pool  = var.kubernetes.default_node_pool
