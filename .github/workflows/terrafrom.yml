@@ -73,7 +73,7 @@ jobs:
           quiet: false
           soft_fail: true
           output_format: sarif
-          output_file: checkov-results.sarif
+          output_file_path: checkov-results.sarif
           
       # - name: Upload Checkov scan results to GitHub Security tab
       #   uses: github/codeql-action/upload-sarif@v3
