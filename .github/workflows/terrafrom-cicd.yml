@@ -1,0 +1,218 @@
+name: Terraform CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - pprd
+      - develop
+      - feature/test
+    paths:
+      - '**.tf'
+      - '**.tfvars'
+      - '.github/workflows/terraform.yml'
+  pull_request:
+    branches:
+      - main
+      - pprd
+      - develop
+    paths:
+      - '**.tf'
+      - '**.tfvars'
+      - '.github/workflows/terraform.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Ambiente para desplegar (dev/ppd/prd)'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - ppd
+          - prd
+
+env:
+  TF_LOG: INFO
+  ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+  ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+
+jobs:
+  terraform-validate:
+    name: Terraform Validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
+
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -check
+        continue-on-error: true
+
+      - name: Terraform Init
+        id: init
+        run: terraform init -backend=false
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate
+        
+  security-scan:
+    name: Security Scan with Checkov
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+        
+      - name: Run Checkov Scan
+        id: checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .
+          framework: terraform
+          quiet: false
+          soft_fail: true
+          output_format: sarif
+          output_file: checkov-results.sarif
+          
+      - name: Upload Checkov scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        if: success() || failure()
+        with:
+          sarif_file: checkov-results.sarif
+          
+      - name: Upload Checkov scan results as artifact
+        uses: actions/upload-artifact@v3
+        if: success() || failure()
+        with:
+          name: checkov-scan-results
+          path: checkov-results.sarif
+          retention-days: 7
+
+  terraform-plan:
+    name: Terraform Plan
+    runs-on: ubuntu-latest
+    needs: [terraform-validate, security-scan]
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    environment:
+      name: ${{ github.event.inputs.environment || 'dev' }}
+    concurrency:
+      group: terraform-${{ github.event.inputs.environment || 'dev' }}
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+
+      - name: Determinar ambiente para PR
+        id: env_selection
+        if: github.event_name == 'pull_request'
+        run: |
+          if [[ "${{ github.base_ref }}" == "main" ]]; then
+            echo "ENVIRONMENT=prd" >> $GITHUB_ENV
+          elif [[ "${{ github.base_ref }}" == "pprd" ]]; then
+            echo "ENVIRONMENT=ppd" >> $GITHUB_ENV
+          else
+            echo "ENVIRONMENT=dev" >> $GITHUB_ENV
+          fi
+
+      - name: Determinar ambiente para workflow_dispatch
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "ENVIRONMENT=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          terraform plan \
+            -var-file=env/${ENVIRONMENT}.tfvars \
+            -out=tfplan
+
+      - name: Publicar Plan de Terraform como Artefacto
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: terraform-plan-${{ env.ENVIRONMENT }}
+          path: tfplan
+          retention-days: 7
+
+  terraform-apply:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+    needs: terraform-plan
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    environment:
+      name: ${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prd' || (github.ref == 'refs/heads/pprd' && 'ppd' || 'dev')) }}
+    concurrency:
+      group: terraform-apply-${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prd' || (github.ref == 'refs/heads/pprd' && 'ppd' || 'dev')) }}
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+
+      - name: Determinar ambiente para push
+        id: env_selection_push
+        if: github.event_name == 'push'
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "ENVIRONMENT=prd" >> $GITHUB_ENV
+          elif [[ "${{ github.ref }}" == "refs/heads/pprd" ]]; then
+            echo "ENVIRONMENT=ppd" >> $GITHUB_ENV
+          else
+            echo "ENVIRONMENT=dev" >> $GITHUB_ENV
+          fi
+
+      - name: Determinar ambiente para workflow_dispatch  
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "ENVIRONMENT=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          terraform plan \
+            -var-file=env/${ENVIRONMENT}.tfvars \
+            -out=tfplan
+
+      - name: Terraform Apply
+        id: apply
+        run: |
+          terraform apply tfplan
+
+      - name: Publicar Estado de Terraform como Artefacto
+        uses: actions/upload-artifact@v3
+        with:
+          name: terraform-state-${{ env.ENVIRONMENT }}-${{ github.run_id }}
+          path: |
+            terraform.tfstate
+            terraform.tfstate.backup
+          retention-days: 30
