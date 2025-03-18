@@ -6,8 +6,8 @@ resource "azurerm_kubernetes_cluster" "aks" {
   kubernetes_version = var.kubernetes_version
   
   # Configuración para clúster privado
-  # private_cluster_enabled = var.private_cluster_enabled
-  # private_dns_zone_id     = var.private_dns_zone_id
+  private_cluster_enabled = var.private_cluster_enabled
+  private_dns_zone_id     = var.private_dns_zone_id
 
   default_node_pool {
     name                = var.default_node_pool.name

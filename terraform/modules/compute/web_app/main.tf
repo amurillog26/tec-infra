@@ -1,8 +1,3 @@
-# main.tf
-locals {
-  is_production = var.environment != "dev"
-}
-
 resource "azurerm_linux_web_app" "web_app" {
   for_each = var.web_apps
 
@@ -10,29 +5,38 @@ resource "azurerm_linux_web_app" "web_app" {
   resource_group_name = var.resource_group_name
   location            = var.location
   service_plan_id     = each.value.service_plan_id
-  https_only         = true
+  https_only          = true
   
-  # Integración con VNet
   virtual_network_subnet_id = each.value.subnet_id
-  
+
   site_config {
     always_on               = true
     minimum_tls_version     = "1.2"
-    vnet_route_all_enabled  = each.value.vnet_route_all_enabled
-    use_32_bit_worker      = false
-    
-    # Configuración Docker
-    container_registry_use_managed_identity = false
-    
-    # Restricciones IP
+    vnet_route_all_enabled  = each.value.subnet_id != null ? true : false
+    use_32_bit_worker       = false
+  
     dynamic "ip_restriction" {
       for_each = each.value.ip_restrictions != null ? each.value.ip_restrictions : {}
       content {
         name                      = ip_restriction.value.name
-        ip_address               = lookup(ip_restriction.value, "ip_address", null)
+        ip_address                = lookup(ip_restriction.value, "ip_address", null)
+        service_tag               = lookup(ip_restriction.value, "service_tag", null)
         virtual_network_subnet_id = lookup(ip_restriction.value, "subnet_id", null)
-        priority                 = ip_restriction.value.priority
-        action                   = ip_restriction.value.action
+        priority                  = ip_restriction.value.priority
+        action                    = ip_restriction.value.action
+      }
+    }
+    
+    # Aplicar las mismas restricciones al sitio SCM
+    dynamic "scm_ip_restriction" {
+      for_each = each.value.ip_restrictions != null ? each.value.ip_restrictions : {}
+      content {
+        name                      = "${scm_ip_restriction.value.name}-scm"
+        ip_address                = lookup(scm_ip_restriction.value, "ip_address", null)
+        service_tag               = lookup(scm_ip_restriction.value, "service_tag", null)
+        virtual_network_subnet_id = lookup(scm_ip_restriction.value, "subnet_id", null)
+        priority                  = scm_ip_restriction.value.priority
+        action                    = scm_ip_restriction.value.action
       }
     }
   }
@@ -40,13 +44,11 @@ resource "azurerm_linux_web_app" "web_app" {
   app_settings = merge(
     each.value.app_settings,
     {
-      DOCKER_REGISTRY_SERVER_URL          = var.acr_login_server
-      DOCKER_REGISTRY_SERVER_USERNAME     = var.acr_admin_username
-      DOCKER_REGISTRY_SERVER_PASSWORD     = var.acr_admin_password
-      WEBSITES_ENABLE_APP_SERVICE_STORAGE = false
+      "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = "false",
+      "FTPS_STATE" = "Disabled"
     }
   )
-  
+
   identity {
     type = "SystemAssigned"
   }
@@ -55,11 +57,4 @@ resource "azurerm_linux_web_app" "web_app" {
     WebApp = each.value.name
     Environment = var.environment
   })
-  lifecycle {
-    ignore_changes = [
-      app_settings["DOCKER_REGISTRY_SERVER_PASSWORD"],
-      app_settings["DOCKER_REGISTRY_SERVER_URL"],
-      app_settings["DOCKER_REGISTRY_SERVER_USERNAME"]
-    ]
-  }
 }

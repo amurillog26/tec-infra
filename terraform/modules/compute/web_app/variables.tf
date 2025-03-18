@@ -23,13 +23,13 @@ variable "web_apps" {
     name              = string
     service_plan_id   = string
     subnet_id         = optional(string)
-    vnet_route_all_enabled = optional(bool, false)
     docker_image      = optional(string)
     docker_image_tag  = optional(string)
     app_settings      = map(string)
     ip_restrictions   = optional(map(object({
       name            = string
       ip_address      = optional(string)
+      service_tag     = optional(string)
       subnet_id       = optional(string)
       priority        = number
       action          = string

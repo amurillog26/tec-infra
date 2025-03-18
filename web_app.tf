@@ -7,7 +7,6 @@ module "service_plans" {
   tags               = var.tags
 }
 
-# Web Apps
 module "web_apps" {
   source = "./terraform/modules/compute/web_app"
 
@@ -18,14 +17,27 @@ module "web_apps" {
   web_apps = {
     "api" = {
       name            = "app-gpt-api-dev"
-      service_plan_id = module.service_plans.service_plan_ids["plan1"]  # Referencia al plan existente
-      subnet_id       = null  # Opcional para dev
+      service_plan_id = module.service_plans.service_plan_ids["plan1"]
+      subnet_id       = module.networking.subnet_ids["snet_gpt_app_dev"]  # Conecta a subnet interna
       app_settings = {
         "WEBSITES_PORT" = "8080"
         "API_VERSION"   = "v1"
         "ENVIRONMENT"   = "development"
       }
-      ip_restrictions = {}  # Vacío para dev
+      ip_restrictions = {
+        "allow-vnet" = {
+          name       = "allow-vnet-only"
+          subnet_id  = module.networking.subnet_ids["snet_gpt_int_dev"]
+          priority   = 100
+          action     = "Allow"
+        },
+        "deny-all" = {
+          name       = "deny-all"
+          ip_address = "0.0.0.0/0"
+          priority   = 200
+          action     = "Deny"
+        }
+      }
     }
   }
 
