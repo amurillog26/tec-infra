@@ -7,19 +7,11 @@ on:
       - pprd
       - develop
       - feature/test
-    paths:
-      - '**.tf'
-      - '**.tfvars'
-      - '.github/workflows/terraform.yml'
   pull_request:
     branches:
       - main
       - pprd
       - develop
-    paths:
-      - '**.tf'
-      - '**.tfvars'
-      - '.github/workflows/terraform.yml'
   workflow_dispatch:
     inputs:
       environment:
