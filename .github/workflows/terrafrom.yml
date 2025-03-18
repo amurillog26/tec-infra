@@ -82,7 +82,7 @@ jobs:
           sarif_file: checkov-results.sarif
           
       - name: Upload Checkov scan results as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4.6.1
         if: success() || failure()
         with:
           name: checkov-scan-results
@@ -140,7 +140,7 @@ jobs:
 
       - name: Publicar Plan de Terraform como Artefacto
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4.6.1
         with:
           name: terraform-plan-${{ env.ENVIRONMENT }}
           path: tfplan
@@ -201,7 +201,7 @@ jobs:
           terraform apply tfplan
 
       - name: Publicar Estado de Terraform como Artefacto
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4.6.1
         with:
           name: terraform-state-${{ env.ENVIRONMENT }}-${{ github.run_id }}
           path: |
