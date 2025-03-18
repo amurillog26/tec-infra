@@ -75,19 +75,19 @@ jobs:
           output_format: sarif
           output_file: checkov-results.sarif
           
-      - name: Upload Checkov scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
-        if: success() || failure()
-        with:
-          sarif_file: checkov-results.sarif
+      # - name: Upload Checkov scan results to GitHub Security tab
+      #   uses: github/codeql-action/upload-sarif@v3
+      #   if: success() || failure()
+      #   with:
+      #     sarif_file: checkov-results.sarif
           
-      - name: Upload Checkov scan results as artifact
-        uses: actions/upload-artifact@v4.6.1
-        if: success() || failure()
-        with:
-          name: checkov-scan-results
-          path: checkov-results.sarif
-          retention-days: 7
+      # - name: Upload Checkov scan results as artifact
+      #   uses: actions/upload-artifact@v4.6.1
+      #   if: success() || failure()
+      #   with:
+      #     name: checkov-scan-results
+      #     path: checkov-results.sarif
+      #     retention-days: 7
 
   terraform-plan:
     name: Terraform Plan
