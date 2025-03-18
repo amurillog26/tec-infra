@@ -11,29 +11,29 @@ variable "location" {
 
 variable "storage_accounts" {
   type = map(object({
-    name                      = string
+    name                     = string
     account_tier             = optional(string)
     account_replication_type = optional(string)
-    account_kind            = optional(string)
-    min_tls_version         = optional(string)
-    access_tier             = optional(string)
-    is_hns_enabled         = optional(bool)
-    
+    account_kind             = optional(string)
+    min_tls_version          = optional(string)
+    access_tier              = optional(string)
+    is_hns_enabled           = optional(bool)
+
     network_rules = optional(object({
       default_action = optional(string)
       ip_rules       = optional(list(string))
       bypass         = optional(list(string))
     }))
-    
+
     containers = optional(list(object({
       name        = string
       access_type = optional(string)
     })))
-    
+
     tables = optional(list(object({
       name = string
     })))
-    
+
     tags = optional(map(string))
   }))
   description = "Mapa de cuentas de almacenamiento para crear"
@@ -46,11 +46,11 @@ variable "tags" {
   default     = {}
 }
 variable "main_rg_name" {
-  type          = string
+  type = string
 }
 
 variable "main_vn_location" {
-  type          = string
+  type = string
 }
 
 variable "resource_tags" {
@@ -67,7 +67,7 @@ variable "kv_public_access" {
   type        = bool
   description = "Enable or disable public access to the key vault"
   default     = false
-  
+
 }
 
 variable "kv_sku_name" {
@@ -78,7 +78,7 @@ variable "kv_sku_name" {
 variable "tenant_id" {
   type        = string
   description = "The tenant ID"
-  
+
 }
 
 variable "environment" {
@@ -148,9 +148,9 @@ variable "cosmos_sql_databases" {
   type = list(object({
     database_name = string
     containers = list(object({
-      name           = string
-      partition_key  = string  # Esto ahora es un solo string para partition_key_path
-      throughput     = number
+      name          = string
+      partition_key = string # Esto ahora es un solo string para partition_key_path
+      throughput    = number
     }))
   }))
   description = "List of Cosmos DB databases and their containers"
@@ -160,7 +160,7 @@ variable "cosmos_capabilities" {
   type        = list(string)
   description = "List of Cosmos DB capabilities"
   default     = null
-  
+
 }
 
 variable "enable_private_endpoint" {
@@ -200,23 +200,23 @@ variable "acr_public" {
 
 variable "service_plans" {
   type = map(object({
-    name                    = string
-    sku_name                = string
-    os_type                 = string
-    worker_count            = number
-    zone_balancing_enabled  = bool
+    name                   = string
+    sku_name               = string
+    os_type                = string
+    worker_count           = number
+    zone_balancing_enabled = bool
   }))
   description = "Map of service plans"
-  
+
 }
 
 variable "web_apps" {
   type = map(object({
     name                   = string
-    subnet_id             = optional(string)
+    subnet_id              = optional(string)
     vnet_route_all_enabled = optional(bool, false)
-    app_settings          = map(string)
-    ip_restrictions       = optional(map(object({
+    app_settings           = map(string)
+    ip_restrictions = optional(map(object({
       name       = string
       ip_address = optional(string)
       subnet_id  = optional(string)
@@ -230,12 +230,12 @@ variable "web_apps" {
 
 variable "apim" {
   type = object({
-    name                = string
-    publisher_name      = string
-    publisher_email     = string
-    sku_name           = string
-    capacity           = number
-    subnet_id          = string
+    name                 = string
+    publisher_name       = string
+    publisher_email      = string
+    sku_name             = string
+    capacity             = number
+    subnet_id            = string
     virtual_network_type = string
     # Opcional: Puedes añadir explícitamente el ID de IP pública si es necesario
     public_ip_address_id = optional(string)
@@ -256,12 +256,12 @@ variable "apim" {
     }))
     products = map(object({
       product_id            = string
-      display_name         = string
-      description         = string
+      display_name          = string
+      description           = string
       subscription_required = bool
-      approval_required    = bool
-      published           = bool
-      subscriptions_limit = number
+      approval_required     = bool
+      published             = bool
+      subscriptions_limit   = number
     }))
     apis = map(object({
       name         = string
@@ -270,8 +270,8 @@ variable "apim" {
       protocols    = list(string)
       revision     = string
       version      = optional(string)
-      version_set  = optional(object({
-        name = string
+      version_set = optional(object({
+        name              = string
         versioning_scheme = string
       }))
     }))
@@ -292,12 +292,12 @@ variable "redis_cache" {
   type = map(object({
     name                = string
     capacity            = number
-    family             = string
-    sku_name           = string
+    family              = string
+    sku_name            = string
     minimum_tls_version = string
-    
+
     redis_configuration = object({
-      maxmemory_policy     = string
+      maxmemory_policy                = string
       maxfragmentationmemory_reserved = number
       maxmemory_reserved              = number
     })
@@ -313,8 +313,8 @@ variable "redis_cache" {
     })
 
     alerts = object({
-      cpu_threshold = number
-      memory_threshold = number
+      cpu_threshold        = number
+      memory_threshold     = number
       connection_threshold = number
     })
 
@@ -372,56 +372,56 @@ variable "application_gateway" {
     backend_http_settings = map(object({
       name                  = string
       cookie_based_affinity = string
-      path                 = string
-      port                 = number
-      protocol            = string
-      request_timeout     = number
-      probe_name         = string
+      path                  = string
+      port                  = number
+      protocol              = string
+      request_timeout       = number
+      probe_name            = string
     }))
     http_listeners = map(object({
       name                           = string
       frontend_ip_configuration_name = string
-      frontend_port_name            = string
-      protocol                      = string
-      ssl_certificate_name          = optional(string)
-      host_name                     = optional(string)
+      frontend_port_name             = string
+      protocol                       = string
+      ssl_certificate_name           = optional(string)
+      host_name                      = optional(string)
     }))
     probes = map(object({
       name                = string
-      host               = string
-      interval           = number
-      path               = string
-      timeout            = number
+      host                = string
+      interval            = number
+      path                = string
+      timeout             = number
       unhealthy_threshold = number
-      protocol           = string
-      port               = number
+      protocol            = string
+      port                = number
       match = object({
         status_codes = list(string)
       })
     }))
     request_routing_rules = map(object({
       name                       = string
-      rule_type                 = string
-      http_listener_name        = string
-      backend_address_pool_name = string
+      rule_type                  = string
+      http_listener_name         = string
+      backend_address_pool_name  = string
       backend_http_settings_name = string
-      priority                  = number
+      priority                   = number
     }))
     waf_configuration = object({
       enabled                  = bool
-      firewall_mode           = string
-      rule_set_type          = string
-      rule_set_version       = string
-      file_upload_limit_mb   = number
-      request_body_check     = bool
+      firewall_mode            = string
+      rule_set_type            = string
+      rule_set_version         = string
+      file_upload_limit_mb     = number
+      request_body_check       = bool
       max_request_body_size_kb = number
       disabled_rule_groups = list(object({
         rule_group_name = string
-        rules          = list(string)
+        rules           = list(string)
       }))
       exclusions = list(object({
         match_variable          = string
-        selector               = string
+        selector                = string
         selector_match_operator = string
       }))
     })
@@ -439,9 +439,9 @@ variable "application_gateway" {
 
 variable "managed_identity" {
   type = object({
-    name                = string
+    name                  = string
     assign_key_vault_role = bool
-    tags               = map(string)
+    tags                  = map(string)
   })
   description = "Managed identity configuration"
 }
@@ -450,22 +450,22 @@ variable "public_ips" {
   type = map(object({
     name              = string
     allocation_method = string
-    sku              = string
-    sku_tier         = optional(string)
-    zones            = optional(list(string))
-    tags             = map(string)
+    sku               = string
+    sku_tier          = optional(string)
+    zones             = optional(list(string))
+    tags              = map(string)
   }))
   description = "Configuración de las IPs públicas"
 }
 
 variable "private_endpoints" {
   type = map(object({
-    name                     = string
-    resource_id              = string
-    subresource_names        = list(string)
-    subnet_key               = optional(string, "snet_gpt_int_dev")  # Default subnet for private endpoints
-    is_manual_connection     = optional(bool, false)
-    private_dns_zone_ids     = optional(list(string))
+    name                 = string
+    resource_id          = string
+    subresource_names    = list(string)
+    subnet_key           = optional(string, "snet_gpt_int_dev") # Default subnet for private endpoints
+    is_manual_connection = optional(bool, false)
+    private_dns_zone_ids = optional(list(string))
   }))
   description = "Map of private endpoints to create"
   default     = {}
@@ -473,7 +473,7 @@ variable "private_endpoints" {
 
 variable "private_dns_zones" {
   type = map(object({
-    name                = string
+    name                 = string
     registration_enabled = optional(bool, false)
   }))
   description = "Map of private DNS zones to create"
@@ -506,29 +506,29 @@ variable "windows_vm" {
 variable "grafana" {
   description = "Configuración del recurso Azure Managed Grafana"
   type = object({
-    name                            = string
-    sku_name                        = string
-    grafana_version                 = string
-    api_key_enabled                 = bool
+    name                              = string
+    sku_name                          = string
+    grafana_version                   = string
+    api_key_enabled                   = bool
     deterministic_outbound_ip_enabled = bool
-    public_network_access_enabled   = bool
-    zone_redundancy_enabled         = bool
-    identity_type                   = string
-    azure_monitor_workspace_id      = optional(string)
-    admin_principal_ids             = optional(list(string))
-    editor_principal_ids            = optional(list(string))
-    viewer_principal_ids            = optional(list(string))
-    tags                            = optional(map(string))
+    public_network_access_enabled     = bool
+    zone_redundancy_enabled           = bool
+    identity_type                     = string
+    azure_monitor_workspace_id        = optional(string)
+    admin_principal_ids               = optional(list(string))
+    editor_principal_ids              = optional(list(string))
+    viewer_principal_ids              = optional(list(string))
+    tags                              = optional(map(string))
   })
   default = {
-    name                            = "grafana-gpt-dev"
-    sku_name                        = "Standard"
-    grafana_version                 = "10"  # Usar versión 10 o 11 para SKU Standard
-    api_key_enabled                 = true
+    name                              = "grafana-gpt-dev"
+    sku_name                          = "Standard"
+    grafana_version                   = "10" # Usar versión 10 o 11 para SKU Standard
+    api_key_enabled                   = true
     deterministic_outbound_ip_enabled = true
-    public_network_access_enabled   = true
-    zone_redundancy_enabled         = false
-    identity_type                   = "SystemAssigned"
+    public_network_access_enabled     = true
+    zone_redundancy_enabled           = false
+    identity_type                     = "SystemAssigned"
   }
 }
 
@@ -539,12 +539,12 @@ variable "kubernetes" {
     dns_prefix         = string
     kubernetes_version = string
     availability_zones = list(string)
-    
+
     # Nuevos campos para clúster privado
-    private_cluster_enabled     = bool
-    private_dns_zone_name       = string
-    
-    default_node_pool  = object({
+    private_cluster_enabled = bool
+    private_dns_zone_name   = string
+
+    default_node_pool = object({
       name                = string
       node_count          = number
       vm_size             = string
@@ -554,7 +554,7 @@ variable "kubernetes" {
       node_labels         = optional(map(string), {})
       node_taints         = optional(list(string), [])
     })
-    
+
     # Nuevo campo para nodepools adicionales
     additional_node_pools = map(object({
       name                = string
@@ -567,9 +567,9 @@ variable "kubernetes" {
       node_labels         = optional(map(string), {})
       node_taints         = optional(list(string), [])
     }))
-    
-    attach_acr         = bool
-    tags               = map(string)
+
+    attach_acr = bool
+    tags       = map(string)
   })
   description = "Configuración del clúster de Kubernetes"
 }

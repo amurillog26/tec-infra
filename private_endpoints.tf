@@ -12,7 +12,7 @@ module "private_endpoint" {
   subresource_names              = each.value.subresource_names
   is_manual_connection           = lookup(each.value, "is_manual_connection", false)
   private_dns_zone_ids           = lookup(each.value, "private_dns_zone_ids", null)
-  
+
   tags = merge(var.tags, {
     environment = var.environment
     workload    = "oai"
@@ -26,6 +26,6 @@ module "private_endpoint" {
     module.storage,
     # module.apim,
     # module.web_apps
-    module.container_registry  # Añade esta dependencia
+    module.container_registry # Añade esta dependencia
   ]
 }

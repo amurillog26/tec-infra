@@ -6,11 +6,11 @@ module "private_dns_zone" {
 
   name                = each.value.name
   resource_group_name = var.resource_group_name
-  linked_vnets        = {
+  linked_vnets = {
     "vnet_gpt_net_dev" = module.networking.vnet_id
   }
   registration_enabled = lookup(each.value, "registration_enabled", false)
-  
+
   tags = merge(var.tags, {
     environment = var.environment
     workload    = "oai"

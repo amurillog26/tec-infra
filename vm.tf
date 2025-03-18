@@ -3,17 +3,17 @@ module "windows_vm" {
 
   main_rg_name     = var.resource_group_name
   main_vn_location = var.location
-  
-  vm_name          = var.windows_vm.name
-  vm_nic_name      = var.windows_vm.nic_name
+
+  vm_name     = var.windows_vm.name
+  vm_nic_name = var.windows_vm.nic_name
   # Referencia correcta al módulo networking que ya tienes definido
-  vm_subnet_id     = module.networking.subnet_ids["snet_gpt_vm_dev"]
-  vm_size          = var.windows_vm.size
+  vm_subnet_id      = module.networking.subnet_ids["snet_gpt_vm_dev"]
+  vm_size           = var.windows_vm.size
   vm_admin_username = var.windows_vm.admin_username
   vm_admin_password = var.windows_vm.admin_password
-  vm_hostname      = var.windows_vm.hostname
+  vm_hostname       = var.windows_vm.hostname
 
-  resource_tags    = merge(var.tags, var.windows_vm.tags)
+  resource_tags = merge(var.tags, var.windows_vm.tags)
 }
 
 
@@ -70,14 +70,14 @@ resource "azurerm_network_interface_security_group_association" "nsg_nic_associa
 
 # VM Linux Ubuntu con autenticación por contraseña
 resource "azurerm_linux_virtual_machine" "vm" {
-  name                = "vm-linux-dev"
-  location            = "southcentralus"
-  resource_group_name = "rg_gpt_oai_dev"
-  size                = "Standard_D2s_v3"
-  admin_username      = "adminuser"
-  admin_password      = "P@ssw0rd1234!" # Asegúrate de cambiar esto a una contraseña segura
+  name                            = "vm-linux-dev"
+  location                        = "southcentralus"
+  resource_group_name             = "rg_gpt_oai_dev"
+  size                            = "Standard_D2s_v3"
+  admin_username                  = "adminuser"
+  admin_password                  = "P@ssw0rd1234!" # Asegúrate de cambiar esto a una contraseña segura
   disable_password_authentication = false
-  
+
   network_interface_ids = [
     azurerm_network_interface.vm_nic.id,
   ]
@@ -90,7 +90,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
 
   source_image_reference {
     publisher = "Canonical"
-    offer     = "0001-com-ubuntu-server-jammy"  # Ubuntu 22.04 LTS
+    offer     = "0001-com-ubuntu-server-jammy" # Ubuntu 22.04 LTS
     sku       = "22_04-lts-gen2"
     version   = "latest"
   }
