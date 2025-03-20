@@ -47,6 +47,7 @@ resource "azurerm_storage_account" "storage_accounts" {
   account_tier             = coalesce(each.value.account_tier, local.default_config.account_tier)
   account_replication_type = coalesce(each.value.account_replication_type, local.default_config.account_replication_type)
   account_kind            = coalesce(each.value.account_kind, local.default_config.account_kind)
+  cross_tenant_replication_enabled = coalesce(each.value.cross_tenant_replication_enabled, false)
   
   min_tls_version          = coalesce(each.value.min_tls_version, local.default_config.min_tls_version)
   access_tier              = coalesce(each.value.access_tier, local.default_config.access_tier)

@@ -5,12 +5,11 @@ resource "azurerm_kubernetes_cluster" "aks" {
   dns_prefix         = var.dns_prefix
   kubernetes_version = var.kubernetes_version
   disk_encryption_set_id = var.disk_encryption_set_id
-  automatic_channel_upgrade = "stable"
-  sku_tier = "Free"
+  automatic_upgrade_channel = "stable"
+  sku_tier            = var.sku_tier
   workload_identity_enabled = true
   oidc_issuer_enabled = true
-
-
+  image_cleaner_interval_hours        = 48 
   
   # Configuración para clúster privado
   private_cluster_enabled = var.private_cluster_enabled
@@ -22,7 +21,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
     vm_size             = var.default_node_pool.vm_size
     vnet_subnet_id      = var.subnet_id
     zones               = var.availability_zones
-    enable_auto_scaling = var.default_node_pool.enable_auto_scaling
+    auto_scaling_enabled = var.default_node_pool.enable_auto_scaling
     min_count          = var.default_node_pool.enable_auto_scaling ? var.default_node_pool.min_count : null
     max_count          = var.default_node_pool.enable_auto_scaling ? var.default_node_pool.max_count : null
     os_disk_type = "Ephemeral"
@@ -43,6 +42,23 @@ resource "azurerm_kubernetes_cluster" "aks" {
    }
 
   role_based_access_control_enabled = true
+
+  dynamic "key_vault_secrets_provider" {
+    for_each = var.enable_key_vault_secrets_provider ? [1] : []
+    content {
+      secret_rotation_enabled = true
+    }
+  }
+  oms_agent {
+    log_analytics_workspace_id = var.log_analytics_workspace_id
+  }
+  microsoft_defender {
+    log_analytics_workspace_id = var.log_analytics_workspace_id
+  }
+  monitor_metrics {
+    annotations_allowed  = "*"
+    labels_allowed      = "*"
+  }
   tags = var.tags
   lifecycle {
     ignore_changes = [
@@ -63,7 +79,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "additional_pools" {
   vnet_subnet_id        = var.subnet_id
   zones                 = var.availability_zones
   mode                  = each.value.mode
-  enable_auto_scaling   = each.value.enable_auto_scaling
+  auto_scaling_enabled   = each.value.enable_auto_scaling
   min_count             = each.value.enable_auto_scaling ? each.value.min_count : null
   max_count             = each.value.enable_auto_scaling ? each.value.max_count : null
   

@@ -27,3 +27,23 @@ module "grafana" {
 
   tags = merge(var.tags, lookup(var.grafana, "tags", {}))
 }
+
+# 6. Asignación de roles para Grafana
+resource "azurerm_role_assignment" "grafana_monitoring_reader" {
+  scope                = module.aks.cluster_id
+  role_definition_name = "Monitoring Reader"
+  principal_id         = module.grafana.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "grafana_monitoring_data_reader" {
+  scope                = azurerm_monitor_workspace.prometheus.id
+  role_definition_name = "Monitoring Data Reader"
+  principal_id         = module.grafana.identity[0].principal_id
+}
+
+# 7. Acceso a datos de Azure Monitor a nivel de suscripción
+resource "azurerm_role_assignment" "grafana_monitor_reader" {
+  scope                = "/subscriptions/${data.azurerm_client_config.current.subscription_id}"
+  role_definition_name = "Monitoring Reader"
+  principal_id         = module.grafana.identity[0].principal_id
+}

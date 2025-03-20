@@ -2,7 +2,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.0"
+      version = "~> 4.23"
     }
     tls = {
       source  = "hashicorp/tls"
@@ -21,5 +21,5 @@ provider "azurerm" {
       recover_soft_deleted_key_vaults = true
     }
   }
-  skip_provider_registration = true
+  resource_provider_registrations = "none"
 }

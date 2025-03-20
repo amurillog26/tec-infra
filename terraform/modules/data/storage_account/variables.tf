@@ -23,6 +23,7 @@ variable "storage_accounts" {
     min_tls_version         = optional(string)
     access_tier             = optional(string)
     is_hns_enabled         = optional(bool)
+    cross_tenant_replication_enabled = optional(bool)
     
     network_rules = optional(object({
       default_action = optional(string)

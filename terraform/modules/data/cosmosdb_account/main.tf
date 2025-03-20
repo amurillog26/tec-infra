@@ -56,7 +56,7 @@ resource "azurerm_cosmosdb_account" "tec_cosmos_ac" {
     retention_in_hours  = 8
   }
   is_virtual_network_filter_enabled = true
-  ip_range_filter = ""  # Empty to deny all public access
+  ip_range_filter = ["0.0.0.0"]
 
   tags = var.tags
 }

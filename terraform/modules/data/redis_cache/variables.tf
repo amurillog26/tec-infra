@@ -22,6 +22,7 @@ variable "redis_cache" {
       maxmemory_policy     = string
       maxfragmentationmemory_reserved = number
       maxmemory_reserved              = number
+      data_persistence_authentication_method = string
     })
 
     patch_schedule = object({

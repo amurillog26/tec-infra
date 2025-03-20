@@ -18,6 +18,7 @@ variable "storage_accounts" {
     min_tls_version          = optional(string)
     access_tier              = optional(string)
     is_hns_enabled           = optional(bool)
+    cross_tenant_replication_enabled = optional(bool)
 
     network_rules = optional(object({
       default_action = optional(string)
@@ -108,6 +109,7 @@ variable "subnets" {
     private_endpoint_network_policies_enabled     = optional(bool, true)
     private_link_service_network_policies_enabled = optional(bool, true)
     service_endpoints                             = optional(list(string), [])
+    private_endpoint_network_policies             = optional(string)
     delegation = optional(list(object({
       name    = string
       actions = list(string)
@@ -317,6 +319,7 @@ variable "redis_cache" {
       maxmemory_policy                = string
       maxfragmentationmemory_reserved = number
       maxmemory_reserved              = number
+      data_persistence_authentication_method = string
     })
 
     patch_schedule = object({
@@ -556,11 +559,13 @@ variable "kubernetes" {
     dns_prefix         = string
     kubernetes_version = string
     availability_zones = list(string)
+    log_analytics_workspace_id = string
 
     # Nuevos campos para clúster privado
     private_cluster_enabled = bool
     private_dns_zone_name   = string
-
+    enable_key_vault_secrets_provider = optional(bool, false)
+    sku_tier           = optional(string, "Free")  # Add this field
     default_node_pool = object({
       name                = string
       node_count          = number
@@ -595,4 +600,36 @@ variable "admin_object_id" {
   description = "Object ID del administrador que necesita acceso completo al Key Vault"
   type        = string
   default     = "" # Completar con tu Object ID
+}
+
+variable "acr_enable_identity" {
+  type        = bool
+  description = "Enable identity for Azure Container Registry"
+  default     = false
+}
+
+variable "acr_identity_type" {
+  type        = string
+  description = "Type of identity for ACR"
+  default     = "UserAssigned"
+}
+
+variable "acr_identity_ids" {
+  type        = list(string)
+  description = "List of identity IDs for ACR"
+  default     = []
+}
+
+variable "key_vault_access_policies" {
+  description = "List of access policies for the Key Vault"
+  type = list(object({
+    tenant_id               = string
+    object_id               = string
+    application_id          = optional(string, null)
+    certificate_permissions = optional(list(string), [])
+    key_permissions         = optional(list(string), [])
+    secret_permissions      = optional(list(string), [])
+    storage_permissions     = optional(list(string), [])
+  }))
+  default = []
 }

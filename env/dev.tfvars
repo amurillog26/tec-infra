@@ -7,6 +7,7 @@ storage_accounts = {
     name = "stgptdev01"
     account_tier = "Standard"
     account_replication_type = "LRS"
+    cross_tenant_replication_enabled = true
     
     network_rules = {
       default_action = "Allow"
@@ -55,38 +56,55 @@ subnets = {
   "snet_gpt_agw_dev" = {
     address_prefixes = ["10.97.174.0/27"]     # 32 IPs: 10.97.174.0 - 10.97.174.31
     service_endpoints = ["Microsoft.Web"]
+    private_endpoint_network_policies = "Enabled"
   },
   "snet_gpt_apim_dev" = {
     address_prefixes = ["10.97.174.32/27"]    # 32 IPs: 10.97.174.32 - 10.97.174.63
     service_endpoints = ["Microsoft.Web", "Microsoft.ContainerRegistry"]
+    private_endpoint_network_policies = "Enabled"
   },
   "snet_gpt_aks_dev" = {
     address_prefixes = ["10.97.175.0/24"]     # 256 IPs: 10.97.175.0 - 10.97.175.255 (subnet más grande en otro segmento)
     service_endpoints = ["Microsoft.ContainerRegistry"]
+    private_endpoint_network_policies = "Enabled"
   },
   "snet_gpt_int_dev" = {
     address_prefixes = ["10.97.174.128/27"]   # 32 IPs: 10.97.174.128 - 10.97.174.159
     service_endpoints = ["Microsoft.Web"]
+    private_endpoint_network_policies = "Enabled"
   },
   "snet_gpt_vm_dev" = {
-    address_prefixes = ["10.97.174.160/27"]   # 32 IPs: 10.97.174.160 - 10.97.174.191
+    address_prefixes = ["10.97.174.160/27"]
     service_endpoints = ["Microsoft.Web"]
+    private_endpoint_network_policies = "Enabled"
   },
   "snet_gpt_pe_dev" = {
     address_prefixes = ["10.97.174.192/27"]   # 32 IPs: 10.97.174.192 - 10.97.174.223
     service_endpoints = ["Microsoft.Web", "Microsoft.Storage", "Microsoft.KeyVault", "Microsoft.ContainerRegistry", "Microsoft.AzureCosmosDB"]
+    private_endpoint_network_policies = "Enabled"
     private_endpoint_network_policies_enabled = false
   },
   "snet_gpt_app_dev" = {
     address_prefixes = ["10.97.174.64/27"]  # Elige un rango disponible
     service_endpoints = ["Microsoft.Web", "Microsoft.Storage", "Microsoft.KeyVault", "Microsoft.ContainerRegistry"]
+    private_endpoint_network_policies = "Enabled"
     delegation = [
       {
         name    = "Microsoft.Web/serverFarms"
         actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
       }
     ]
-  }
+  },
+  "snet_gpt_github_actions" = {
+    address_prefixes = ["10.97.174.96/27"]
+    service_endpoints = ["Microsoft.Web"]
+    delegation = [
+      {
+        name    = "GitHub.Network/networkSettings"
+        actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
+      }
+    ]
+  },
 }
 
 ########## cosmosdb ##########
@@ -135,7 +153,11 @@ acr_name           = "crgptoaidev01"  # Debe ser globalmente único
 acr_admin_enabled  = true           # Habilitado para desarrollo
 acr_public         = true           # Público para desarrollo
 acr_zone_redundancy_enabled = false
-
+acr_enable_identity = true
+acr_identity_type   = "UserAssigned"
+acr_identity_ids    = [
+  "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-aks-services-wi"
+]
 service_plans = {
   "plan1" = {
     name                    = "asp-gpt-api-dev"
@@ -245,6 +267,7 @@ redis_cache = {
       maxmemory_policy     = "allkeys-lru"
       maxfragmentationmemory_reserved = 642
       maxmemory_reserved              = 642
+      data_persistence_authentication_method = "SAS"
     }
 
     patch_schedule = {
@@ -617,6 +640,9 @@ kubernetes = {
   # Habilitar clúster privado
   private_cluster_enabled     = true
   private_dns_zone_name       = "System"
+  enable_key_vault_secrets_provider = true
+  sku_tier           = "Free"  # Can be "Free", "Standard", or "Premium"
+  log_analytics_workspace_id = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg-monitoring/providers/Microsoft.OperationalInsights/workspaces/log-analytics-workspace"
   
   # Nodepool para infraestructura (system)
   default_node_pool  = {
@@ -724,3 +750,50 @@ key_vault_secrets = {
 }
 
 admin_object_id = "693831f7-28b7-4429-bb0c-f0892c718230" 
+
+key_vault_access_policies = [
+  {
+    tenant_id = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
+    object_id = "693831f7-28b7-4429-bb0c-f0892c718230"
+    application_id = "ff864b72-fd0c-4ad9-8e38-ea5407e2c0c7"
+    certificate_permissions = []
+    key_permissions = []
+    secret_permissions = [
+      "Get", "List", "Set", "Delete", "Recover", "Backup", "Restore"
+    ]
+    storage_permissions = []
+  },
+  {
+    tenant_id = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
+    object_id = "693831f7-28b7-4429-bb0c-f0892c718230"
+    application_id = ""
+    certificate_permissions = []
+    key_permissions = []
+    secret_permissions = [
+      "Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"
+    ]
+    storage_permissions = []
+  },
+  {
+    tenant_id = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
+    object_id = "606cbf95-ed55-45c6-9eca-c67d585827c5"
+    application_id = ""
+    certificate_permissions = []
+    key_permissions = []
+    secret_permissions = [
+      "Get", "List", "Recover"
+    ]
+    storage_permissions = []
+  },
+  {
+    tenant_id = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
+    object_id = "2496dc6a-3aa4-4960-9d41-2b49c5a8827e"
+    application_id = ""
+    certificate_permissions = []
+    key_permissions = []
+    secret_permissions = [
+      "Get", "List"
+    ]
+    storage_permissions = []
+  }
+]

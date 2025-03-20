@@ -29,6 +29,7 @@ resource "azurerm_redis_cache" "redis" {
     maxmemory_policy               = each.value.redis_configuration.maxmemory_policy
     maxfragmentationmemory_reserved = each.value.redis_configuration.maxfragmentationmemory_reserved
     maxmemory_reserved             = each.value.redis_configuration.maxmemory_reserved
+    data_persistence_authentication_method = each.value.redis_configuration.data_persistence_authentication_method
   }
 
   patch_schedule {

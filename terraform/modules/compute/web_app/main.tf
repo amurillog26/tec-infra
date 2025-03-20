@@ -17,6 +17,7 @@ resource "azurerm_linux_web_app" "web_app" {
     use_32_bit_worker       = false
     ftps_state = "Disabled"
     health_check_path = "/health"
+    health_check_eviction_time_in_min = 3  # Agregado este parámetro obligatorio
     http2_enabled = true
   
     dynamic "ip_restriction" {

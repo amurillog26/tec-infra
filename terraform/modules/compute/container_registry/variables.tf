@@ -63,3 +63,21 @@ variable "zone_redundancy_enabled" {
   description = "Whether or not the container registry is zone redundant"
   default = true
 }
+
+variable "enable_identity" {
+  type        = bool
+  description = "Enable user assigned identity for container registry"
+  default     = false
+}
+
+variable "identity_type" {
+  type        = string
+  description = "Type of identity to use"
+  default     = "UserAssigned"
+}
+
+variable "identity_ids" {
+  type        = list(string)
+  description = "List of user assigned identity IDs"
+  default     = []
+}

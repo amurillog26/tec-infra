@@ -114,3 +114,35 @@ variable "user_assigned_identity_id" {
   description = "User assigned identity ID for AKS"
   default     = null  # Esto permite que sea opcional
 }
+
+variable "enable_key_vault_secrets_provider" {
+  type        = bool
+  description = "Enable key vault secrets provider for AKS"
+  default     = false
+}
+
+variable "sku_tier" {
+  type        = string
+  description = "The SKU tier for the AKS cluster"
+  default     = "Free"
+  validation {
+    condition     = contains(["Free", "Standard", "Premium"], var.sku_tier)
+    error_message = "The SKU tier must be one of: Free, Standard, Premium."
+  }
+}
+
+variable "key_vault_secrets_provider" {
+  type = object({
+    enabled                 = bool
+    secret_rotation_enabled = optional(bool, true)
+  })
+  description = "Configuration for the Key Vault Secrets Provider"
+  default = {
+    enabled = false
+  }
+}
+
+variable "log_analytics_workspace_id" {
+  type        = string
+  description = "ID del espacio de trabajo de Log Analytics para diagnósticos"
+}
