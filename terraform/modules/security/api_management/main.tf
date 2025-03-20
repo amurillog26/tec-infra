@@ -41,7 +41,7 @@ resource "azurerm_subnet_network_security_group_association" "nsg_to_apimsubnet"
 resource "azurerm_monitor_diagnostic_setting" "tec_apim_monitor" {
   name               = var.apim_name
   target_resource_id = azurerm_api_management.tec_apim.id
-  log_analytics_workspace_id = var.log_analytics_workspace_id
+  log_analytics_workspace_id = module.log_analytics.workspace_id
   log_analytics_destination_type = "AzureDiagnostics"
 
   log {

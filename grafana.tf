@@ -13,6 +13,7 @@ module "grafana" {
   deterministic_outbound_ip_enabled = var.grafana.deterministic_outbound_ip_enabled
   public_network_access_enabled     = var.grafana.public_network_access_enabled
   zone_redundancy_enabled           = var.grafana.zone_redundancy_enabled
+  private_endpoint_enabled          = var.grafana.private_endpoint_enabled
 
   # Identidad
   identity_type = var.grafana.identity_type

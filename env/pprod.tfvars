@@ -117,7 +117,6 @@ cosmos_sql_databases = [
 
 enable_private_endpoint     = true  # true for prod
 private_dns_zone_id        = null   # Required for prod
-log_analytics_workspace_id = "/subscriptions/xxxx/resourceGroups/rg-monitoring/providers/Microsoft.OperationalInsights/workspaces/log-analytics-workspace"
 
 # Container Registry
 acr_name           = "crgptoaipprd01"  # Debe ser globalmente único
@@ -505,7 +504,7 @@ windows_vm = {
 grafana = {
   name                            = "grafana-gpt-pprd"
   sku_name                        = "Standard"
-  grafana_version                 = "10"
+  grafana_version                 = "11"
   api_key_enabled                 = true
   deterministic_outbound_ip_enabled = true
   public_network_access_enabled   = true

@@ -6,7 +6,7 @@ resource "azurerm_dashboard_grafana" "grafana" {
   deterministic_outbound_ip_enabled = var.deterministic_outbound_ip_enabled
   public_network_access_enabled     = var.public_network_access_enabled
   zone_redundancy_enabled           = var.zone_redundancy_enabled
-  
+ 
   # Especificar el SKU
   sku = var.sku_name
   
@@ -28,7 +28,7 @@ resource "azurerm_dashboard_grafana" "grafana" {
 
   lifecycle {
     ignore_changes = [
-      resource_group_name
+      grafana_major_version
     ]
   }
 }

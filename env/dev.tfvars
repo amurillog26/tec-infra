@@ -146,7 +146,6 @@ cosmos_sql_databases = [
 
 enable_private_endpoint     = true  # true for prod
 private_dns_zone_id        = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/privateDnsZones/privatelink.documents.azure.com"   # Required for prod
-log_analytics_workspace_id = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg-monitoring/providers/Microsoft.OperationalInsights/workspaces/log-analytics-workspace"
 
 # Container Registry
 acr_name           = "crgptoaidev01"  # Debe ser globalmente único
@@ -607,6 +606,7 @@ grafana = {
   public_network_access_enabled   = false
   zone_redundancy_enabled         = false
   identity_type                   = "SystemAssigned"
+  private_endpoint_enabled        = true
   
   # Opcional: Integración con Azure Monitor
   # azure_monitor_workspace_id    = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Monitor/accounts/monitorws-gpt-dev"
@@ -642,8 +642,7 @@ kubernetes = {
   private_dns_zone_name       = "System"
   enable_key_vault_secrets_provider = true
   sku_tier           = "Free"  # Can be "Free", "Standard", or "Premium"
-  log_analytics_workspace_id = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg-monitoring/providers/Microsoft.OperationalInsights/workspaces/log-analytics-workspace"
-  
+
   # Nodepool para infraestructura (system)
   default_node_pool  = {
     name                = "infra"

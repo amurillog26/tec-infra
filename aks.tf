@@ -21,7 +21,7 @@ module "aks" {
 
   # Añadir nodepool adicional
   additional_node_pools = var.kubernetes.additional_node_pools
-  log_analytics_workspace_id = var.kubernetes.log_analytics_workspace_id
+  log_analytics_workspace_id = module.log_analytics.workspace_id
   # attach_acr         = var.kubernetes.attach_acr
   # acr_id             = module.container_registry.acr_id
 
@@ -32,7 +32,7 @@ module "aks" {
 resource "azurerm_monitor_diagnostic_setting" "aks_diagnostic" {
   name                       = "aks-${var.environment}-diagnostics"
   target_resource_id         = module.aks.cluster_id
-  log_analytics_workspace_id = var.log_analytics_workspace_id
+  log_analytics_workspace_id = module.log_analytics.workspace_id
 
   enabled_log {
     category = "kube-apiserver"

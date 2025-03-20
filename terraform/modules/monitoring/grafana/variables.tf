@@ -26,11 +26,7 @@ variable "sku_name" {
 variable "grafana_version" {
   description = "Versión de Grafana a usar"
   type        = string
-  default     = "10"
-  validation {
-    condition     = contains(["10", "11"], var.grafana_version)
-    error_message = "La versión de Grafana debe ser 10 o 11 para el SKU Standard."
-  }
+  default     = "11"
 }
 
 variable "api_key_enabled" {
@@ -95,4 +91,10 @@ variable "tags" {
   description = "Etiquetas a asignar al recurso Grafana"
   type        = map(string)
   default     = {}
+}
+
+variable "private_endpoint_enabled" {
+  description = "Indica si se habilita el acceso a través de un punto de conexión privado"
+  type        = bool
+  default     = false
 }

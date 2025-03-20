@@ -65,11 +65,6 @@ variable "private_dns_zone_id" {
   description = "Private DNS Zone ID"
 }
 
-variable "log_analytics_workspace_id" {
-  type        = string
-  description = "Log Analytics Workspace ID for diagnostics"
-}
-
 variable "tags" {
   type        = map(string)
   description = "Tags for resources"

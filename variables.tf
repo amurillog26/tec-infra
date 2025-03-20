@@ -183,11 +183,6 @@ variable "private_dns_zone_id" {
   description = "Private DNS Zone ID for Cosmos DB private endpoint"
 }
 
-variable "log_analytics_workspace_id" {
-  type        = string
-  description = "Log Analytics Workspace ID for diagnostics"
-}
-
 # Container Registry Variables
 variable "acr_name" {
   type        = string
@@ -538,17 +533,19 @@ variable "grafana" {
     admin_principal_ids               = optional(list(string))
     editor_principal_ids              = optional(list(string))
     viewer_principal_ids              = optional(list(string))
+    private_endpoint_enabled          = bool
     tags                              = optional(map(string))
   })
   default = {
     name                              = "grafana-gpt-dev"
     sku_name                          = "Standard"
-    grafana_version                   = "10" # Usar versión 10 o 11 para SKU Standard
+    grafana_version                   = "11" # Usar versión 10 o 11 para SKU Standard
     api_key_enabled                   = true
     deterministic_outbound_ip_enabled = true
     public_network_access_enabled     = true
     zone_redundancy_enabled           = false
     identity_type                     = "SystemAssigned"
+    private_endpoint_enabled          = false
   }
 }
 
@@ -559,8 +556,6 @@ variable "kubernetes" {
     dns_prefix         = string
     kubernetes_version = string
     availability_zones = list(string)
-    log_analytics_workspace_id = string
-
     # Nuevos campos para clúster privado
     private_cluster_enabled = bool
     private_dns_zone_name   = string

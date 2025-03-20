@@ -144,5 +144,6 @@ variable "key_vault_secrets_provider" {
 
 variable "log_analytics_workspace_id" {
   type        = string
-  description = "ID del espacio de trabajo de Log Analytics para diagnósticos"
+  description = "Log Analytics workspace ID"
+  
 }

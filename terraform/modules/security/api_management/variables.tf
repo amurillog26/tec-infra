@@ -36,10 +36,6 @@ variable "apim_subnet_id" {
   description = "The Subnet Id for the APIM"
 }
 
-variable "log_analytics_workspace_id" {
-  type        = string
-}
-
 variable "apim_nsg_name" {
   type        = string
   description = "Network Security Group name for the APIM"
