@@ -7,6 +7,8 @@ resource "azurerm_kubernetes_cluster" "aks" {
   disk_encryption_set_id = var.disk_encryption_set_id
   automatic_channel_upgrade = "stable"
   sku_tier = "Free"
+  workload_identity_enabled = true
+  oidc_issuer_enabled = true
 
 
   
@@ -36,7 +38,9 @@ resource "azurerm_kubernetes_cluster" "aks" {
     network_plugin     = "azure"
     load_balancer_sku = "standard"
     network_policy    = "calico"
-  }
+    service_cidr        = "10.241.0.0/16"
+    dns_service_ip      = "10.241.0.10"
+   }
 
   role_based_access_control_enabled = true
   tags = var.tags

@@ -1,10 +1,14 @@
+# --------------------------------------------------
+# Archivo: main.tf del módulo key_vault
+# --------------------------------------------------
+
 locals {
   kv_retention    = 7
   kv_purge        = false
 }
 
 # --------------------------------------------------
-# Kery Vault resource
+# Key Vault resource
 # --------------------------------------------------
 resource "azurerm_key_vault" "tec_kv" {
   name                        = var.kv_name
@@ -28,6 +32,38 @@ resource "azurerm_key_vault" "tec_kv" {
     # virtual_network_subnet_ids = var.allow_subnets
   }
 
+  # Añadir políticas de acceso dinámicas
+  dynamic "access_policy" {
+    for_each = var.access_policies
+    content {
+      tenant_id               = access_policy.value.tenant_id
+      object_id               = access_policy.value.object_id
+      application_id          = access_policy.value.application_id
+      certificate_permissions = access_policy.value.certificate_permissions
+      key_permissions         = access_policy.value.key_permissions
+      secret_permissions      = access_policy.value.secret_permissions
+      storage_permissions     = access_policy.value.storage_permissions
+    }
+  }
+
   tags = var.tags
 }
 
+# --------------------------------------------------
+# Archivo: variables.tf del módulo key_vault
+# Añadir esta variable
+# --------------------------------------------------
+
+variable "access_policies" {
+  description = "Lista de políticas de acceso para el Key Vault"
+  type = list(object({
+    tenant_id               = string
+    object_id               = string
+    application_id          = optional(string, null)
+    certificate_permissions = optional(list(string), [])
+    key_permissions         = optional(list(string), [])
+    secret_permissions      = optional(list(string), [])
+    storage_permissions     = optional(list(string), [])
+  }))
+  default = []
+}

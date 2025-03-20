@@ -36,7 +36,7 @@ main_rg_name        = "rg_gpt_oai_dev"
 main_vn_location    = "southcentralus"
 kv_name             = "kv-gpt-oai-dev-01"
 kv_sku_name         = "standard"
-kv_public_access = false
+kv_public_access = true
 
 resource_tags = {
     environment = "dev"
@@ -133,7 +133,7 @@ log_analytics_workspace_id = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377
 # Container Registry
 acr_name           = "crgptoaidev01"  # Debe ser globalmente único
 acr_admin_enabled  = true           # Habilitado para desarrollo
-acr_public         = false           # Público para desarrollo
+acr_public         = true           # Público para desarrollo
 acr_zone_redundancy_enabled = false
 
 service_plans = {
@@ -657,3 +657,70 @@ kubernetes = {
     component   = "kubernetes"
   }
 }
+
+key_vault_secrets = {
+  "openai" = [
+    "openai-dalle-token",
+    "openai-dalle-endpoint",
+    "openai-gpt-endpoint",
+    "openai-gpt-dev-endpoint-skrill"
+  ],
+  "graph" = [
+    "API-GRAPH-ten-cli-sec",
+    "api-graph-url"
+  ],
+  "skrill" = [
+    "skrill-user",
+    "skrill-pass",
+    "skrill-url",
+    "skrill-gpt-folder-id",
+    "skrill-gpt-drive-id",
+    "skrill-bs-dev-connection-string",
+    "skrill-container-dev-name"
+  ],
+  "test" = [
+    "test-user",
+    "test-pass"
+  ],
+  "services" = [
+    "grl-tecgpt-mail-pass",
+    "gpt-skrill-dev-bing-sus-key",
+    "gpt-skrill-dev-bing-endpoint"
+  ],
+  "custom_api" = [
+    "API-CUSTOM-SKILL-dom-tok",
+    "API-CUSTOM-CHATS-dom-tok"
+  ],
+  "skills" = [
+    "skill-studio-imagenes",
+    "conocimiento-blob-documento",
+    "cosmos-Skill-Studio-url-key",
+    "tecgpt-tblquerys"
+  ],
+  "storage" = [
+    "btc-blob-conv-account-name",
+    "btc-blob-conv-account-key"
+  ],
+  "cosmos" = [
+    "tecgpt-apiback-cosmos"
+  ],
+  "redis" = [
+    "btc-redis-address",
+    "btc-redis-port",
+    "btc-redis-password"
+  ],
+  "security" = [
+    "btc-pass-encrypt",
+    "SSJWTtoken"
+  ],
+  "config" = [
+    "multimedia-reader-configuration"
+  ],
+  "azure" = [
+    "client-id",
+    "client-secret",
+    "tenant-id"
+  ]
+}
+
+admin_object_id = "693831f7-28b7-4429-bb0c-f0892c718230" 

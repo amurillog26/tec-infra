@@ -75,6 +75,12 @@ variable "kv_sku_name" {
   description = "The SKU for Key Vault"
 }
 
+variable "key_vault_secrets" {
+  description = "Mapa de secretos para almacenar en Key Vault, agrupados por categoría"
+  type = map(list(string))
+  default = {}
+}
+
 variable "tenant_id" {
   type        = string
   description = "The tenant ID"
@@ -583,4 +589,10 @@ variable "kubernetes" {
     tags       = map(string)
   })
   description = "Configuración del clúster de Kubernetes"
+}
+
+variable "admin_object_id" {
+  description = "Object ID del administrador que necesita acceso completo al Key Vault"
+  type        = string
+  default     = "" # Completar con tu Object ID
 }
