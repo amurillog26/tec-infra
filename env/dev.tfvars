@@ -215,12 +215,12 @@ apim = {
   name                = "apim-gpt-api-dev-01"  # Nuevo nombre
   publisher_name      = "GPT Dev Team"
   publisher_email     = "admin@yourdomain.com"
-  sku_name           = "Premium_1"
+  sku_name           = "Developer_1"
   capacity           = 1
   
   # Para habilitar Private Endpoints, necesitamos:
   # 1. Una configuración de red virtual
-  virtual_network_type = "Internal" 
+  virtual_network_type = "Internal"
   subnet_id = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/virtualNetworks/vnet_gpt_net_dev/subnets/snet_gpt_apim_dev"
   identity_type       = "SystemAssigned"
   
@@ -445,10 +445,10 @@ public_ips = {
 
 # Configuración de Private Endpoints
 private_endpoints = {
-  # Key Vault Private Endpoint
+#  Key Vault Private Endpoint
   "pe-kv-gpt-oai-dev" = {
     name              = "pe-kv-gpt-oai-dev"
-    subnet_key        = "snet_gpt_int_dev"
+    subnet_key        = "snet_gpt_pe_dev"
     resource_id       = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.KeyVault/vaults/kv-gpt-oai-dev-01"
     subresource_names = ["vault"]
     private_dns_zone_ids = [
@@ -459,7 +459,7 @@ private_endpoints = {
   # Cosmos DB Private Endpoint
   "pe-cosmos-gpt-db-dev-01" = {
     name              = "pe-cosmos-gpt-db-dev-01"
-    subnet_key        = "snet_gpt_int_dev"
+    subnet_key        = "snet_gpt_pe_dev"
     resource_id       = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.DocumentDB/databaseAccounts/cosmos-gpt-db-dev-01"
     subresource_names = ["Sql"]
     private_dns_zone_ids = [
@@ -470,7 +470,7 @@ private_endpoints = {
   # Storage Account Blob Private Endpoint
   "pe-stgptdev001-table" = {
     name              = "pe-stgptdev01-table"
-    subnet_key        = "snet_gpt_int_dev"
+    subnet_key        = "snet_gpt_pe_dev"
     resource_id       = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Storage/storageAccounts/stgptdev01"
     subresource_names = ["table"]
     private_dns_zone_ids = [
@@ -481,7 +481,7 @@ private_endpoints = {
   # Redis Cache Private Endpoint
   "pe-redis-gpt-cache-dev-01" = {
     name              = "pe-redis-gpt-cache-dev-01"
-    subnet_key        = "snet_gpt_int_dev"
+    subnet_key        = "snet_gpt_pe_dev"
     resource_id       = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Cache/Redis/redis-gpt-cache-dev-01"
     subresource_names = ["redisCache"]
     private_dns_zone_ids = [
@@ -492,7 +492,7 @@ private_endpoints = {
   # Container Registry Private Endpoint
   "pe-crgptoaidev01" = {
     name              = "pe-crgptoaidev01"
-    subnet_key        = "snet_gpt_int_dev"
+    subnet_key        = "snet_gpt_pe_dev"
     resource_id       = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.ContainerRegistry/registries/crgptoaidev01"
     subresource_names = ["registry"]
     private_dns_zone_ids = [
@@ -787,6 +787,17 @@ key_vault_access_policies = [
   {
     tenant_id = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
     object_id = "2496dc6a-3aa4-4960-9d41-2b49c5a8827e"
+    application_id = ""
+    certificate_permissions = []
+    key_permissions = []
+    secret_permissions = [
+      "Get", "List"
+    ]
+    storage_permissions = []
+  },
+  {
+    tenant_id = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
+    object_id = "67c1315c-4823-4dd3-a18e-a1ce247bd2a5"
     application_id = ""
     certificate_permissions = []
     key_permissions = []
