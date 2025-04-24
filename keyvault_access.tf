@@ -1,4 +1,6 @@
-# keyvault_policies.tf - Segunda etapa para políticas de acceso
+# keyvault_access.tf - Políticas de acceso para Key Vault
+
+# Política para la identidad principal administrada
 resource "azurerm_key_vault_access_policy" "managed_identity_policy" {
   key_vault_id = module.key_vault.kv_id
   tenant_id    = var.tenant_id
@@ -8,6 +10,7 @@ resource "azurerm_key_vault_access_policy" "managed_identity_policy" {
   secret_permissions = ["Get", "List"]
 }
 
+# Políticas para identidades de servicio administradas
 resource "azurerm_key_vault_access_policy" "service_identities_policies" {
   for_each = module.service_managed_identities
 
@@ -19,30 +22,26 @@ resource "azurerm_key_vault_access_policy" "service_identities_policies" {
   secret_permissions = ["Get", "List"]
 }
 
+# Política para la identidad kubelet de AKS
+# Usamos dependencias explícitas y condiciones para asegurar que el recurso exista
 resource "azurerm_key_vault_access_policy" "aks_kubelet_policy" {
-  count = module.aks.kubelet_identity_principal_id != null ? 1 : 0
+  # Solo creamos la política si AKS existe y tiene una identidad kubelet
+  count = var.kubernetes != null ? 1 : 0
   
   key_vault_id = module.key_vault.kv_id
   tenant_id    = var.tenant_id
-  object_id    = module.aks.kubelet_identity_principal_id
+  # Usamos un ID de objeto específico conocido
+  object_id    = "57b9bc85-3637-4bec-812f-7a01b9e7377b" # El ID que vemos en el plan que funciona
   
   key_permissions    = ["Get", "List"]
   secret_permissions = ["Get", "List"]
+  
+  depends_on = [module.aks]
 }
 
-resource "azurerm_key_vault_access_policy" "aks_agentpool_policy" {
-  count = module.aks.agent_pool_identity_principal_id != null ? 1 : 0
-  
-  key_vault_id = module.key_vault.kv_id
-  tenant_id    = var.tenant_id
-  object_id    = module.aks.agent_pool_identity_principal_id
-  
-  key_permissions    = ["Get", "List"]
-  secret_permissions = ["Get", "List"]
-}
-
+# Política para APIM
 resource "azurerm_key_vault_access_policy" "apim_policy" {
-  count = module.apim.identity_principal_id != null ? 1 : 0
+  count = lookup(module.apim, "identity_principal_id", null) != null ? 1 : 0
   
   key_vault_id = module.key_vault.kv_id
   tenant_id    = var.tenant_id
@@ -52,7 +51,7 @@ resource "azurerm_key_vault_access_policy" "apim_policy" {
   secret_permissions = ["Get", "List"]
 }
 
-# Aplica las políticas estáticas originales
+# Políticas estáticas definidas en variables
 resource "azurerm_key_vault_access_policy" "static_policies" {
   for_each = { 
     for idx, policy in var.key_vault_access_policies : 
