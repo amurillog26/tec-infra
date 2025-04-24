@@ -653,3 +653,20 @@ variable "key_vault_access_policies" {
   }))
   default = []
 }
+
+variable "security_contacts" {
+  description = "Email addresses for security alerts"
+  type = list(object({
+    email               = string
+    phone               = optional(string)
+    alert_notifications = optional(bool)
+    alerts_to_admins    = optional(bool)
+  }))
+  default = [
+    {
+      email = "security@yourdomain.com"
+      alert_notifications = true
+      alerts_to_admins    = true
+    }
+  ]
+}

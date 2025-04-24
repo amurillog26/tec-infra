@@ -794,3 +794,12 @@ key_vault_access_policies = [
 
 
 ]
+
+
+security_contacts = [
+  {
+    email = "security-alerts@yourdomain.com"
+    alert_notifications = true
+    alerts_to_admins    = true
+  }
+]
