@@ -74,3 +74,8 @@ variable "tags" {
   description = "Tags to be applied to resources"
   default     = {}
 }
+
+variable "tenant_id" {
+  type        = string
+  description = "ID del tenant de Azure"
+}

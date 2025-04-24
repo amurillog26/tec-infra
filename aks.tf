@@ -14,7 +14,7 @@ module "aks" {
   # Configuración para clúster privado
   private_cluster_enabled   = var.kubernetes.private_cluster_enabled
   private_dns_zone_id       = var.kubernetes.private_dns_zone_name
-  user_assigned_identity_id = module.managed_identity.id
+  user_assigned_identity_id = module.service_managed_identities["aks-services-wi"].id
   enable_key_vault_secrets_provider = var.kubernetes.enable_key_vault_secrets_provider
   default_node_pool = var.kubernetes.default_node_pool
   sku_tier            = var.kubernetes.sku_tier  # Add this line
@@ -24,6 +24,7 @@ module "aks" {
   log_analytics_workspace_id = module.log_analytics.workspace_id
   # attach_acr         = var.kubernetes.attach_acr
   # acr_id             = module.container_registry.acr_id
+  tenant_id = var.tenant_id
 
   tags = merge(var.tags, var.kubernetes.tags)
 }

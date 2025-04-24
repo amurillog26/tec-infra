@@ -6,12 +6,12 @@ resource "azurerm_user_assigned_identity" "managed_identity" {
 }
 
 # # Asignación de roles para Key Vault
-# resource "azurerm_role_assignment" "key_vault_secrets" {
-#   count                = var.assign_key_vault_role && var.key_vault_id != null ? 1 : 0
-#   scope                = var.key_vault_id
-#   role_definition_name = "Key Vault Secrets User"
-#   principal_id         = azurerm_user_assigned_identity.managed_identity.principal_id
-# }
+resource "azurerm_role_assignment" "key_vault_secrets" {
+  count                = var.assign_key_vault_role && var.key_vault_id != null ? 1 : 0
+  scope                = var.key_vault_id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = azurerm_user_assigned_identity.managed_identity.principal_id
+}
 
 # # En terraform/modules/security/managed_identity/main.tf
 # resource "azurerm_role_assignment" "dns_zone_contributor" {

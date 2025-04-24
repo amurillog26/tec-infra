@@ -1,7 +1,4 @@
-# --------------------------------------------------
-# Archivo: main.tf en la raíz del proyecto
-# --------------------------------------------------
-
+# keyvault_base.tf - Primera etapa
 module "key_vault" {
   source = "./terraform/modules/security/key_vault"
 
@@ -11,6 +8,6 @@ module "key_vault" {
   tenant_id        = var.tenant_id
   kv_public_access = var.kv_public_access
   kv_sku_name      = var.kv_sku_name
-  access_policies = var.key_vault_access_policies
+  # Sin políticas de acceso inicialmente
   tags             = var.tags
 }

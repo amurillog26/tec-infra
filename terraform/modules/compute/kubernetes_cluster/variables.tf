@@ -147,3 +147,8 @@ variable "log_analytics_workspace_id" {
   description = "Log Analytics workspace ID"
   
 }
+
+variable "tenant_id" {
+  type        = string
+  description = "ID del tenant de Azure"
+}

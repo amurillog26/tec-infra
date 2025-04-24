@@ -1,4 +1,3 @@
-
 # variables.tf
 variable "name" {
   type        = string
@@ -25,6 +24,12 @@ variable "key_vault_id" {
   type        = string
   description = "ID of the Key Vault where certificates are stored"
   default     = null
+}
+
+variable "tenant_id" {
+  type        = string
+  description = "Azure AD tenant ID"
+  default     = ""
 }
 
 variable "tags" {

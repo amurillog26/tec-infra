@@ -5,6 +5,12 @@
 locals {
   kv_retention    = 7
   kv_purge        = false
+  
+  # Filtrar cualquier política inválida aquí dentro del módulo
+  valid_policies = [
+    for policy in var.access_policies : policy
+    if policy.object_id != null && policy.object_id != ""
+  ]
 }
 
 # --------------------------------------------------
@@ -28,17 +34,15 @@ resource "azurerm_key_vault" "tec_kv" {
   network_acls {
     bypass = "AzureServices"
     default_action = "Allow"
-    #  ip_rules = var.allow_subnets
-    # virtual_network_subnet_ids = var.allow_subnets
   }
 
   # Añadir políticas de acceso dinámicas
   dynamic "access_policy" {
-    for_each = var.access_policies
+    for_each = local.valid_policies
     content {
       tenant_id               = access_policy.value.tenant_id
       object_id               = access_policy.value.object_id
-      application_id          = access_policy.value.application_id
+      application_id          = lookup(access_policy.value, "application_id", null) == "" ? null : lookup(access_policy.value, "application_id", null)
       certificate_permissions = access_policy.value.certificate_permissions
       key_permissions         = access_policy.value.key_permissions
       secret_permissions      = access_policy.value.secret_permissions
@@ -47,23 +51,4 @@ resource "azurerm_key_vault" "tec_kv" {
   }
 
   tags = var.tags
-}
-
-# --------------------------------------------------
-# Archivo: variables.tf del módulo key_vault
-# Añadir esta variable
-# --------------------------------------------------
-
-variable "access_policies" {
-  description = "Lista de políticas de acceso para el Key Vault"
-  type = list(object({
-    tenant_id               = string
-    object_id               = string
-    application_id          = optional(string, null)
-    certificate_permissions = optional(list(string), [])
-    key_permissions         = optional(list(string), [])
-    secret_permissions      = optional(list(string), [])
-    storage_permissions     = optional(list(string), [])
-  }))
-  default = []
 }

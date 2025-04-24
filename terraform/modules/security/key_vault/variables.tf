@@ -31,3 +31,17 @@ variable "kv_public_access" {
   description = "Enable or disable public access to the key vault"
   default     = false
 }
+
+variable "access_policies" {
+  description = "Lista de políticas de acceso para el Key Vault"
+  type = list(object({
+    tenant_id               = string
+    object_id               = string
+    application_id          = optional(string, null)
+    certificate_permissions = optional(list(string), [])
+    key_permissions         = optional(list(string), [])
+    secret_permissions      = optional(list(string), [])
+    storage_permissions     = optional(list(string), [])
+  }))
+  default = []
+}
