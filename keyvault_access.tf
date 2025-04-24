@@ -5,7 +5,7 @@ resource "azurerm_key_vault_access_policy" "managed_identity_policy" {
   key_vault_id = module.key_vault.kv_id
   tenant_id    = var.tenant_id
   object_id    = module.managed_identity.principal_id
-  
+
   key_permissions    = ["Get", "List"]
   secret_permissions = ["Get", "List"]
 }
@@ -17,7 +17,7 @@ resource "azurerm_key_vault_access_policy" "service_identities_policies" {
   key_vault_id = module.key_vault.kv_id
   tenant_id    = var.tenant_id
   object_id    = each.value.principal_id
-  
+
   key_permissions    = ["Get", "List"]
   secret_permissions = ["Get", "List"]
 }
@@ -27,46 +27,46 @@ resource "azurerm_key_vault_access_policy" "service_identities_policies" {
 resource "azurerm_key_vault_access_policy" "aks_kubelet_policy" {
   # Solo creamos la política si AKS existe y tiene una identidad kubelet
   count = var.kubernetes != null ? 1 : 0
-  
+
   key_vault_id = module.key_vault.kv_id
   tenant_id    = var.tenant_id
   # Usamos un ID de objeto específico conocido
-  object_id    = "57b9bc85-3637-4bec-812f-7a01b9e7377b" # El ID que vemos en el plan que funciona
-  
+  object_id = "57b9bc85-3637-4bec-812f-7a01b9e7377b" # El ID que vemos en el plan que funciona
+
   key_permissions    = ["Get", "List"]
   secret_permissions = ["Get", "List"]
-  
+
   depends_on = [module.aks]
 }
 
 # Política para APIM
 resource "azurerm_key_vault_access_policy" "apim_policy" {
   count = lookup(module.apim, "identity_principal_id", null) != null ? 1 : 0
-  
+
   key_vault_id = module.key_vault.kv_id
   tenant_id    = var.tenant_id
   object_id    = module.apim.identity_principal_id
-  
+
   key_permissions    = ["Get", "List"]
   secret_permissions = ["Get", "List"]
 }
 
 # Políticas estáticas definidas en variables
 resource "azurerm_key_vault_access_policy" "static_policies" {
-  for_each = { 
-    for idx, policy in var.key_vault_access_policies : 
-    idx => policy 
+  for_each = {
+    for idx, policy in var.key_vault_access_policies :
+    idx => policy
     if policy.object_id != null && policy.object_id != ""
   }
-  
+
   key_vault_id = module.key_vault.kv_id
   tenant_id    = each.value.tenant_id
   object_id    = each.value.object_id
-  
+
   key_permissions         = each.value.key_permissions
   secret_permissions      = each.value.secret_permissions
   certificate_permissions = each.value.certificate_permissions
   storage_permissions     = each.value.storage_permissions
-  
+
   application_id = lookup(each.value, "application_id", "") == "" ? null : lookup(each.value, "application_id", null)
 }

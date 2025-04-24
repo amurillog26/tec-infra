@@ -5,5 +5,5 @@ module "redis" {
   location            = var.location
 
   redis_cache = var.redis_cache
-  tags = var.tags
+  tags        = var.tags
 }

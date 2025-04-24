@@ -12,15 +12,15 @@ module "aks" {
   availability_zones = var.kubernetes.availability_zones
 
   # Configuración para clúster privado
-  private_cluster_enabled   = var.kubernetes.private_cluster_enabled
-  private_dns_zone_id       = var.kubernetes.private_dns_zone_name
-  user_assigned_identity_id = module.service_managed_identities["aks-services-wi"].id
+  private_cluster_enabled           = var.kubernetes.private_cluster_enabled
+  private_dns_zone_id               = var.kubernetes.private_dns_zone_name
+  user_assigned_identity_id         = module.service_managed_identities["aks-services-wi"].id
   enable_key_vault_secrets_provider = var.kubernetes.enable_key_vault_secrets_provider
-  default_node_pool = var.kubernetes.default_node_pool
-  sku_tier            = var.kubernetes.sku_tier  # Add this line
+  default_node_pool                 = var.kubernetes.default_node_pool
+  sku_tier                          = var.kubernetes.sku_tier # Add this line
 
   # Añadir nodepool adicional
-  additional_node_pools = var.kubernetes.additional_node_pools
+  additional_node_pools      = var.kubernetes.additional_node_pools
   log_analytics_workspace_id = module.log_analytics.workspace_id
   # attach_acr         = var.kubernetes.attach_acr
   # acr_id             = module.container_registry.acr_id
@@ -38,23 +38,23 @@ resource "azurerm_monitor_diagnostic_setting" "aks_diagnostic" {
   enabled_log {
     category = "kube-apiserver"
   }
-  
+
   enabled_log {
     category = "kube-audit"
   }
-  
+
   enabled_log {
     category = "kube-audit-admin"
   }
-  
+
   enabled_log {
     category = "kube-controller-manager"
   }
-  
+
   enabled_log {
     category = "kube-scheduler"
   }
-  
+
   enabled_log {
     category = "cluster-autoscaler"
   }

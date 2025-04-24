@@ -11,13 +11,13 @@ variable "location" {
 
 variable "storage_accounts" {
   type = map(object({
-    name                     = string
-    account_tier             = optional(string)
-    account_replication_type = optional(string)
-    account_kind             = optional(string)
-    min_tls_version          = optional(string)
-    access_tier              = optional(string)
-    is_hns_enabled           = optional(bool)
+    name                             = string
+    account_tier                     = optional(string)
+    account_replication_type         = optional(string)
+    account_kind                     = optional(string)
+    min_tls_version                  = optional(string)
+    access_tier                      = optional(string)
+    is_hns_enabled                   = optional(bool)
     cross_tenant_replication_enabled = optional(bool)
 
     network_rules = optional(object({
@@ -78,8 +78,8 @@ variable "kv_sku_name" {
 
 variable "key_vault_secrets" {
   description = "Mapa de secretos para almacenar en Key Vault, agrupados por categoría"
-  type = map(list(string))
-  default = {}
+  type        = map(list(string))
+  default     = {}
 }
 
 variable "tenant_id" {
@@ -306,25 +306,25 @@ variable "redis_cache" {
   type = map(object({
     name                = string
     capacity            = number
-    is_enterprise       = optional(bool, false)  # New field to determine resource type
-    family              = optional(string)       # Required for standard Redis, not for Enterprise
-    sku_name            = string                 # Will be different format for Enterprise
+    is_enterprise       = optional(bool, false) # New field to determine resource type
+    family              = optional(string)      # Required for standard Redis, not for Enterprise
+    sku_name            = string                # Will be different format for Enterprise
     minimum_tls_version = optional(string, "1.2")
     zones               = optional(list(string)) # For Enterprise zone redundancy
-    
+
     # Standard Redis configurations - make optional
     redis_configuration = optional(object({
-      maxmemory_policy                = optional(string, "volatile-lru")
-      maxfragmentationmemory_reserved = optional(number)
-      maxmemory_reserved              = optional(number)
+      maxmemory_policy                       = optional(string, "volatile-lru")
+      maxfragmentationmemory_reserved        = optional(number)
+      maxmemory_reserved                     = optional(number)
       data_persistence_authentication_method = optional(string)
     }))
 
     # Enterprise Redis configurations
-    client_protocol     = optional(string, "Encrypted")
-    clustering_policy   = optional(string, "OSSCluster")
-    eviction_policy     = optional(string, "NoEviction")
-    modules             = optional(list(string), ["RediSearch"])  # List of modules to enable
+    client_protocol   = optional(string, "Encrypted")
+    clustering_policy = optional(string, "OSSCluster")
+    eviction_policy   = optional(string, "NoEviction")
+    modules           = optional(list(string), ["RediSearch"]) # List of modules to enable
 
     patch_schedule = optional(object({
       day_of_week    = string
@@ -566,10 +566,10 @@ variable "kubernetes" {
     kubernetes_version = string
     availability_zones = list(string)
     # Nuevos campos para clúster privado
-    private_cluster_enabled = bool
-    private_dns_zone_name   = string
+    private_cluster_enabled           = bool
+    private_dns_zone_name             = string
     enable_key_vault_secrets_provider = optional(bool, false)
-    sku_tier           = optional(string, "Free")  # Add this field
+    sku_tier                          = optional(string, "Free") # Add this field
     default_node_pool = object({
       name                = string
       node_count          = number
@@ -664,7 +664,7 @@ variable "security_contacts" {
   }))
   default = [
     {
-      email = "security@yourdomain.com"
+      email               = "security@yourdomain.com"
       alert_notifications = true
       alerts_to_admins    = true
     }

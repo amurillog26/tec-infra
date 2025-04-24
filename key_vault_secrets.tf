@@ -29,7 +29,7 @@ resource "azurerm_key_vault_secret" "secrets" {
   for_each = { for item in local.flat_secrets : item.name => item }
 
   name         = each.value.name
-  value        = ""  # Valor vacío inicial
+  value        = "" # Valor vacío inicial
   key_vault_id = data.azurerm_key_vault.kv.id
 
   lifecycle {

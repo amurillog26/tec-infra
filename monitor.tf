@@ -2,11 +2,11 @@
 module "log_analytics" {
   source = "./terraform/modules/monitoring/insights"
 
-  workspace_name        = "log-analytics-${var.environment}-workspace"
-  location             = data.azurerm_resource_group.rg.location
-  resource_group_name  = data.azurerm_resource_group.rg.name
-  sku                  = "PerGB2018"
-  retention_days       = 30
+  workspace_name      = "log-analytics-${var.environment}-workspace"
+  location            = data.azurerm_resource_group.rg.location
+  resource_group_name = data.azurerm_resource_group.rg.name
+  sku                 = "PerGB2018"
+  retention_days      = 30
 
   tags = merge(var.tags, {
     component = "monitoring"
@@ -24,13 +24,13 @@ resource "azurerm_monitor_workspace" "prometheus" {
 
 # 3. Data Collection Endpoint
 resource "azurerm_monitor_data_collection_endpoint" "prometheus_dce" {
-  name                = "dce-${var.kubernetes.cluster_name}-prometheus"
-  resource_group_name = var.resource_group_name
-  location            = var.location
-  kind                = "Linux"
+  name                          = "dce-${var.kubernetes.cluster_name}-prometheus"
+  resource_group_name           = var.resource_group_name
+  location                      = var.location
+  kind                          = "Linux"
   public_network_access_enabled = true
-  description         = "Data Collection Endpoint para métricas de Prometheus"
-  
+  description                   = "Data Collection Endpoint para métricas de Prometheus"
+
   tags = var.tags
 }
 
@@ -40,8 +40,8 @@ resource "azurerm_monitor_data_collection_rule" "prometheus_dcr" {
   resource_group_name         = var.resource_group_name
   location                    = var.location
   data_collection_endpoint_id = azurerm_monitor_data_collection_endpoint.prometheus_dce.id
-  
-  description                 = "Data Collection Rule para Prometheus en AKS"
+
+  description = "Data Collection Rule para Prometheus en AKS"
 
   destinations {
     monitor_account {

@@ -3,7 +3,7 @@ resource "azurerm_cdn_profile" "cdn_profile" {
   name                = "cdn-gpt-api-dev-01"
   location            = var.location
   resource_group_name = var.resource_group_name
-  sku                 = "Standard_Microsoft"  
+  sku                 = "Standard_Microsoft"
 
   tags = var.tags
 }
@@ -15,19 +15,19 @@ resource "azurerm_cdn_endpoint" "cdn_endpoint_static" {
   location            = var.location
   resource_group_name = var.resource_group_name
   origin_host_header  = "stgptdev01.blob.core.windows.net"
-  
+
   origin {
-    name       = "static-origin"
-    host_name  = "stgptdev01.blob.core.windows.net"
+    name      = "static-origin"
+    host_name = "stgptdev01.blob.core.windows.net"
   }
-  
+
   is_compression_enabled = true
   content_types_to_compress = [
     "application/javascript", "application/json", "application/x-javascript", "application/xml", "text/css", "text/html", "text/javascript", "text/plain"
   ]
-  
+
   optimization_type = "GeneralWebDelivery"
-  
+
   # Configuración de caché para recursos estáticos
   delivery_rule {
     name  = "CacheImagesAndIcons"
@@ -39,14 +39,14 @@ resource "azurerm_cdn_endpoint" "cdn_endpoint_static" {
     }
 
     request_scheme_condition {
-      match_values     = [
-          "HTTPS",
-        ]
+      match_values = [
+        "HTTPS",
+      ]
       negate_condition = false
       operator         = "Equal"
     }
   }
-  
+
   tags = var.tags
 }
 

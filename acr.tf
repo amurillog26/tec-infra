@@ -8,7 +8,7 @@ module "container_registry" {
   acr_public              = var.acr_public
   resource_tags           = var.tags
   zone_redundancy_enabled = var.acr_zone_redundancy_enabled
-  
+
   # Add these lines
   enable_identity = var.acr_enable_identity
   identity_type   = var.acr_identity_type

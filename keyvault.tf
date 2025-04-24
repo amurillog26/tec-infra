@@ -9,5 +9,5 @@ module "key_vault" {
   kv_public_access = var.kv_public_access
   kv_sku_name      = var.kv_sku_name
   # Sin políticas de acceso inicialmente
-  tags             = var.tags
+  tags = var.tags
 }

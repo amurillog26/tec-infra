@@ -21,6 +21,6 @@ provider "azurerm" {
       recover_soft_deleted_key_vaults = true
     }
   }
-  subscription_id = var.subscription_id  # Añade esta línea
+  subscription_id                 = var.subscription_id # Añade esta línea
   resource_provider_registrations = "none"
 }
