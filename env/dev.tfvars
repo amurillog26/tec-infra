@@ -1,6 +1,7 @@
 resource_group_name = "rg_gpt_oai_dev"
 location           = "southcentralus"
 environment = "dev"
+subscription_id = "49b8793e-f25e-49ab-8fc2-1190c08f377e" 
 
 storage_accounts = {
   "stgptdev01" = {
@@ -791,128 +792,111 @@ admin_object_id = "693831f7-28b7-4429-bb0c-f0892c718230"
 
 key_vault_access_policies = [
   {
-    tenant_id = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
-    object_id = "693831f7-28b7-4429-bb0c-f0892c718230"
     application_id = "ff864b72-fd0c-4ad9-8e38-ea5407e2c0c7"
+    object_id      = "693831f7-28b7-4429-bb0c-f0892c718230"
+    tenant_id      = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
+    key_permissions = ["Get", "List", "Update", "Create", "Import", "Delete", "Recover", "Backup", "Restore", "GetRotationPolicy", "SetRotationPolicy", "Rotate"]
     certificate_permissions = []
-    key_permissions = []
-    secret_permissions = [
-      "Get", "List", "Set", "Delete", "Recover", "Backup", "Restore"
-    ]
+    secret_permissions = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore"]
     storage_permissions = []
   },
   {
-    tenant_id = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
-    object_id = "693831f7-28b7-4429-bb0c-f0892c718230"
     application_id = ""
+    object_id      = "693831f7-28b7-4429-bb0c-f0892c718230"
+    tenant_id      = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
+    key_permissions = ["Get", "List", "Update", "Create", "Import", "Delete", "Recover", "Backup", "Restore", "GetRotationPolicy", "SetRotationPolicy", "Rotate"]
     certificate_permissions = []
-    key_permissions = []
-    secret_permissions = [
-      "Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"
-    ]
+    secret_permissions = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
     storage_permissions = []
   },
   {
-    tenant_id = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
-    object_id = "606cbf95-ed55-45c6-9eca-c67d585827c5"
     application_id = ""
+    object_id      = "606cbf95-ed55-45c6-9eca-c67d585827c5"
+    tenant_id      = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
+    key_permissions = ["Get", "List", "Update", "Create", "Import", "Delete", "Recover", "Backup", "Restore", "GetRotationPolicy", "SetRotationPolicy", "Rotate"]
     certificate_permissions = []
-    key_permissions = []
-    secret_permissions = [
-      "Get", "List", "Recover"
-    ]
+    secret_permissions = ["Get", "List", "Recover"]
     storage_permissions = []
   },
   {
-    tenant_id = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
-    object_id = "2496dc6a-3aa4-4960-9d41-2b49c5a8827e"
     application_id = ""
-    certificate_permissions = []
+    object_id      = "2496dc6a-3aa4-4960-9d41-2b49c5a8827e"
+    tenant_id      = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
     key_permissions = []
-    secret_permissions = [
-      "Get", "List"
-    ]
+    certificate_permissions = []
+    secret_permissions = ["Get", "List"]
     storage_permissions = []
   },
   {
-    tenant_id = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
-    object_id = "67c1315c-4823-4dd3-a18e-a1ce247bd2a5"
     application_id = ""
+    object_id      = "67c1315c-4823-4dd3-a18e-a1ce247bd2a5"
+    tenant_id      = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
+    key_permissions = ["Get", "List", "Update", "Create", "Import", "Delete", "Recover", "Backup", "Restore", "GetRotationPolicy", "SetRotationPolicy", "Rotate"]
     certificate_permissions = []
-    key_permissions = []
-    secret_permissions = [
-      "Get", "List"
-    ]
+    secret_permissions = ["Get", "List"]
     storage_permissions = []
   },
   {
-    tenant_id = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
-    object_id = "b44ff64f-6507-47e7-b0b3-dd5743f51c00"
     application_id = ""
+    object_id      = "b44ff64f-6507-47e7-b0b3-dd5743f51c00"
+    tenant_id      = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
+    key_permissions = []
     certificate_permissions = []
-    key_permissions = []
-    secret_permissions = [
-      "Get", "List"
-    ]
+    secret_permissions = ["Get", "List"]
+    storage_permissions = []
   },
   {
-    tenant_id = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
-    object_id = "9ded7820-b683-44e2-8899-1830db80f9ab"
     application_id = ""
-    certificate_permissions = ["Get","List","Update","Create","Import","Delete","Recover","Backup","Restore","ManageContacts","ManageIssuers","GetIssuers","ListIssuers","SetIssuers","DeleteIssuers"]
-    key_permissions = []
-    secret_permissions = [
-      "Get", "List", "Set", "Delete", "Recover", "Backup", "Restore",
-    ]
+    object_id      = "9ded7820-b683-44e2-8899-1830db80f9ab"
+    tenant_id      = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
+    key_permissions = ["Get", "List", "Update", "Create", "Import", "Delete", "Recover", "Backup", "Restore", "GetRotationPolicy", "SetRotationPolicy", "Rotate"]
+    certificate_permissions = ["Get", "List", "Update", "Create", "Import", "Delete", "Recover", "Backup", "Restore", "ManageContacts", "ManageIssuers", "GetIssuers", "ListIssuers", "SetIssuers", "DeleteIssuers"]
+    secret_permissions = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore"]
+    storage_permissions = []
   },
   {
-    tenant_id = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
-    object_id = "57b9bc85-3637-4bec-812f-7a01b9e7377b"
     application_id = ""
-    certificate_permissions = ["Get","List","Update","Create","Import","Delete","Recover","Backup","Restore","ManageContacts","ManageIssuers","GetIssuers","ListIssuers","SetIssuers","DeleteIssuers"]
-    key_permissions = []
-    secret_permissions = [
-      "Get", "List"
-    ]
+    object_id      = "57b9bc85-3637-4bec-812f-7a01b9e7377b"
+    tenant_id      = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
+    key_permissions = ["Get", "List", "Update", "Create", "Import", "Delete", "Recover", "Backup", "Restore", "GetRotationPolicy", "SetRotationPolicy", "Rotate"]
+    certificate_permissions = ["Get", "List", "Update", "Create", "Import", "Delete", "Recover", "Backup", "Restore", "ManageContacts", "ManageIssuers", "GetIssuers", "ListIssuers", "SetIssuers", "DeleteIssuers"]
+    secret_permissions = ["Get", "List"]
+    storage_permissions = []
   },
   {
-    tenant_id = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
-    object_id = "f0cbb4d6-aa42-4327-b706-ebbd3b6690d5"
     application_id = ""
-    certificate_permissions = ["Get","List","Update","Create","Import","Delete","Recover","Backup","Restore","ManageContacts","ManageIssuers","GetIssuers","ListIssuers","SetIssuers","DeleteIssuers"]
+    object_id      = "f0cbb4d6-aa42-4327-b706-ebbd3b6690d5"
+    tenant_id      = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
     key_permissions = []
-    secret_permissions = [
-      "Get", "List", "Set", "Delete", "Recover", "Backup", "Restore"
-    ]
+    certificate_permissions = ["Get", "List", "Update", "Create", "Import", "Delete", "Recover", "Backup", "Restore", "ManageContacts", "ManageIssuers", "GetIssuers", "ListIssuers", "SetIssuers", "DeleteIssuers"]
+    secret_permissions = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore"]
+    storage_permissions = []
   },
   {
-    tenant_id = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
-    object_id = "e21eb2e9-1110-4de3-aa77-c91f2e5ee454"
     application_id = ""
+    object_id      = "e21eb2e9-1110-4de3-aa77-c91f2e5ee454"
+    tenant_id      = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
+    key_permissions = ["Get", "List", "Update", "Create", "Import", "Delete", "Recover", "Backup", "Restore", "GetRotationPolicy", "SetRotationPolicy", "Rotate"]
     certificate_permissions = []
-    key_permissions = []
-    secret_permissions = [
-      "Get", "List", "Set", "Get", "List", "Set", "Delete", "Recover", "Backup", "Restore"
-    ]
+    secret_permissions = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore"]
+    storage_permissions = []
   },
   {
-    tenant_id = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
-    object_id = "b6d6fd3c-b3bb-4654-ba84-8fdc530c79f3"
     application_id = ""
+    object_id      = "b6d6fd3c-b3bb-4654-ba84-8fdc530c79f3"
+    tenant_id      = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
+    key_permissions = []
     certificate_permissions = []
-    key_permissions = []
-    secret_permissions = [
-      "Get", "List", "Set", "Delete", "Recover", "Backup", "Restore"
-    ]
+    secret_permissions = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore"]
+    storage_permissions = []
   },
-    {
-    tenant_id = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
-    object_id = "767c6288-81f8-46f6-85b3-a650e97d87d9"
+  {
     application_id = ""
-    certificate_permissions = ["Get","List","Update","Create","Import","Delete","Recover","Backup","Restore","ManageContacts","ManageIssuers","GetIssuers","ListIssuers","SetIssuers","DeleteIssuers"]
-    key_permissions = []
-    secret_permissions = [
-      "Get", "List"
-    ]
+    object_id      = "767c6288-81f8-46f6-85b3-a650e97d87d9"
+    tenant_id      = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
+    key_permissions = ["Get", "List", "Update", "Create", "Import", "Delete", "Recover", "Backup", "Restore", "GetRotationPolicy", "SetRotationPolicy", "Rotate"]
+    certificate_permissions = ["Get", "List", "Update", "Create", "Import", "Delete", "Recover", "Backup", "Restore", "ManageContacts", "ManageIssuers", "GetIssuers", "ListIssuers", "SetIssuers", "DeleteIssuers"]
+    secret_permissions = ["Get", "List"]
+    storage_permissions = []
   }
 ]

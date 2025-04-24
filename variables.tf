@@ -606,6 +606,22 @@ variable "admin_object_id" {
   default     = "" # Completar con tu Object ID
 }
 
+variable "admin_app_id" {
+  description = "Application ID para el administrador del Key Vault"
+  type        = string
+  default     = ""
+}
+
+variable "kv_accessor_ids" {
+  description = "Mapa de IDs de objetos para políticas de acceso al Key Vault"
+  type        = map(string)
+  default     = {}
+}
+
+variable "subscription_id" {
+  description = "ID de la suscripción de Azure"
+  type        = string
+}
 variable "acr_enable_identity" {
   type        = bool
   description = "Enable identity for Azure Container Registry"
