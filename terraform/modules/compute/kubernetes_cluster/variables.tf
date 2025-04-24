@@ -27,7 +27,7 @@ variable "disk_encryption_set_id" {
 variable "kubernetes_version" {
   type        = string
   description = "Kubernetes version"
-  default     = "1.31.5"
+  default     = "1.31.7"
 }
 
 variable "default_node_pool" {

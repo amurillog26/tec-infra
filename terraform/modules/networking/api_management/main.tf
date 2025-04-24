@@ -8,9 +8,11 @@ resource "azurerm_api_management" "apim" {
   sku_name           = var.apim.sku_name
   
   # Según la documentación, public_ip_address_id debería estar aquí
-  public_ip_address_id = lookup(var.apim, "public_ip_address_id", null)
+  public_ip_address_id = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/publicIPAddresses/apim-mgmnt-pip"
   
   virtual_network_type = var.apim.virtual_network_type
+
+  zones = ["1"]
   
   dynamic "virtual_network_configuration" {
     for_each = var.apim.virtual_network_type != "None" ? [1] : []
@@ -18,7 +20,7 @@ resource "azurerm_api_management" "apim" {
       subnet_id = var.apim.subnet_id
     }
   }
-  # public_network_access_enabled = false
+  public_network_access_enabled = true
   identity {
     type = var.apim.identity_type
   }

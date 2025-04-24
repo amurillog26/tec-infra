@@ -537,7 +537,7 @@ grafana = {
 kubernetes = {
   cluster_name       = "aks-gpt-pprd-001"
   dns_prefix         = "aks-gpt-pprd"
-  kubernetes_version = "1.31.5"
+  kubernetes_version = "1.31.7"
   availability_zones = ["1"]
   
   default_node_pool  = {

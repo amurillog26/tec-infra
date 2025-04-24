@@ -19,7 +19,6 @@ storage_accounts = {
         name = "gpt"
       }
     ]
-
     tags = {
       environment = "dev"
       workload = "oai"
@@ -61,7 +60,7 @@ subnets = {
   "snet_gpt_apim_dev" = {
     address_prefixes = ["10.97.174.32/27"]    # 32 IPs: 10.97.174.32 - 10.97.174.63
     service_endpoints = ["Microsoft.Web", "Microsoft.ContainerRegistry"]
-    private_endpoint_network_policies = "Enabled"
+    private_endpoint_network_policies = "Disabled"
   },
   "snet_gpt_aks_dev" = {
     address_prefixes = ["10.97.175.0/24"]     # 256 IPs: 10.97.175.0 - 10.97.175.255 (subnet más grande en otro segmento)
@@ -112,7 +111,7 @@ subnets = {
 cosmos_account_name        = "cosmos-gpt-db-dev-01"
 cosmos_account_offer_type  = "Standard"
 cosmos_account_kind       = "GlobalDocumentDB"
-cosmos_public_access      = false  # true for dev, false for prod
+cosmos_public_access      = true  # true for dev, false for prod
 cosmos_failover_az_region = "eastus"  # región secundaria para failover
 cosmos_capabilities       = ["EnableServerless"]
 
@@ -212,10 +211,10 @@ web_apps = {
 
 
 apim = {
-  name                = "apim-gpt-api-dev-01"  # Nuevo nombre
+  name                = "gpt-apim-dev-01"  # Nuevo nombre
   publisher_name      = "GPT Dev Team"
-  publisher_email     = "admin@yourdomain.com"
-  sku_name           = "Developer_1"
+  publisher_email     = "arturo.murillo@mobiik.com"
+  sku_name           = "Premium_1"
   capacity           = 1
   
   # Para habilitar Private Endpoints, necesitamos:
@@ -225,7 +224,7 @@ apim = {
   identity_type       = "SystemAssigned"
   
   protocols = {
-    enable_http2 = true
+    enable_http2 = false
   }
   
   security = {
@@ -238,7 +237,7 @@ apim = {
   }
   
   additional_settings = {
-    enable_sign_in = true
+    enable_sign_in = false
     enable_sign_up = true
   }
   
@@ -256,26 +255,30 @@ apim = {
 
 redis_cache = {
   "redis_gpt_cache_dev" = {
-    name                = "redis-gpt-cache-dev-01"
-    capacity            = 1
-    family             = "P"
-    sku_name           = "Premium"
-    minimum_tls_version = "1.2"
+    name              = "redis-gpt-cache-dev-01"
+    capacity          = 2
+    is_enterprise     = true  # Set to true for Redis Enterprise
     
-    redis_configuration = {
-      maxmemory_policy     = "allkeys-lru"
-      maxfragmentationmemory_reserved = 642
-      maxmemory_reserved              = 642
-      data_persistence_authentication_method = "SAS"
-    }
-
+    # Enterprise SKU format is "Enterprise_E<capacity>-<tier>"
+    # 1 = no redundancy, 2 = zone redundancy
+    sku_name          = "Enterprise_E5-2"  # 10GB memory with zone redundancy
+    
+    minimum_tls_version = "1.2"
+    # zones             = ["1", "2", "3"]  # For zone redundancy
+    
+    # Enterprise-specific settings
+    client_protocol   = "Encrypted"
+    clustering_policy = "EnterpriseCluster"
+    eviction_policy   = "NoEviction"
+    
+    # For scheduling patches
     patch_schedule = {
       day_of_week    = "Sunday"
       start_hour_utc = 2
     }
 
     private_endpoint = {
-      enabled = true  # Para dev lo dejamos en false
+      enabled = true
       subnet_id = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/virtualNetworks/vnet_gpt_net_dev/subnets/snet_gpt_pe_dev"
     }
 
@@ -283,14 +286,6 @@ redis_cache = {
       cpu_threshold = 80
       memory_threshold = 80
       connection_threshold = 1000
-    }
-
-    # ACLs para desarrollo
-    firewall_rules = {
-      "AllowAll" = {
-        start_ip = "0.0.0.0"
-        end_ip   = "255.255.255.255"
-      }
     }
 
     tags = {
@@ -477,12 +472,21 @@ private_endpoints = {
       "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/privateDnsZones/privatelink.table.core.windows.net"
     ]
   },
+  "pe-stgptdev01-blob-cdn" = {
+    name              = "pe-stgptdev01-blob-cdn"
+    subnet_key        = "snet_gpt_pe_dev"
+    resource_id       = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Storage/storageAccounts/stgptdev01"
+    subresource_names = ["blob"]
+    private_dns_zone_ids = [
+      "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/privateDnsZones/privatelink.blob.core.windows.net"
+    ]
+  }
   
   # Redis Cache Private Endpoint
   "pe-redis-gpt-cache-dev-01" = {
     name              = "pe-redis-gpt-cache-dev-01"
     subnet_key        = "snet_gpt_pe_dev"
-    resource_id       = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Cache/Redis/redis-gpt-cache-dev-01"
+    resource_id       = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Cache/redis/redis-gpt-cache-dev-01"
     subresource_names = ["redisCache"]
     private_dns_zone_ids = [
       "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/privateDnsZones/privatelink.redis.cache.windows.net"
@@ -500,15 +504,50 @@ private_endpoints = {
     ]
   },
   
-  # # API Management Private Endpoint
+  # API Management Private Endpoint
   # "pe-apim-gpt-api-dev-01" = {
   #   name              = "pe-apim-gpt-api-dev-01"
+    
+  #   # This is changing, but we'll ignore it with lifecycle rules
   #   subnet_key        = "snet_gpt_int_dev"
-  #   resource_id       = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.ApiManagement/service/apim-gpt-api-dev-01"
-  #   subresource_names = ["gateway"]
+    
+  #   # Use the existing resource ID format and casing exactly
+  #   resource_id       = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.ApiManagement/service/gpt-apim-dev-01"
+    
+  #   # Keep the original subresource names
+  #   subresource_names = ["Gateway"]
+    
+  #   # Preserve the existing NIC name
+  #   custom_network_interface_name = "pe-apim-gpt-api-dev-01-nic"
+    
+  #   # Use the exact existing connection name
+  #   private_service_connection_name = "pe-apim-gpt-api-dev-01"
+    
+  #   # Use the existing DNS zone group name
+  #   private_dns_zone_group_name = "default"
+    
+  #   # Preserve the exact IP configuration
+  #   ip_configurations = [
+  #     {
+  #       name               = "apim"
+  #       private_ip_address = "10.97.174.36"
+  #       subresource_name   = "Gateway"
+  #       member_name        = "Gateway"
+  #     }
+  #   ]
+    
+  #   # DNS zone configuration
   #   private_dns_zone_ids = [
   #     "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/privateDnsZones/privatelink.azure-api.net"
   #   ]
+    
+  #   # Match existing tags
+  #   tags = {
+  #     environment = "dev"
+  #     managed_by  = "terraform"
+  #     owner       = "dev-team"
+  #     workload    = "oai"
+  #   }
   # },
   "pe-acr-gpt-dev" = {
     name              = "pe-acr-gpt-dev"
@@ -634,7 +673,7 @@ grafana = {
 kubernetes = {
   cluster_name       = "aks-gpt-dev-001"
   dns_prefix         = "aks-gpt-dev"
-  kubernetes_version = "1.31.5"  # Ajusta a la versión deseada
+  kubernetes_version = "1.31.7"  # Ajusta a la versión deseada
   availability_zones = ["1", "2", "3"]
   
   # Habilitar clúster privado
@@ -805,5 +844,75 @@ key_vault_access_policies = [
       "Get", "List"
     ]
     storage_permissions = []
+  },
+  {
+    tenant_id = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
+    object_id = "b44ff64f-6507-47e7-b0b3-dd5743f51c00"
+    application_id = ""
+    certificate_permissions = []
+    key_permissions = []
+    secret_permissions = [
+      "Get", "List"
+    ]
+  },
+  {
+    tenant_id = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
+    object_id = "9ded7820-b683-44e2-8899-1830db80f9ab"
+    application_id = ""
+    certificate_permissions = ["Get","List","Update","Create","Import","Delete","Recover","Backup","Restore","ManageContacts","ManageIssuers","GetIssuers","ListIssuers","SetIssuers","DeleteIssuers"]
+    key_permissions = []
+    secret_permissions = [
+      "Get", "List", "Set", "Delete", "Recover", "Backup", "Restore",
+    ]
+  },
+  {
+    tenant_id = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
+    object_id = "57b9bc85-3637-4bec-812f-7a01b9e7377b"
+    application_id = ""
+    certificate_permissions = ["Get","List","Update","Create","Import","Delete","Recover","Backup","Restore","ManageContacts","ManageIssuers","GetIssuers","ListIssuers","SetIssuers","DeleteIssuers"]
+    key_permissions = []
+    secret_permissions = [
+      "Get", "List"
+    ]
+  },
+  {
+    tenant_id = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
+    object_id = "f0cbb4d6-aa42-4327-b706-ebbd3b6690d5"
+    application_id = ""
+    certificate_permissions = ["Get","List","Update","Create","Import","Delete","Recover","Backup","Restore","ManageContacts","ManageIssuers","GetIssuers","ListIssuers","SetIssuers","DeleteIssuers"]
+    key_permissions = []
+    secret_permissions = [
+      "Get", "List", "Set", "Delete", "Recover", "Backup", "Restore"
+    ]
+  },
+  {
+    tenant_id = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
+    object_id = "e21eb2e9-1110-4de3-aa77-c91f2e5ee454"
+    application_id = ""
+    certificate_permissions = []
+    key_permissions = []
+    secret_permissions = [
+      "Get", "List", "Set", "Get", "List", "Set", "Delete", "Recover", "Backup", "Restore"
+    ]
+  },
+  {
+    tenant_id = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
+    object_id = "b6d6fd3c-b3bb-4654-ba84-8fdc530c79f3"
+    application_id = ""
+    certificate_permissions = []
+    key_permissions = []
+    secret_permissions = [
+      "Get", "List", "Set", "Delete", "Recover", "Backup", "Restore"
+    ]
+  },
+    {
+    tenant_id = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
+    object_id = "767c6288-81f8-46f6-85b3-a650e97d87d9"
+    application_id = ""
+    certificate_permissions = ["Get","List","Update","Create","Import","Delete","Recover","Backup","Restore","ManageContacts","ManageIssuers","GetIssuers","ListIssuers","SetIssuers","DeleteIssuers"]
+    key_permissions = []
+    secret_permissions = [
+      "Get", "List"
+    ]
   }
 ]

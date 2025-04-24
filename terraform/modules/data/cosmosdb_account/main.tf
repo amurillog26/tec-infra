@@ -29,7 +29,7 @@ resource "azurerm_cosmosdb_account" "tec_cosmos_ac" {
   kind                = var.cosmos_account_kind
 
   automatic_failover_enabled     = false  # Cambiado a false para serverless
-  public_network_access_enabled = var.enable_private_endpoint ? false : var.cosmos_public_access
+  public_network_access_enabled = true
   network_acl_bypass_for_azure_services = true
 
   dynamic "capabilities" {
@@ -55,8 +55,8 @@ resource "azurerm_cosmosdb_account" "tec_cosmos_ac" {
     interval_in_minutes = 240
     retention_in_hours  = 8
   }
-  is_virtual_network_filter_enabled = true
-  ip_range_filter = ["0.0.0.0"]
+  is_virtual_network_filter_enabled = false
+  ip_range_filter = ["189.139.13.89","187.188.76.17","187.189.69.17","201.145.55.195"]
 
   tags = var.tags
 }

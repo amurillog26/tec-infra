@@ -88,7 +88,7 @@ resource "azurerm_storage_container" "containers" {
   }
 
   name                  = each.value.container_name
-  storage_account_name = azurerm_storage_account.storage_accounts[each.value.storage_account_key].name
+  storage_account_id    = azurerm_storage_account.storage_accounts[each.value.storage_account_key].id
   container_access_type = try(each.value.access_type, "private")
 }
 

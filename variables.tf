@@ -306,41 +306,50 @@ variable "redis_cache" {
   type = map(object({
     name                = string
     capacity            = number
-    family              = string
-    sku_name            = string
-    minimum_tls_version = string
+    is_enterprise       = optional(bool, false)  # New field to determine resource type
+    family              = optional(string)       # Required for standard Redis, not for Enterprise
+    sku_name            = string                 # Will be different format for Enterprise
+    minimum_tls_version = optional(string, "1.2")
+    zones               = optional(list(string)) # For Enterprise zone redundancy
+    
+    # Standard Redis configurations - make optional
+    redis_configuration = optional(object({
+      maxmemory_policy                = optional(string, "volatile-lru")
+      maxfragmentationmemory_reserved = optional(number)
+      maxmemory_reserved              = optional(number)
+      data_persistence_authentication_method = optional(string)
+    }))
 
-    redis_configuration = object({
-      maxmemory_policy                = string
-      maxfragmentationmemory_reserved = number
-      maxmemory_reserved              = number
-      data_persistence_authentication_method = string
-    })
+    # Enterprise Redis configurations
+    client_protocol     = optional(string, "Encrypted")
+    clustering_policy   = optional(string, "OSSCluster")
+    eviction_policy     = optional(string, "NoEviction")
+    modules             = optional(list(string), ["RediSearch"])  # List of modules to enable
 
-    patch_schedule = object({
+    patch_schedule = optional(object({
       day_of_week    = string
       start_hour_utc = number
-    })
+    }))
 
-    private_endpoint = object({
+    private_endpoint = optional(object({
       enabled   = bool
       subnet_id = optional(string)
-    })
+    }))
 
-    alerts = object({
+    alerts = optional(object({
       cpu_threshold        = number
       memory_threshold     = number
       connection_threshold = number
-    })
-
-    firewall_rules = map(object({
-      start_ip = string
-      end_ip   = string
     }))
 
-    tags = map(string)
+    firewall_rules = optional(map(object({
+      start_ip = string
+      end_ip   = string
+    })), {})
+
+    tags = optional(map(string), {})
   }))
-  description = "Redis Cache configurations"
+  description = "Redis Cache and Redis Enterprise configurations"
 }
 
 # variable "diagnostics" {

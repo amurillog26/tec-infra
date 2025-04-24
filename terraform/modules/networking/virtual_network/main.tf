@@ -36,7 +36,6 @@ resource "azurerm_network_security_group" "apim_nsg" {
   location            = var.location
   resource_group_name = var.resource_group_name
 
-  # Regla para Management Endpoint
   security_rule {
     name                       = "Management_Endpoint"
     priority                   = 100
@@ -49,7 +48,6 @@ resource "azurerm_network_security_group" "apim_nsg" {
     destination_address_prefix = "VirtualNetwork"
   }
 
-  # Regla para Load Balancer
   security_rule {
     name                       = "Allow_Load_Balancer"
     priority                   = 110
@@ -62,7 +60,6 @@ resource "azurerm_network_security_group" "apim_nsg" {
     destination_address_prefix = "VirtualNetwork"
   }
 
-  # Regla para tráfico HTTP/HTTPS entrante
   security_rule {
     name                       = "Allow_HTTP_HTTPS"
     priority                   = 120
@@ -70,12 +67,11 @@ resource "azurerm_network_security_group" "apim_nsg" {
     access                     = "Allow"
     protocol                   = "Tcp"
     source_port_range          = "*"
-    destination_port_ranges    = ["80", "443"]
     source_address_prefix      = "*"
     destination_address_prefix = "VirtualNetwork"
+    destination_port_ranges    = ["443", "80"]
   }
 
-  # Regla para Storage
   security_rule {
     name                       = "Dependency_Storage"
     priority                   = 130
@@ -87,8 +83,7 @@ resource "azurerm_network_security_group" "apim_nsg" {
     source_address_prefix      = "VirtualNetwork"
     destination_address_prefix = "Storage"
   }
-  
-  # Regla para SQL
+
   security_rule {
     name                       = "Dependency_SQL"
     priority                   = 140
@@ -100,8 +95,7 @@ resource "azurerm_network_security_group" "apim_nsg" {
     source_address_prefix      = "VirtualNetwork"
     destination_address_prefix = "Sql"
   }
-  
-  # Regla para KeyVault
+
   security_rule {
     name                       = "Dependency_KeyVault"
     priority                   = 150
@@ -112,6 +106,59 @@ resource "azurerm_network_security_group" "apim_nsg" {
     destination_port_range     = "443"
     source_address_prefix      = "VirtualNetwork"
     destination_address_prefix = "AzureKeyVault"
+  }
+
+  # Estas reglas son las que Terraform intentaba eliminar
+  security_rule {
+    name                                       = "AllowAnyCustomAnyOutbound"
+    priority                                   = 160
+    direction                                  = "Outbound"
+    access                                     = "Allow"
+    protocol                                   = "*"
+    source_port_range                          = "*"
+    destination_port_range                     = "*"
+    source_address_prefix                      = "*"
+    destination_address_prefix                 = "*"
+  }
+
+  security_rule {
+    name                                       = "AllowAnyCustomAnyInbound"
+    priority                                   = 170
+    direction                                  = "Inbound"
+    access                                     = "Allow"
+    protocol                                   = "*"
+    source_port_range                          = "*"
+    destination_port_range                     = "*"
+    source_address_prefix                      = "*"
+    destination_address_prefix                 = "*"
+  }
+
+  security_rule {
+    name                                       = "AllowApplicationSecurityGroupCustomAnyInbound"
+    priority                                   = 180
+    direction                                  = "Inbound"
+    access                                     = "Allow"
+    protocol                                   = "*"
+    source_port_range                          = "*"
+    destination_port_range                     = "*"
+    source_application_security_group_ids      = [
+      "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/applicationSecurityGroups/nsg-gpt-pe-dev",
+    ]
+    destination_address_prefix                 = "*"
+  }
+
+  security_rule {
+    name                                       = "AllowApplicationSecurityGroupCustomAnyOutbound"
+    priority                                   = 190
+    direction                                  = "Outbound"
+    access                                     = "Allow"
+    protocol                                   = "*"
+    source_port_range                          = "*"
+    destination_port_range                     = "*"
+    source_application_security_group_ids      = [
+      "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/applicationSecurityGroups/nsg-gpt-pe-dev",
+    ]
+    destination_address_prefix                 = "*"
   }
 
   tags = var.tags

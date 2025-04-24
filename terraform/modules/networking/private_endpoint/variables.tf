@@ -1,47 +1,73 @@
+# terraform/modules/networking/private_endpoint/variables.tf
+
 variable "name" {
   description = "The name of the private endpoint"
   type        = string
 }
 
 variable "location" {
-  description = "The Azure region where the private endpoint should be created"
+  description = "The location of the private endpoint"
   type        = string
 }
 
 variable "resource_group_name" {
-  description = "The name of the resource group in which to create the private endpoint"
+  description = "The resource group name of the private endpoint"
   type        = string
 }
 
 variable "subnet_id" {
-  description = "The ID of the subnet where the private endpoint should be created"
+  description = "The subnet ID for the private endpoint"
   type        = string
 }
 
 variable "private_connection_resource_id" {
-  description = "The resource ID of the private link service or resource to connect to"
+  description = "The resource ID to connect to"
   type        = string
 }
 
 variable "subresource_names" {
-  description = "A list of subresource names which the private endpoint is able to connect to"
+  description = "A list of subresource names to connect to"
   type        = list(string)
 }
 
 variable "is_manual_connection" {
-  description = "Does the Private Endpoint require manual approval from the remote resource owner?"
+  description = "Whether the connection is manual"
   type        = bool
   default     = false
 }
 
 variable "private_dns_zone_ids" {
-  description = "The IDs of the private DNS zones to link to the private endpoint"
+  description = "A list of private DNS zone IDs"
   type        = list(string)
   default     = null
 }
 
+variable "custom_network_interface_name" {
+  description = "Custom name for the network interface"
+  type        = string
+  default     = null
+}
+
+variable "private_service_connection_name" {
+  description = "Name of the private service connection"
+  type        = string
+  default     = null
+}
+
+variable "private_dns_zone_group_name" {
+  description = "Name of the private DNS zone group"
+  type        = string
+  default     = null
+}
+
+variable "ip_configurations" {
+  description = "List of IP configurations for the private endpoint"
+  type        = list(map(string))
+  default     = null
+}
+
 variable "tags" {
-  description = "A mapping of tags to assign to the resource"
+  description = "Tags for the private endpoint"
   type        = map(string)
   default     = {}
 }
