@@ -1,7 +1,6 @@
 #!/usr/bin/env fish
-# populate_secrets.fish
-# Script para poblar automáticamente los secretos del KeyVault desde los recursos de Azure
-# Versión para Fish Shell
+# populate_secrets_improved.fish
+# Script mejorado para poblar automáticamente los secretos del KeyVault desde los recursos de Azure y los outputs de Terraform
 
 # Colores para mejor visualización
 set GREEN '\033[0;32m'
@@ -12,9 +11,10 @@ set CYAN '\033[0;36m'
 set NC '\033[0m' # No Color
 
 # Configuración
-set KV_NAME "kv-gpt-oai-dev-01"
-set RG_NAME "rg_gpt_oai_dev"
-set SUBSCRIPTION_ID "49b8793e-f25e-49ab-8fc2-1190c08f377e"  # Tomado de tus archivos
+set ENVIRONMENT "dev"  # Este valor podría pasarse como argumento
+set KV_NAME "kv-gpt-oai-$ENVIRONMENT-01"
+set RG_NAME "rg_gpt_oai_$ENVIRONMENT"
+set SUBSCRIPTION_ID "49b8793e-f25e-49ab-8fc2-1190c08f377e"
 
 # Asegurarse de que estamos en la suscripción correcta
 echo -e "$BLUE➡️ Configurando suscripción Azure...$NC"
@@ -38,7 +38,7 @@ function set_secret
     end
 
     echo -e "$BLUE🔑 Configurando secreto: $CYAN$name$BLUE (categoría: $CYAN$category$BLUE)$NC"
-    az keyvault secret set --vault-name $KV_NAME --name "$name" --value "$value" --tags "category=$category" "environment=dev" "managed_by=script" >/dev/null
+    az keyvault secret set --vault-name $KV_NAME --name "$name" --value "$value" --tags "category=$category" "environment=$ENVIRONMENT" "managed_by=script" >/dev/null
     
     if test $status -eq 0
         echo -e "$GREEN  ✅ Secreto configurado correctamente$NC"
@@ -56,133 +56,220 @@ if test $status -ne 0
 end
 echo -e "$GREEN✅ KeyVault encontrado$NC"
 
+# Intentar primero usar terraform output
+echo -e "$BLUE➡️ Buscando outputs de Terraform...$NC"
+set TERRAFORM_OUTPUT_FILE "terraform_outputs.json"
+
+# Verificar si estamos en un directorio de Terraform y hay un state
+if test -f "./terraform.tfstate"
+    echo -e "$BLUE➡️ Encontrado estado local de Terraform, extrayendo outputs...$NC"
+    terraform output -json > $TERRAFORM_OUTPUT_FILE
+    if test $status -eq 0
+        echo -e "$GREEN✅ Outputs de Terraform extraídos correctamente$NC"
+    else
+        echo -e "$YELLOW⚠️ No se pudieron extraer outputs de Terraform, usando método alternativo$NC"
+        rm -f $TERRAFORM_OUTPUT_FILE
+    end
+else
+    echo -e "$YELLOW⚠️ No se encontró estado local de Terraform, usando método alternativo$NC"
+end
+
 # === Cosmos DB ===
 echo -e "\n$CYAN📁 Procesando secretos de Cosmos DB...$NC"
-set COSMOS_ACCOUNT "cosmos-gpt-db-dev-01"
+set COSMOS_ACCOUNT "cosmos-gpt-db-$ENVIRONMENT-01"
 
-az cosmosdb show --name $COSMOS_ACCOUNT --resource-group $RG_NAME >/dev/null 2>&1
-if test $status -eq 0
-    echo -e "$BLUE➡️ Obteniendo claves y cadenas de conexión...$NC"
-    set PRIMARY_KEY (az cosmosdb keys list --name $COSMOS_ACCOUNT --resource-group $RG_NAME --query primaryMasterKey -o tsv)
-    set SECONDARY_KEY (az cosmosdb keys list --name $COSMOS_ACCOUNT --resource-group $RG_NAME --query secondaryMasterKey -o tsv)
-    set CONNECTION_STRING (az cosmosdb keys list --name $COSMOS_ACCOUNT --resource-group $RG_NAME --type connection-strings --query 'connectionStrings[0].connectionString' -o tsv)
-
-    set_secret "cosmos-gpt-db-dev-primary-key" "$PRIMARY_KEY" "database"
-    set_secret "cosmos-gpt-db-dev-secondary-key" "$SECONDARY_KEY" "database"
-    set_secret "cosmos-gpt-db-dev-connection-string" "$CONNECTION_STRING" "database"
+# Intentar obtener de Terraform primero
+if test -f $TERRAFORM_OUTPUT_FILE
+    set PRIMARY_KEY (jq -r '.cosmos_db_outputs.value.primary_key // empty' $TERRAFORM_OUTPUT_FILE)
+    set ENDPOINT (jq -r '.cosmos_db_outputs.value.endpoint // empty' $TERRAFORM_OUTPUT_FILE)
     
-    # También configuramos el secreto tecgpt-apiback-cosmos que se mencionó en la lista
-    set_secret "tecgpt-apiback-cosmos" "$CONNECTION_STRING" "database"
-else
-    echo -e "$YELLOW⚠️ Cosmos DB $COSMOS_ACCOUNT no encontrado$NC"
+    if test -n "$PRIMARY_KEY" -a -n "$ENDPOINT"
+        set CONNECTION_STRING "AccountEndpoint=$ENDPOINT;AccountKey=$PRIMARY_KEY;"
+        set_secret "$COSMOS_ACCOUNT-primary-key" "$PRIMARY_KEY" "database"
+        set_secret "$COSMOS_ACCOUNT-secondary-key" "$PRIMARY_KEY" "database" # Mismo valor para dev
+        set_secret "$COSMOS_ACCOUNT-connection-string" "$CONNECTION_STRING" "database"
+        set_secret "tecgpt-apiback-cosmos" "$CONNECTION_STRING" "database"
+    else
+        echo -e "$YELLOW⚠️ No se encontraron outputs de Terraform para Cosmos DB, consultando Azure CLI$NC"
+    end
+end
+
+# Si no se pudo obtener de Terraform, usar Azure CLI
+if not set -q PRIMARY_KEY; or test -z "$PRIMARY_KEY"
+    az cosmosdb show --name $COSMOS_ACCOUNT --resource-group $RG_NAME >/dev/null 2>&1
+    if test $status -eq 0
+        echo -e "$BLUE➡️ Obteniendo claves y cadenas de conexión...$NC"
+        set PRIMARY_KEY (az cosmosdb keys list --name $COSMOS_ACCOUNT --resource-group $RG_NAME --query primaryMasterKey -o tsv)
+        set SECONDARY_KEY (az cosmosdb keys list --name $COSMOS_ACCOUNT --resource-group $RG_NAME --query secondaryMasterKey -o tsv)
+        set ENDPOINT (az cosmosdb show --name $COSMOS_ACCOUNT --resource-group $RG_NAME --query documentEndpoint -o tsv)
+        set CONNECTION_STRING "AccountEndpoint=$ENDPOINT;AccountKey=$PRIMARY_KEY;"
+
+        set_secret "$COSMOS_ACCOUNT-primary-key" "$PRIMARY_KEY" "database"
+        set_secret "$COSMOS_ACCOUNT-secondary-key" "$SECONDARY_KEY" "database"
+        set_secret "$COSMOS_ACCOUNT-connection-string" "$CONNECTION_STRING" "database"
+        set_secret "tecgpt-apiback-cosmos" "$CONNECTION_STRING" "database"
+    else
+        echo -e "$YELLOW⚠️ Cosmos DB $COSMOS_ACCOUNT no encontrado$NC"
+    end
 end
 
 # === Redis Cache ===
 echo -e "\n$CYAN📁 Procesando secretos de Redis Cache...$NC"
-set REDIS_NAME "redis-gpt-cache-dev-01"
+set REDIS_NAME "redis-gpt-cache-$ENVIRONMENT-01"
 
-az redis show --name $REDIS_NAME --resource-group $RG_NAME >/dev/null 2>&1
-if test $status -eq 0
-    echo -e "$BLUE➡️ Obteniendo claves y configuración...$NC"
-    set PRIMARY_KEY (az redis list-keys --name $REDIS_NAME --resource-group $RG_NAME --query primaryKey -o tsv)
-    set SECONDARY_KEY (az redis list-keys --name $REDIS_NAME --resource-group $RG_NAME --query secondaryKey -o tsv)
-    set HOST (az redis show --name $REDIS_NAME --resource-group $RG_NAME --query hostName -o tsv)
-    set PORT "6380"  # Puerto SSL estándar para Redis en Azure
-    set SSL "True"
-    set CONNECTION_STRING "$REDIS_NAME.redis.cache.windows.net:$PORT,password=$PRIMARY_KEY,ssl=$SSL,abortConnect=False"
-
-    set_secret "redis-gpt-cache-dev-primary-key" "$PRIMARY_KEY" "redis"
-    set_secret "redis-gpt-cache-dev-secondary-key" "$SECONDARY_KEY" "redis"
-    set_secret "redis-gpt-cache-dev-connection-string" "$CONNECTION_STRING" "redis"
+# Intentar obtener de Terraform primero
+if test -f $TERRAFORM_OUTPUT_FILE
+    set REDIS_KEY (jq -r '.redis_outputs.value.primary_key // empty' $TERRAFORM_OUTPUT_FILE)
+    set REDIS_HOST (jq -r '.redis_outputs.value.hostname // empty' $TERRAFORM_OUTPUT_FILE)
     
-    # Configurar también los secretos específicos para BTC Redis
-    set_secret "btc-redis-address" "$HOST" "redis"
-    set_secret "btc-redis-port" "$PORT" "redis"
-    set_secret "btc-redis-password" "$PRIMARY_KEY" "redis"
-else
-    echo -e "$YELLOW⚠️ Redis Cache $REDIS_NAME no encontrado$NC"
+    if test -n "$REDIS_KEY" -a -n "$REDIS_HOST"
+        set PORT "6380"  # Puerto SSL estándar para Redis en Azure
+        set SSL "True"
+        set CONNECTION_STRING "$REDIS_HOST:$PORT,password=$REDIS_KEY,ssl=$SSL,abortConnect=False"
+
+        set_secret "redis-gpt-cache-$ENVIRONMENT-primary-key" "$REDIS_KEY" "redis"
+        set_secret "redis-gpt-cache-$ENVIRONMENT-secondary-key" "$REDIS_KEY" "redis" # Mismo valor para dev
+        set_secret "redis-gpt-cache-$ENVIRONMENT-connection-string" "$CONNECTION_STRING" "redis"
+        set_secret "btc-redis-address" "$REDIS_HOST" "redis"
+        set_secret "btc-redis-port" "$PORT" "redis"
+        set_secret "btc-redis-password" "$REDIS_KEY" "redis"
+    else
+        echo -e "$YELLOW⚠️ No se encontraron outputs de Terraform para Redis, consultando Azure CLI$NC"
+    end
+end
+
+# Si no se pudo obtener de Terraform, usar Azure CLI
+if not set -q REDIS_KEY; or test -z "$REDIS_KEY"
+    az redis show --name $REDIS_NAME --resource-group $RG_NAME >/dev/null 2>&1
+    if test $status -eq 0
+        echo -e "$BLUE➡️ Obteniendo claves y configuración...$NC"
+        set PRIMARY_KEY (az redis list-keys --name $REDIS_NAME --resource-group $RG_NAME --query primaryKey -o tsv)
+        set SECONDARY_KEY (az redis list-keys --name $REDIS_NAME --resource-group $RG_NAME --query secondaryKey -o tsv)
+        set HOST (az redis show --name $REDIS_NAME --resource-group $RG_NAME --query hostName -o tsv)
+        set PORT "6380"  # Puerto SSL estándar para Redis en Azure
+        set SSL "True"
+        set CONNECTION_STRING "$HOST:$PORT,password=$PRIMARY_KEY,ssl=$SSL,abortConnect=False"
+
+        set_secret "redis-gpt-cache-$ENVIRONMENT-primary-key" "$PRIMARY_KEY" "redis"
+        set_secret "redis-gpt-cache-$ENVIRONMENT-secondary-key" "$SECONDARY_KEY" "redis"
+        set_secret "redis-gpt-cache-$ENVIRONMENT-connection-string" "$CONNECTION_STRING" "redis"
+        set_secret "btc-redis-address" "$HOST" "redis"
+        set_secret "btc-redis-port" "$PORT" "redis"
+        set_secret "btc-redis-password" "$PRIMARY_KEY" "redis"
+    else
+        echo -e "$YELLOW⚠️ Redis Cache $REDIS_NAME no encontrado$NC"
+    end
 end
 
 # === Storage Account ===
 echo -e "\n$CYAN📁 Procesando secretos de Storage Account...$NC"
-set STORAGE_ACCOUNT "stgptdev01"
+set STORAGE_ACCOUNT "stgpt${ENVIRONMENT}01"
 
-az storage account show --name $STORAGE_ACCOUNT --resource-group $RG_NAME >/dev/null 2>&1
-if test $status -eq 0
-    echo -e "$BLUE➡️ Obteniendo claves de acceso...$NC"
-    set STORAGE_KEY (az storage account keys list --account-name $STORAGE_ACCOUNT --resource-group $RG_NAME --query '[0].value' -o tsv)
-    set CONN_STRING (az storage account show-connection-string --name $STORAGE_ACCOUNT --resource-group $RG_NAME --query connectionString -o tsv)
+# Intentar obtener de Terraform primero
+if test -f $TERRAFORM_OUTPUT_FILE
+    set JQ_PATH ".storage_outputs.value.${STORAGE_ACCOUNT}.primary_access_key // empty"
+    set STORAGE_KEY (jq -r $JQ_PATH $TERRAFORM_OUTPUT_FILE)
+    
+    set JQ_PATH ".storage_outputs.value.${STORAGE_ACCOUNT}.connection_string // empty"
+    set CONN_STRING (jq -r $JQ_PATH $TERRAFORM_OUTPUT_FILE)
+    
+    if test -n "$STORAGE_KEY"
+        set_secret "${STORAGE_ACCOUNT}-key" "$STORAGE_KEY" "storage"
+        set_secret "btc-blob-conv-account-key" "$STORAGE_KEY" "storage"
+        set_secret "btc-blob-conv-account-name" "$STORAGE_ACCOUNT" "storage"
+        
+        if test -n "$CONN_STRING"
+            set_secret "${STORAGE_ACCOUNT}-connection-string" "$CONN_STRING" "storage"
+            set_secret "skrill-bs-${ENVIRONMENT}-connection-string" "$CONN_STRING" "storage"
+        end
+    else
+        echo -e "$YELLOW⚠️ No se encontraron outputs de Terraform para Storage, consultando Azure CLI$NC"
+    end
+end
 
-    set_secret "stgptdev01-key" "$STORAGE_KEY" "storage"
-    set_secret "stgptdev01-connection-string" "$CONN_STRING" "storage"
-    
-    # Configurar secretos de blob storage para btc
-    set_secret "btc-blob-conv-account-name" "$STORAGE_ACCOUNT" "storage"
-    set_secret "btc-blob-conv-account-key" "$STORAGE_KEY" "storage"
-    
-    # Intentar configurar el secreto para Skrill blob storage (aunque probablemente necesite ajuste manual)
-    set_secret "skrill-bs-dev-connection-string" "$CONN_STRING" "storage"
-else
-    echo -e "$YELLOW⚠️ Storage Account $STORAGE_ACCOUNT no encontrado$NC"
+# Si no se pudo obtener de Terraform, usar Azure CLI
+if not set -q STORAGE_KEY; or test -z "$STORAGE_KEY"
+    az storage account show --name $STORAGE_ACCOUNT --resource-group $RG_NAME >/dev/null 2>&1
+    if test $status -eq 0
+        echo -e "$BLUE➡️ Obteniendo claves de acceso...$NC"
+        set STORAGE_KEY (az storage account keys list --account-name $STORAGE_ACCOUNT --resource-group $RG_NAME --query '[0].value' -o tsv)
+        set CONN_STRING (az storage account show-connection-string --name $STORAGE_ACCOUNT --resource-group $RG_NAME --query connectionString -o tsv)
+
+        set_secret "${STORAGE_ACCOUNT}-key" "$STORAGE_KEY" "storage"
+        set_secret "${STORAGE_ACCOUNT}-connection-string" "$CONN_STRING" "storage"
+        set_secret "btc-blob-conv-account-name" "$STORAGE_ACCOUNT" "storage"
+        set_secret "btc-blob-conv-account-key" "$STORAGE_KEY" "storage"
+        set_secret "skrill-bs-${ENVIRONMENT}-connection-string" "$CONN_STRING" "storage"
+    else
+        echo -e "$YELLOW⚠️ Storage Account $STORAGE_ACCOUNT no encontrado$NC"
+    end
 end
 
 # === Container Registry ===
 echo -e "\n$CYAN📁 Procesando secretos de Container Registry...$NC"
-set ACR_NAME "crgptoaidev01"
+set ACR_NAME "crgptoai${ENVIRONMENT}01"
 
-az acr show --name $ACR_NAME --resource-group $RG_NAME >/dev/null 2>&1
-if test $status -eq 0
-    echo -e "$BLUE➡️ Obteniendo credenciales...$NC"
-    set ACR_USERNAME (az acr credential show --name $ACR_NAME --query username -o tsv)
-    set ACR_PASSWORD (az acr credential show --name $ACR_NAME --query passwords[0].value -o tsv)
+# Intentar obtener de Terraform primero
+if test -f $TERRAFORM_OUTPUT_FILE
+    set ACR_USERNAME (jq -r '.acr_outputs.value.admin_username // empty' $TERRAFORM_OUTPUT_FILE)
+    set ACR_PASSWORD (jq -r '.acr_outputs.value.admin_password // empty' $TERRAFORM_OUTPUT_FILE)
+    
+    if test -n "$ACR_USERNAME" -a -n "$ACR_PASSWORD"
+        set_secret "${ACR_NAME}-admin-username" "$ACR_USERNAME" "container_registry"
+        set_secret "${ACR_NAME}-admin-password" "$ACR_PASSWORD" "container_registry"
+    else
+        echo -e "$YELLOW⚠️ No se encontraron outputs de Terraform para ACR, consultando Azure CLI$NC"
+    end
+end
 
-    set_secret "crgptoaidev01-admin-username" "$ACR_USERNAME" "container_registry"
-    set_secret "crgptoaidev01-admin-password" "$ACR_PASSWORD" "container_registry"
-else
-    echo -e "$YELLOW⚠️ Container Registry $ACR_NAME no encontrado$NC"
+# Si no se pudo obtener de Terraform, usar Azure CLI
+if not set -q ACR_PASSWORD; or test -z "$ACR_PASSWORD"
+    az acr show --name $ACR_NAME --resource-group $RG_NAME >/dev/null 2>&1
+    if test $status -eq 0
+        echo -e "$BLUE➡️ Obteniendo credenciales...$NC"
+        set ACR_USERNAME (az acr credential show --name $ACR_NAME --query username -o tsv)
+        set ACR_PASSWORD (az acr credential show --name $ACR_NAME --query passwords[0].value -o tsv)
+
+        set_secret "${ACR_NAME}-admin-username" "$ACR_USERNAME" "container_registry"
+        set_secret "${ACR_NAME}-admin-password" "$ACR_PASSWORD" "container_registry"
+    else
+        echo -e "$YELLOW⚠️ Container Registry $ACR_NAME no encontrado$NC"
+    end
 end
 
 # === AKS ===
 echo -e "\n$CYAN📁 Procesando secretos de AKS...$NC"
 set AKS_NAME "aks-gpt-dev-001"
 
-az aks show --name $AKS_NAME --resource-group $RG_NAME >/dev/null 2>&1
-if test $status -eq 0
-    echo -e "$BLUE➡️ Obteniendo configuración de Kubernetes...$NC"
-    set KUBE_CONFIG (az aks get-credentials --name $AKS_NAME --resource-group $RG_NAME --file - -o json)
-    set SP_ID (az aks show --name $AKS_NAME --resource-group $RG_NAME --query servicePrincipalProfile.clientId -o tsv)
+# Intentar obtener de Terraform primero
+if test -f $TERRAFORM_OUTPUT_FILE
+    set KUBE_CONFIG (jq -r '.aks_outputs.value.kube_config // empty' $TERRAFORM_OUTPUT_FILE)
+    set SP_ID (jq -r '.aks_outputs.value.principal_id // empty' $TERRAFORM_OUTPUT_FILE)
     
-    set_secret "aks-gpt-dev-001-kube-config" "$KUBE_CONFIG" "kubernetes"
-    set_secret "aks-gpt-dev-001-sp-client-id" "$SP_ID" "kubernetes"
-    
-    # Nota: No podemos obtener el SP_SECRET automáticamente, debe ser proporcionado manualmente
-    echo -e "$YELLOW⚠️ El secreto del service principal de AKS debe ser configurado manualmente$NC"
-else
-    echo -e "$YELLOW⚠️ AKS $AKS_NAME no encontrado$NC"
-end
-
-# === Web App ===
-echo -e "\n$CYAN📁 Procesando secretos de Web App...$NC"
-set WEBAPP_NAME "app-gpt-api-dev"
-
-az webapp show --name $WEBAPP_NAME --resource-group $RG_NAME >/dev/null 2>&1
-if test $status -eq 0
-    echo -e "$BLUE➡️ Obteniendo perfil de publicación...$NC"
-    # Obtener token de despliegue (requiere roles avanzados)
-    set PUBLISH_PROFILE (az webapp deployment list-publishing-profiles --name $WEBAPP_NAME --resource-group $RG_NAME --xml)
-    
-    if test -n "$PUBLISH_PROFILE"
-        set_secret "app-gpt-api-dev-publishing-profile" "$PUBLISH_PROFILE" "web_app"
+    if test -n "$KUBE_CONFIG"
+        set_secret "aks-gpt-dev-001-kube-config" "$KUBE_CONFIG" "kubernetes"
+        if test -n "$SP_ID"
+            set_secret "aks-gpt-dev-001-sp-client-id" "$SP_ID" "kubernetes"
+        end
     else
-        echo -e "$YELLOW⚠️ No se pudo obtener el perfil de publicación para $WEBAPP_NAME$NC"
+        echo -e "$YELLOW⚠️ No se encontraron outputs de Terraform para AKS, consultando Azure CLI$NC"
     end
-else
-    echo -e "$YELLOW⚠️ Web App $WEBAPP_NAME no encontrada$NC"
 end
 
-# === VM (No podemos obtener credenciales existentes) ===
-echo -e "\n$CYAN📁 Secretos de VM...$NC"
-echo -e "$YELLOW⚠️ Las credenciales de la máquina virtual deben ser configuradas manualmente$NC"
+# Si no se pudo obtener de Terraform, usar Azure CLI
+if not set -q KUBE_CONFIG; or test -z "$KUBE_CONFIG"
+    az aks show --name $AKS_NAME --resource-group $RG_NAME >/dev/null 2>&1
+    if test $status -eq 0
+        echo -e "$BLUE➡️ Obteniendo configuración de Kubernetes...$NC"
+        set KUBE_CONFIG (az aks get-credentials --name $AKS_NAME --resource-group $RG_NAME --file - -o json)
+        set SP_ID (az aks show --name $AKS_NAME --resource-group $RG_NAME --query identity.principalId -o tsv)
+        
+        set_secret "aks-gpt-dev-001-kube-config" "$KUBE_CONFIG" "kubernetes"
+        set_secret "aks-gpt-dev-001-sp-client-id" "$SP_ID" "kubernetes"
+    else
+        echo -e "$YELLOW⚠️ AKS $AKS_NAME no encontrado$NC"
+    end
+end
 
 # === Secretos de seguridad personalizados ===
 echo -e "\n$CYAN📁 Generando secretos de seguridad personalizados...$NC"
@@ -194,118 +281,10 @@ set_secret "SSJWTtoken" "$JWT_KEY" "security"  # También configuramos este secr
 set_secret "encryption-key" "$ENCRYPTION_KEY" "security"
 set_secret "btc-pass-encrypt" "$ENCRYPTION_KEY" "security"  # También configuramos este secreto que parece ser para el mismo propósito
 
-# === Crear el secreto para multimedia-reader-configuration ===
-set MULTIMEDIA_CONFIG '{
-  "providers": {
-    "local": {
-      "enabled": true,
-      "basePath": "/data/media"
-    },
-    "azure": {
-      "enabled": true,
-      "connectionString": "'$CONN_STRING'",
-      "containerName": "media"
-    }
-  },
-  "cache": {
-    "enabled": true,
-    "ttl": 3600
-  }
-}'
-set_secret "multimedia-reader-configuration" "$MULTIMEDIA_CONFIG" "config"
-
-# === Secretos que requieren configuración manual ===
-echo -e "\n$CYAN📁 Secretos que requieren configuración manual...$NC"
-echo -e "$YELLOW Los siguientes secretos no pueden ser poblados automáticamente y requieren configuración manual:$NC"
-
-echo -e "$YELLOW
-1. Microsoft Graph API:
-   - API-GRAPH-ten-cli-sec
-   - api-graph-url
-
-2. Skrill:
-   - skrill-user
-   - skrill-pass
-   - skrill-url
-   - skrill-gpt-folder-id
-   - skrill-gpt-drive-id
-   - skrill-container-dev-name
-
-3. Test:
-   - test-user
-   - test-pass
-
-4. API Personalizadas:
-   - API-CUSTOM-SKILL-dom-tok
-   - API-CUSTOM-CHATS-dom-tok
-
-5. Skills y Conocimiento:
-   - skill-studio-imagenes
-   - conocimiento-blob-documento
-   - cosmos-Skill-Studio-url-key
-   - tecgpt-tblquerys
-$NC"
-
-# Opción para configurar manualmente algunos secretos críticos
-echo -e "\n$CYAN📝 ¿Deseas configurar manualmente algunos secretos críticos ahora? (s/n)$NC"
-read -l configure_now
-
-if test "$configure_now" = "s" -o "$configure_now" = "S"
-    echo -e "$BLUE➡️ Configurando secretos críticos manualmente...$NC"
-    
-    # Skrill
-    echo -e "\n$CYAN Configurando secretos de Skrill:$NC"
-    read -P "Usuario de Skrill (skrill-user): " skrill_user
-    
-    # Fish no tiene un equivalente directo para read -sp, usamos stty para ocultar la entrada
-    echo -n "Contraseña de Skrill (skrill-pass): "
-    stty -echo
-    read -l skrill_pass
-    stty echo
-    echo
-    
-    read -P "URL de Skrill (skrill-url): " skrill_url
-    
-    if test -n "$skrill_user"
-        set_secret "skrill-user" "$skrill_user" "skrill"
-    end
-    if test -n "$skrill_pass"
-        set_secret "skrill-pass" "$skrill_pass" "skrill"
-    end
-    if test -n "$skrill_url"
-        set_secret "skrill-url" "$skrill_url" "skrill"
-    end
-    
-    # Test
-    echo -e "\n$CYAN Configurando secretos de Test:$NC"
-    read -P "Usuario de prueba (test-user): " test_user
-    
-    echo -n "Contraseña de prueba (test-pass): "
-    stty -echo
-    read -l test_pass
-    stty echo
-    echo
-    
-    if test -n "$test_user"
-        set_secret "test-user" "$test_user" "test"
-    end
-    if test -n "$test_pass"
-        set_secret "test-pass" "$test_pass" "test"
-    end
-    
-    # Microsoft Graph
-    echo -e "\n$CYAN Configurando secretos de Microsoft Graph:$NC"
-    read -P "Valores separados por coma para API-GRAPH-ten-cli-sec: " graph_cli_sec
-    read -P "URL de API Graph (api-graph-url): " graph_url
-    
-    if test -n "$graph_cli_sec"
-        set_secret "API-GRAPH-ten-cli-sec" "$graph_cli_sec" "graph"
-    end
-    if test -n "$graph_url"
-        set_secret "api-graph-url" "$graph_url" "graph"
-    end
+# Limpiar archivo temporal
+if test -f $TERRAFORM_OUTPUT_FILE
+    rm -f $TERRAFORM_OUTPUT_FILE
 end
 
 echo -e "\n$GREEN✅ Proceso de población de secretos completado$NC"
 echo -e "$BLUE ℹ️ Para los secretos restantes, utiliza el Portal de Azure o la CLI de Azure para configurarlos manualmente$NC"
-echo -e "$BLUE ℹ️ Ejemplo: az keyvault secret set --vault-name $KV_NAME --name \"NOMBRE_SECRETO\" --value \"VALOR_SECRETO\" --tags \"category=categoria\"$NC"

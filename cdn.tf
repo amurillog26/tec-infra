@@ -1,6 +1,6 @@
 # CDN Profile 
 resource "azurerm_cdn_profile" "cdn_profile" {
-  name                = "cdn-gpt-api-dev-01"
+  name                = "cdn-gpt-api-${var.environment}-01"
   location            = var.location
   resource_group_name = var.resource_group_name
   sku                 = "Standard_Microsoft"
@@ -10,15 +10,15 @@ resource "azurerm_cdn_profile" "cdn_profile" {
 
 # CDN Endpoint para el contenido estático
 resource "azurerm_cdn_endpoint" "cdn_endpoint_static" {
-  name                = "cdn-gpt-static-dev-01"
+  name                = "cdn-gpt-static-${var.environment}-01"
   profile_name        = azurerm_cdn_profile.cdn_profile.name
   location            = var.location
   resource_group_name = var.resource_group_name
-  origin_host_header  = "stgptdev01.blob.core.windows.net"
+  origin_host_header  = "stgpt${var.environment}01.blob.core.windows.net"
 
   origin {
     name      = "static-origin"
-    host_name = "stgptdev01.blob.core.windows.net"
+    host_name = "stgpt${var.environment}01.blob.core.windows.net"
   }
 
   is_compression_enabled = true

@@ -6,7 +6,7 @@ module "defender" {
   subscription_id     = var.subscription_id
   resource_group_name = var.resource_group_name
 
-  # Planes de Defender según tu diagrama (sin incluir API que se maneja de forma separada)
+  # Planes de Defender según tu diagrama
   defender_plans = {
     Containers = {
       tier = "Standard" # Para AKS y Container Registry
@@ -40,8 +40,9 @@ module "defender" {
   # Configuración para Defender for APIs
   api_defender_subplan = "P1" # P1 para desarrollo
 
-  # Configurar Log Analytics
+  # Configuración para Log Analytics - usando variables que se conocen en tiempo de planificación
   log_analytics_workspace_id = module.log_analytics.workspace_id
+  enable_log_analytics_integration = true  # Nueva variable para control determinista
 
   # Configurar contactos para alertas
   security_contacts = var.security_contacts

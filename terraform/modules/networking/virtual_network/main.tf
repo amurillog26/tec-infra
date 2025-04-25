@@ -31,8 +31,16 @@ resource "azurerm_subnet" "subnets" {
   }
 }
 
+resource "azurerm_application_security_group" "asg_private_endpoint" {
+  name                = "nsg-gpt-pe-${var.environment}"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  tags                = var.tags
+}
+
+# Ahora podemos crear el Network Security Group que depende del ASG
 resource "azurerm_network_security_group" "apim_nsg" {
-  name                = "nsg-apim-dev"
+  name                = "nsg-apim-${var.environment}"
   location            = var.location
   resource_group_name = var.resource_group_name
 
@@ -108,7 +116,7 @@ resource "azurerm_network_security_group" "apim_nsg" {
     destination_address_prefix = "AzureKeyVault"
   }
 
-  # Estas reglas son las que Terraform intentaba eliminar
+  # Estas reglas ahora hacen referencia al ASG que acabamos de crear
   security_rule {
     name                                       = "AllowAnyCustomAnyOutbound"
     priority                                   = 160
@@ -141,8 +149,9 @@ resource "azurerm_network_security_group" "apim_nsg" {
     protocol                                   = "*"
     source_port_range                          = "*"
     destination_port_range                     = "*"
+    # Ahora referenciamos directamente el ASG recién creado
     source_application_security_group_ids      = [
-      "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/applicationSecurityGroups/nsg-gpt-pe-dev",
+      azurerm_application_security_group.asg_private_endpoint.id
     ]
     destination_address_prefix                 = "*"
   }
@@ -155,15 +164,27 @@ resource "azurerm_network_security_group" "apim_nsg" {
     protocol                                   = "*"
     source_port_range                          = "*"
     destination_port_range                     = "*"
+    # Ahora referenciamos directamente el ASG recién creado
     source_application_security_group_ids      = [
-      "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/applicationSecurityGroups/nsg-gpt-pe-dev",
+      azurerm_application_security_group.asg_private_endpoint.id
     ]
     destination_address_prefix                 = "*"
   }
 
   tags = var.tags
+  
+  # Dependencia explícita del ASG
+  depends_on = [
+    azurerm_application_security_group.asg_private_endpoint
+  ]
 }
+
 resource "azurerm_subnet_network_security_group_association" "apim_subnet_nsg" {
-  subnet_id                 = azurerm_subnet.subnets["snet_gpt_apim_dev"].id
+  subnet_id                 = azurerm_subnet.subnets["snet_gpt_apim_${var.environment}"].id
   network_security_group_id = azurerm_network_security_group.apim_nsg.id
+  
+  # Dependencia explícita del NSG
+  depends_on = [
+    azurerm_network_security_group.apim_nsg
+  ]
 }

@@ -79,3 +79,7 @@ variable "tenant_id" {
   type        = string
   description = "ID del tenant de Azure"
 }
+
+variable "environment" {
+  
+}

@@ -45,6 +45,7 @@ resource_tags = {
 }
 
 tenant_id = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
+# tenant_id = "ff463ea8-92b7-4e5a-a417-cf03db333692"
 
 ########## vnet ##########
 
@@ -64,7 +65,7 @@ subnets = {
     private_endpoint_network_policies = "Disabled"
   },
   "snet_gpt_aks_pprd" = {
-    address_prefixes = ["10.97.175.0/24"]     # 256 IPs: 10.97.175.0 - 10.97.175.255 (subnet más grande en otro segmento)
+    address_prefixes = ["10.97.197.0/24"]     # 256 IPs: 10.97.175.0 - 10.97.175.255 (subnet más grande en otro segmento)
     service_endpoints = ["Microsoft.ContainerRegistry"]
     private_endpoint_network_policies = "Enabled"
   },
@@ -426,15 +427,17 @@ managed_identity = {
 
 # Public IPs
 public_ips = {
-  "pip_agw_gpt_pprd" = {
-    name              = "pip-agw-gpt-pprd"
+  "pip_apim_mgmt_pprd" = {
+    name              = "apim-mgmnt-pip"
     allocation_method = "Static"
     sku              = "Standard"
     sku_tier         = "Regional"
     zones            = ["1", "2", "3"]
+    domain_name_label = "apim-gpt-pprd-01"
     tags = {
       environment = "pprd"
       workload    = "oai"
+      component   = "apim" 
     }
   }
 }
@@ -675,7 +678,7 @@ kubernetes = {
   cluster_name       = "aks-gpt-pprd-001"
   dns_prefix         = "aks-gpt-pprd"
   kubernetes_version = "1.31.7"  # Ajusta a la versión deseada
-  availability_zones = ["1", "2", "3"]
+  availability_zones = ["1"]
   
   # Habilitar clúster privado
   private_cluster_enabled     = true

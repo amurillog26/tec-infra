@@ -7,7 +7,7 @@ module "windows_vm" {
   vm_name     = var.windows_vm.name
   vm_nic_name = var.windows_vm.nic_name
   # Referencia correcta al módulo networking que ya tienes definido
-  vm_subnet_id      = module.networking.subnet_ids["snet_gpt_vm_dev"]
+  vm_subnet_id = module.networking.subnet_ids["snet_gpt_vm_${var.environment}"]
   vm_size           = var.windows_vm.size
   vm_admin_username = var.windows_vm.admin_username
   vm_admin_password = var.windows_vm.admin_password

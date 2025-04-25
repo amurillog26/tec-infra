@@ -56,3 +56,8 @@ terraform {
   }
   required_version = ">=1.0.0"
 }
+
+output "oidc_issuer_url" {
+  value       = azurerm_kubernetes_cluster.aks.oidc_issuer_url
+  description = "The OIDC issuer URL for the cluster"
+}

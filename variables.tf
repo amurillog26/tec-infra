@@ -475,6 +475,7 @@ variable "public_ips" {
     name              = string
     allocation_method = string
     sku               = string
+    domain_name_label = optional(string)
     sku_tier          = optional(string)
     zones             = optional(list(string))
     tags              = map(string)
@@ -482,19 +483,24 @@ variable "public_ips" {
   description = "Configuración de las IPs públicas"
 }
 
-variable "private_endpoints" {
+variable "additional_private_endpoints" {
   type = map(object({
     name                 = string
     resource_id          = string
+    subnet_key           = optional(string)
+    subnet_id            = optional(string)
     subresource_names    = list(string)
-    subnet_key           = optional(string, "snet_gpt_int_dev") # Default subnet for private endpoints
     is_manual_connection = optional(bool, false)
     private_dns_zone_ids = optional(list(string))
+    custom_network_interface_name = optional(string)
+    private_service_connection_name = optional(string)
+    private_dns_zone_group_name = optional(string)
+    ip_configurations = optional(list(map(string)))
+    tags = optional(map(string), {})
   }))
-  description = "Map of private endpoints to create"
+  description = "Mapa de private endpoints adicionales a crear (además de los generados dinámicamente)"
   default     = {}
 }
-
 variable "private_dns_zones" {
   type = map(object({
     name                 = string

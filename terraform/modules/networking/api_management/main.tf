@@ -7,7 +7,8 @@ resource "azurerm_api_management" "apim" {
   publisher_email     = var.apim.publisher_email
   sku_name           = var.apim.sku_name
   
-  public_ip_address_id = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_dev/providers/Microsoft.Network/publicIPAddresses/apim-mgmnt-pip"
+  # Usar la nueva IP dinámica en lugar de la hardcoded
+  public_ip_address_id = var.apim.public_ip_address_id
   
   virtual_network_type = var.apim.virtual_network_type
 

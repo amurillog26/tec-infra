@@ -6,6 +6,11 @@ resource "azurerm_security_center_subscription_pricing" "defender_plans" {
 
   tier          = each.value.tier
   resource_type = each.key
+  lifecycle {
+    ignore_changes = [
+      subplan
+    ]
+  }
 }
 
 # Para API Management, que requiere un subplan, usamos un recurso separado
@@ -46,10 +51,24 @@ resource "azurerm_security_center_contact" "security_contact" {
   alerts_to_admins    = lookup(var.security_contacts[0], "alerts_to_admins", true)
 }
 
-# Conexión con Log Analytics
-resource "azurerm_security_center_workspace" "log_analytics_workspace" {
-  count        = var.log_analytics_workspace_id != null ? 1 : 0
+# Conexión con Log Analytics usando un recurso nulo y CLI de Azure
+resource "null_resource" "log_analytics_connection" {
+  # Solo ejecutar si enable_log_analytics_integration es true
+  count = var.enable_log_analytics_integration ? 1 : 0
   
-  scope        = "/subscriptions/${var.subscription_id}"
-  workspace_id = var.log_analytics_workspace_id
+  # Cualquier cambio en el ID del workspace triggereará esto
+  triggers = {
+    log_analytics_id = var.log_analytics_workspace_id
+    subscription_id  = var.subscription_id
+  }
+  
+  # Usamos local-exec para configurar la integración después de que los recursos están creados
+  provisioner "local-exec" {
+    command = <<-EOT
+      az security workspace-setting create \
+        --name default \
+        --target-workspace "${var.log_analytics_workspace_id}" \
+        --subscription "${var.subscription_id}"
+    EOT
+  }
 }

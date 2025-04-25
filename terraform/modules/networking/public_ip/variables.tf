@@ -1,4 +1,3 @@
-
 # variables.tf
 variable "resource_group_name" {
   type        = string
@@ -17,6 +16,7 @@ variable "public_ips" {
     sku              = string
     sku_tier         = optional(string)
     zones            = optional(list(string))
+    domain_name_label = optional(string) # Nuevo campo para DNS name
     tags             = map(string)
   }))
   description = "Map of public IPs to create"

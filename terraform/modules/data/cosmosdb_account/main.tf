@@ -23,6 +23,7 @@ locals {
 
 resource "azurerm_cosmosdb_account" "tec_cosmos_ac" {
   name                = var.cosmos_account_name
+  # location            = var.main_vn_location
   location            = var.main_vn_location
   resource_group_name = var.main_rg_name
   offer_type          = var.cosmos_account_offer_type
@@ -56,7 +57,7 @@ resource "azurerm_cosmosdb_account" "tec_cosmos_ac" {
     retention_in_hours  = 8
   }
   is_virtual_network_filter_enabled = false
-  ip_range_filter = ["189.139.13.89","187.188.76.17","187.189.69.17","201.145.55.195"]
+  ip_range_filter = ["189.139.13.89","187.188.76.17","187.189.69.17","201.145.55.195","187.189.188.17"]
 
   tags = var.tags
 }

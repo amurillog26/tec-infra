@@ -426,15 +426,17 @@ managed_identity = {
 
 # Public IPs
 public_ips = {
-  "pip_agw_gpt_dev" = {
-    name              = "pip-agw-gpt-dev"
+  "apim-mgmnt-pip" = {
+    name              = "apim-mgmnt-pip"
     allocation_method = "Static"
     sku              = "Standard"
     sku_tier         = "Regional"
     zones            = ["1", "2", "3"]
+    domain_name_label = "apim-gpt-api-dev-01"
     tags = {
-      environment = "dev"
+      environment = "pprd"
       workload    = "oai"
+      component   = "apim" 
     }
   }
 }

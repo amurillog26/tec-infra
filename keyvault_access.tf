@@ -40,15 +40,33 @@ resource "azurerm_key_vault_access_policy" "aks_kubelet_policy" {
 }
 
 # Política para APIM
-resource "azurerm_key_vault_access_policy" "apim_policy" {
-  count = lookup(module.apim, "identity_principal_id", null) != null ? 1 : 0
-
-  key_vault_id = module.key_vault.kv_id
-  tenant_id    = var.tenant_id
-  object_id    = module.apim.identity_principal_id
-
-  key_permissions    = ["Get", "List"]
-  secret_permissions = ["Get", "List"]
+# Aplicamos esta política DESPUÉS de que el módulo APIM ha sido creado
+resource "null_resource" "apim_keyvault_policy_trigger" {
+  count = var.apim != null ? 1 : 0
+  
+  # Cualquier cambio en APIM o KeyVault triggereará esto
+  triggers = {
+    apim_id = module.apim.id
+    kv_id   = module.key_vault.kv_id
+  }
+  
+  # Usamos provisioner local-exec para aplicar la política DESPUÉS de que APIM y KeyVault están creados
+  provisioner "local-exec" {
+    command = <<-EOT
+      az keyvault set-policy \
+        --name ${var.kv_name} \
+        --resource-group ${var.resource_group_name} \
+        --object-id ${module.apim.identity_principal_id} \
+        --secret-permissions Get List \
+        --key-permissions Get List \
+        --certificate-permissions Get List
+    EOT
+  }
+  
+  depends_on = [
+    module.apim,
+    module.key_vault
+  ]
 }
 
 # Políticas estáticas definidas en variables

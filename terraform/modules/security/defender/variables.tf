@@ -65,3 +65,10 @@ variable "subscription_id" {
   description = "Subscription ID where Defender will be enabled"
   type        = string
 }
+
+# Nueva variable para controlar la integración con Log Analytics
+variable "enable_log_analytics_integration" {
+  description = "Enable integration with Log Analytics workspace"
+  type        = bool
+  default     = false
+}

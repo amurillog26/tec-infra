@@ -7,7 +7,7 @@ module "private_dns_zone" {
   name                = each.value.name
   resource_group_name = var.resource_group_name
   linked_vnets = {
-    "vnet_gpt_net_dev" = module.networking.vnet_id
+    "vnet_gpt_net_${var.environment}" = module.networking.vnet_id
   }
   registration_enabled = lookup(each.value, "registration_enabled", false)
 

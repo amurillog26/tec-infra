@@ -8,7 +8,7 @@ module "aks" {
   dns_prefix          = var.kubernetes.dns_prefix
   kubernetes_version  = var.kubernetes.kubernetes_version
 
-  subnet_id          = lookup(module.networking.subnet_ids, "snet_gpt_aks_dev", null)
+  subnet_id          = lookup(module.networking.subnet_ids, "snet_gpt_aks_${var.environment}", null)
   availability_zones = var.kubernetes.availability_zones
 
   # Configuración para clúster privado
