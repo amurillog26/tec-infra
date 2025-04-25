@@ -51,17 +51,17 @@ resource "null_resource" "apim_keyvault_policy_trigger" {
   }
   
   # Usamos provisioner local-exec para aplicar la política DESPUÉS de que APIM y KeyVault están creados
-  provisioner "local-exec" {
-    command = <<-EOT
-      az keyvault set-policy \
-        --name ${var.kv_name} \
-        --resource-group ${var.resource_group_name} \
-        --object-id ${module.apim.identity_principal_id} \
-        --secret-permissions Get List \
-        --key-permissions Get List \
-        --certificate-permissions Get List
-    EOT
-  }
+  # provisioner "local-exec" {
+  #   command = <<-EOT
+  #     az keyvault set-policy \
+  #       --name ${var.kv_name} \
+  #       --resource-group ${var.resource_group_name} \
+  #       --object-id ${module.apim.identity_principal_id} \
+  #       --secret-permissions Get List \
+  #       --key-permissions Get List \
+  #       --certificate-permissions Get List
+  #   EOT
+  # }
   
   depends_on = [
     module.apim,
