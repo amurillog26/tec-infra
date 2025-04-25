@@ -51,7 +51,7 @@ tenant_id = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
 
 
 vnet_name           = "vnet_gpt_net_pprd"
-address_space       = ["10.97.196.0/23"]  # Mantiene el rango 10.97.196.0 - 10.97.175.255
+address_space       = ["10.97.196.0/22"]  # Mantiene el rango 10.97.196.0 - 10.97.175.255
 
 subnets = {
   "snet_gpt_agw_pprd" = {
