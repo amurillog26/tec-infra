@@ -7,7 +7,6 @@ resource "azurerm_api_management" "apim" {
   publisher_email     = var.apim.publisher_email
   sku_name           = var.apim.sku_name
   
-  # Usar la nueva IP dinámica en lugar de la hardcoded
   public_ip_address_id = var.apim.public_ip_address_id
   
   virtual_network_type = var.apim.virtual_network_type
@@ -26,16 +25,16 @@ resource "azurerm_api_management" "apim" {
   }
 
   protocols {
-    enable_http2 = var.apim.protocols.enable_http2
+    http2_enabled = var.apim.protocols.enable_http2
   }
 
   security {
-    enable_backend_ssl30  = var.apim.security.enable_backend_ssl30
-    enable_backend_tls10  = var.apim.security.enable_backend_tls10
-    enable_backend_tls11  = var.apim.security.enable_backend_tls11
-    enable_frontend_ssl30 = var.apim.security.enable_frontend_ssl30
-    enable_frontend_tls10 = var.apim.security.enable_frontend_tls10
-    enable_frontend_tls11 = var.apim.security.enable_frontend_tls11
+    backend_ssl30_enabled  = var.apim.security.enable_backend_ssl30
+    backend_tls10_enabled  = var.apim.security.enable_backend_tls10
+    backend_tls11_enabled  = var.apim.security.enable_backend_tls11
+    frontend_ssl30_enabled = var.apim.security.enable_frontend_ssl30
+    frontend_tls10_enabled = var.apim.security.enable_frontend_tls10
+    frontend_tls11_enabled = var.apim.security.enable_frontend_tls11
   }
 
   sign_in {

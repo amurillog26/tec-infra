@@ -676,3 +676,20 @@ variable "security_contacts" {
     }
   ]
 }
+
+variable "private_endpoints" {
+  type = map(object({
+    name                 = string
+    subnet_key           = string
+    resource_id          = string
+    subresource_names    = list(string)
+    private_dns_zone_ids = list(string)
+    custom_network_interface_name = optional(string)
+    private_service_connection_name = optional(string)
+    private_dns_zone_group_name = optional(string)
+    ip_configurations = optional(list(map(string)))
+    tags = optional(map(string), {})
+  }))
+  description = "Mapa de private endpoints a crear"
+  default     = {}
+}
