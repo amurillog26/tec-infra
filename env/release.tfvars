@@ -618,6 +618,15 @@ private_dns_zones = {
   },
   "privatelink.grafana.azure.com" = {
     name = "privatelink.grafana.azure.com"
+  },
+  "privatelink.cognitiveservices.azure.com" = {
+  name = "privatelink.cognitiveservices.azure.com"
+  },
+  "privatelink.openai.azure.com" = {
+    name = "privatelink.openai.azure.com"
+  },
+  "privatelink.search.windows.net" = {
+    name = "privatelink.search.windows.net"
   }
 }
 
