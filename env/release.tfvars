@@ -427,7 +427,7 @@ managed_identity = {
 
 # Public IPs
 public_ips = {
-  "pip_apim_mgmt_pprd" = {
+  "apim-mgmnt-pip" = {
     name              = "apim-mgmnt-pip"
     allocation_method = "Static"
     sku              = "Standard"
