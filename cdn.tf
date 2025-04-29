@@ -1,6 +1,6 @@
 # CDN Profile 
 resource "azurerm_cdn_profile" "cdn_profile" {
-  name                = "cdn-gpt-api-${var.environment}-01"
+  name                = var.cdn_name
   location            = var.location
   resource_group_name = var.resource_group_name
   sku                 = "Standard_Microsoft"
@@ -10,7 +10,7 @@ resource "azurerm_cdn_profile" "cdn_profile" {
 
 # CDN Endpoint para el contenido estático
 resource "azurerm_cdn_endpoint" "cdn_endpoint_static" {
-  name                = "cdn-gpt-static-${var.environment}-01"
+  name                = var.cdn_profile_name
   profile_name        = azurerm_cdn_profile.cdn_profile.name
   location            = var.location
   resource_group_name = var.resource_group_name

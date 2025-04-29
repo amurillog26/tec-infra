@@ -1,6 +1,8 @@
 # defender.tf
-
 module "defender" {
+  # Usa count para crear o no el módulo según el entorno
+  count = var.environment == "dev" ? 1 : 0
+
   source = "./terraform/modules/security/defender"
 
   subscription_id     = var.subscription_id

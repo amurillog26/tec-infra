@@ -519,6 +519,7 @@ variable "windows_vm" {
     admin_username = string
     admin_password = string
     hostname       = string
+    sku       = string
     tags           = map(string)
   })
   default = {
@@ -528,6 +529,7 @@ variable "windows_vm" {
     admin_username = "adminuser"
     admin_password = null # Debe configurarse en el archivo tfvars
     hostname       = "win11-workstation"
+    sku            = "win11-22h2-pro"
     tags = {
       type = "workstation"
     }
@@ -692,4 +694,16 @@ variable "private_endpoints" {
   }))
   description = "Mapa de private endpoints a crear"
   default     = {}
+}
+
+variable "cdn_name" {
+  type        = string
+  description = "Nombre del CDN"
+  
+}
+
+variable "cdn_profile_name" {
+  type        = string
+  description = "Nombre del perfil de CDN"
+  
 }

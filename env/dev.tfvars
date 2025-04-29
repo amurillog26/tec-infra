@@ -623,6 +623,9 @@ private_dns_zones = {
   },
   "privatelink.openai.azure.com" = {
     name = "privatelink.openai.azure.com"
+  },
+  "privatelink.search.windows.net" = {
+    name = "privatelink.search.windows.net"
   }
 }
 
@@ -634,6 +637,7 @@ windows_vm = {
   admin_username = "adminuser"
   admin_password = "P@ssw0rd1234!" # ¡Considera usar Azure Key Vault en producción!
   hostname       = "win-workstation"
+  sku          = "win11-22h2-pro"
   tags = {
     environment = "dev"
     workload    = "oai"
@@ -811,3 +815,6 @@ security_contacts = [
     alerts_to_admins    = true
   }
 ]
+
+cdn_name = "cdn-gpt-api-dev-01"
+cdn_profile_name = "cdn-gpt-static-dev-01"
