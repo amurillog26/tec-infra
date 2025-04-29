@@ -50,3 +50,10 @@ variable "resource_tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "vm_sku" {
+  description = "SKU de la máquina virtual"
+  type        = string
+  default     = "win11-22h2-pro"
+  
+}

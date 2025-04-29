@@ -12,6 +12,7 @@ module "windows_vm" {
   vm_admin_username = var.windows_vm.admin_username
   vm_admin_password = var.windows_vm.admin_password
   vm_hostname       = var.windows_vm.hostname
+  vm_sku           = var.windows_vm.sku
 
   resource_tags = merge(var.tags, var.windows_vm.tags)
 }

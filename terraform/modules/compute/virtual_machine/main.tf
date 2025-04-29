@@ -7,7 +7,7 @@ locals {
   
   vm_publisher            = "MicrosoftWindowsDesktop"
   vm_offer                = "Windows-11"
-  vm_sku                  = "win11-22h2-pro"
+  vm_sku                  = var.vm_sku
   vm_version              = "latest"
   nic_ip_cfg_name         = "${var.vm_nic_name}-cfg"
 }

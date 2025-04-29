@@ -4,8 +4,8 @@ environment = "pprd"
 subscription_id = "49b8793e-f25e-49ab-8fc2-1190c08f377e" 
 
 storage_accounts = {
-  "stgptpprd01" = {
-    name = "stgptpprd01"
+  "stgptpprd" = {
+    name = "stgptpprd"
     account_tier = "Standard"
     account_replication_type = "LRS"
     cross_tenant_replication_enabled = true
@@ -35,7 +35,7 @@ tags = {
 
 main_rg_name        = "rg_gpt_oai_pprd"
 main_vn_location    = "southcentralus"
-kv_name             = "kv-gpt-oai-pprd-01"
+kv_name             = "kv-gpt-oai-pprd"
 kv_sku_name         = "standard"
 kv_public_access = true
 
@@ -149,7 +149,7 @@ enable_private_endpoint     = true  # true for prod
 private_dns_zone_id        = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_pprd/providers/Microsoft.Network/privateDnsZones/privatelink.documents.azure.com"   # Required for prod
 
 # Container Registry
-acr_name           = "crgptoaipprd01"  # Debe ser globalmente único
+acr_name           = "crgptoaipprd"  # Debe ser globalmente único
 acr_admin_enabled  = true           # Habilitado para desarrollo
 acr_public         = true           # Público para desarrollo
 acr_zone_redundancy_enabled = false
@@ -213,7 +213,7 @@ web_apps = {
 
 
 apim = {
-  name                = "gpt-apim-pprd-01"  # Nuevo nombre
+  name                = "gpt-apim-pprd"  # Nuevo nombre
   publisher_name      = "GPT pprd Team"
   publisher_email     = "arturo.murillo@mobiik.com"
   sku_name           = "Premium_1"
@@ -427,13 +427,13 @@ managed_identity = {
 
 # Public IPs
 public_ips = {
-  "pip_apim_mgmt_pprd" = {
+  "apim-mgmnt-pip" = {
     name              = "apim-mgmnt-pip"
     allocation_method = "Static"
     sku              = "Standard"
     sku_tier         = "Regional"
     zones            = ["1", "2", "3"]
-    domain_name_label = "apim-gpt-pprd-01"
+    domain_name_label = "apim-gpt-pprd"
     tags = {
       environment = "pprd"
       workload    = "oai"
@@ -448,7 +448,7 @@ private_endpoints = {
   "pe-kv-gpt-oai-pprd" = {
     name              = "pe-kv-gpt-oai-pprd"
     subnet_key        = "snet_gpt_pe_pprd"
-    resource_id       = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_pprd/providers/Microsoft.KeyVault/vaults/kv-gpt-oai-pprd-01"
+    resource_id       = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_pprd/providers/Microsoft.KeyVault/vaults/kv-gpt-oai-pprd"
     subresource_names = ["vault"]
     private_dns_zone_ids = [
       "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_pprd/providers/Microsoft.Network/privateDnsZones/privatelink.vaultcore.azure.net"
@@ -468,18 +468,18 @@ private_endpoints = {
   
   # Storage Account Blob Private Endpoint
   "pe-stgptpprd001-table" = {
-    name              = "pe-stgptpprd01-table"
+    name              = "pe-stgptpprd-table"
     subnet_key        = "snet_gpt_pe_pprd"
-    resource_id       = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_pprd/providers/Microsoft.Storage/storageAccounts/stgptpprd01"
+    resource_id       = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_pprd/providers/Microsoft.Storage/storageAccounts/stgptpprd"
     subresource_names = ["table"]
     private_dns_zone_ids = [
       "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_pprd/providers/Microsoft.Network/privateDnsZones/privatelink.table.core.windows.net"
     ]
   },
-  "pe-stgptpprd01-blob-cdn" = {
-    name              = "pe-stgptpprd01-blob-cdn"
+  "pe-stgptpprd-blob-cdn" = {
+    name              = "pe-stgptpprd-blob-cdn"
     subnet_key        = "snet_gpt_pe_pprd"
-    resource_id       = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_pprd/providers/Microsoft.Storage/storageAccounts/stgptpprd01"
+    resource_id       = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_pprd/providers/Microsoft.Storage/storageAccounts/stgptpprd"
     subresource_names = ["blob"]
     private_dns_zone_ids = [
       "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_pprd/providers/Microsoft.Network/privateDnsZones/privatelink.blob.core.windows.net"
@@ -498,10 +498,10 @@ private_endpoints = {
   },
   
   # Container Registry Private Endpoint
-  "pe-crgptoaipprd01" = {
-    name              = "pe-crgptoaipprd01"
+  "pe-crgptoaipprd" = {
+    name              = "pe-crgptoaipprd"
     subnet_key        = "snet_gpt_pe_pprd"
-    resource_id       = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_pprd/providers/Microsoft.ContainerRegistry/registries/crgptoaipprd01"
+    resource_id       = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_pprd/providers/Microsoft.ContainerRegistry/registries/crgptoaipprd"
     subresource_names = ["registry"]
     private_dns_zone_ids = [
       "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_pprd/providers/Microsoft.Network/privateDnsZones/privatelink.azurecr.io"
@@ -556,7 +556,7 @@ private_endpoints = {
   "pe-acr-gpt-pprd" = {
     name              = "pe-acr-gpt-pprd"
     subnet_key        = "snet_gpt_pe_pprd"  # Subnet dedicada para Private Endpoints
-    resource_id       = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_pprd/providers/Microsoft.ContainerRegistry/registries/crgptoaipprd01"
+    resource_id       = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_pprd/providers/Microsoft.ContainerRegistry/registries/crgptoaipprd"
     subresource_names = ["registry"]
     private_dns_zone_ids = [
       "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377e/resourceGroups/rg_gpt_oai_pprd/providers/Microsoft.Network/privateDnsZones/privatelink.azurecr.io"
@@ -629,6 +629,7 @@ windows_vm = {
   admin_username = "adminuser"
   admin_password = "P@ssw0rd1234!" # ¡Considera usar Azure Key Vault en producción!
   hostname       = "win-workstation"
+  sku          = "win11-24h2-pro"
   tags = {
     environment = "pprd"
     workload    = "oai"
@@ -806,3 +807,7 @@ security_contacts = [
     alerts_to_admins    = true
   }
 ]
+
+
+cdn_name = "cdn-gpt-api-pprd"
+cdn_profile_name = "cdn-gpt-static-pprd"

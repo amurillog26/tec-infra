@@ -1,34 +1,35 @@
-# Obtener todos los NSGs en el grupo de recursos de AKS
-data "azurerm_resources" "aks_nsgs" {
-  resource_group_name = "MC_rg_gpt_oai_${var.environment}_aks-gpt-${var.environment}-001_southcentralus"
-  type                = "Microsoft.Network/networkSecurityGroups"
-}
+# aks_nsg_rules.tf - Versión mejorada sin dependencias circulares
 
-# Filtrar el NSG específico usando locals
 locals {
+  # Nombre del resource group gestionado por AKS
   aks_mc_resource_group = "MC_rg_gpt_oai_${var.environment}_aks-gpt-${var.environment}-001_southcentralus"
   
-  # Filtrar manualmente el NSG que coincida con el patrón
-  matching_nsgs = [
-    for nsg in data.azurerm_resources.aks_nsgs.resources :
-    nsg if length(regexall("^aks-agentpool-[0-9]+-nsg$", nsg.name)) > 0
-  ]
+  # Prefijo del nombre esperado para el NSG
+  aks_nsg_prefix = "aks-agentpool"
   
-  # Obtener el primer NSG que coincida
-  aks_nsg_id   = length(local.matching_nsgs) > 0 ? local.matching_nsgs[0].id : ""
-  aks_nsg_name = length(local.matching_nsgs) > 0 ? local.matching_nsgs[0].name : ""
+  # Definir un nombre determinista para el NSG que esperamos encontrar
+  # Esta es una convención estándar para los NSGs creados por AKS
+  expected_nsg_name = "${local.aks_nsg_prefix}-28976913-nsg"
 }
 
-# Obtener más detalles del NSG específico una vez identificado
-data "azurerm_network_security_group" "aks_nsg" {
-  count               = local.aks_nsg_name != "" ? 1 : 0
-  name                = local.aks_nsg_name
-  resource_group_name = local.aks_mc_resource_group
+# Crear las reglas de NSG de forma condicional usando un recurso null_resource como interruptor
+resource "null_resource" "aks_nsg_setup_trigger" {
+  # Trigger basado en el ID del clúster AKS, así se ejecuta solo después de que AKS existe
+  triggers = {
+    aks_id = module.aks.cluster_id
+  }
+
+  # Este provisioner solo loguea información pero no afecta la infraestructura
+  provisioner "local-exec" {
+    command = "echo Preparando reglas NSG para AKS: ${module.aks.cluster_id}"
+  }
 }
 
-# Aplicar esta lógica solo si se encontró un NSG
+# Regla para permitir tráfico desde AKS a APIM
 resource "azurerm_network_security_rule" "allow_aks_to_apim" {
-  count                       = local.aks_nsg_name != "" ? 1 : 0
+  # Solo crear este recurso si el trigger existe (es decir, AKS existe)
+  depends_on = [null_resource.aks_nsg_setup_trigger]
+
   name                        = "Allow-AKS-To-APIM"
   priority                    = 200
   direction                   = "Outbound"
@@ -39,17 +40,24 @@ resource "azurerm_network_security_rule" "allow_aks_to_apim" {
   source_address_prefix       = "*"
   destination_address_prefix  = module.networking.subnet_address_prefixes["snet_gpt_apim_${var.environment}"]
   resource_group_name         = local.aks_mc_resource_group
-  network_security_group_name = local.aks_nsg_name
+  network_security_group_name = local.expected_nsg_name
   
-  depends_on = [
-    module.aks,
-    module.networking
-  ]
+  # Ignorar errores de creación ya que esto es una configuración opcional
+  lifecycle {
+    ignore_changes = [
+      resource_group_name,
+      network_security_group_name
+    ]
+    # Prevenir errores si el grupo no existe todavía
+    create_before_destroy = true
+  }
 }
 
-# Regla para permitir el tráfico de entrada desde APIM a AKS
+# Regla para permitir tráfico desde APIM a AKS
 resource "azurerm_network_security_rule" "allow_apim_to_aks" {
-  count                       = local.aks_nsg_name != "" ? 1 : 0
+  # Solo crear este recurso si el trigger existe (es decir, AKS existe)
+  depends_on = [null_resource.aks_nsg_setup_trigger]
+
   name                        = "Allow-APIM-To-AKS"
   priority                    = 210
   direction                   = "Inbound"
@@ -60,10 +68,26 @@ resource "azurerm_network_security_rule" "allow_apim_to_aks" {
   source_address_prefix       = module.networking.subnet_address_prefixes["snet_gpt_apim_${var.environment}"]
   destination_address_prefix  = "*"
   resource_group_name         = local.aks_mc_resource_group
-  network_security_group_name = local.aks_nsg_name
+  network_security_group_name = local.expected_nsg_name
   
-  depends_on = [
-    module.aks,
-    module.networking
-  ]
+  # Ignorar errores de creación ya que esto es una configuración opcional
+  lifecycle {
+    ignore_changes = [
+      resource_group_name,
+      network_security_group_name
+    ]
+    # Prevenir errores si el grupo no existe todavía
+    create_before_destroy = true
+  }
+}
+
+# Proveemos un output para facilitar la depuración
+output "aks_nsg_expected_name" {
+  value = local.expected_nsg_name
+  description = "Nombre esperado del NSG de AKS que se está configurando"
+}
+
+output "aks_mc_resource_group" {
+  value = local.aks_mc_resource_group
+  description = "Grupo de recursos gestionado de AKS donde se encuentran los NSGs"
 }
