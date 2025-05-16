@@ -1,0 +1,6 @@
+azure-cosmos>=4.3.0
+python-dotenv>=0.19.0
+tqdm>=4.62.0
+azure-storage-blob>=12.9.0
+azure-data-tables>=12.4.0
+

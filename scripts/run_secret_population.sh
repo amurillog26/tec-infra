@@ -17,3 +17,4 @@ fi
 fish -c "set -x ENVIRONMENT $ENVIRONMENT; ./populate_secrets_improved.fish"
 
 echo "Proceso completado para ambiente $ENVIRONMENT"
+
