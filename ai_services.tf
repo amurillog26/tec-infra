@@ -132,6 +132,9 @@ resource "azurerm_key_vault_secret" "openai_dalle_endpoint" {
   name         = "openai-dalle-endpoint"
   value        = "${azurerm_cognitive_account.openai.endpoint}/openai/deployments/dalle-3/images/generations?api-version=2023-12-01-preview"
   key_vault_id = module.key_vault.kv_id
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 # Recurso para el servicio OpenAI de Whisper
 resource "azurerm_cognitive_account" "whisper_openai" {

@@ -707,3 +707,8 @@ variable "cdn_profile_name" {
   description = "Nombre del perfil de CDN"
   
 }
+
+variable "cdn_storage_account_name" {
+  type        = string
+  description = "Nombre de la cuenta de almacenamiento para CDN"
+}

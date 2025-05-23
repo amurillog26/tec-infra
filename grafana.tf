@@ -1,50 +1,46 @@
-# Azure Managed Grafana
-# module "grafana" {
-#   source = "./terraform/modules/monitoring/grafana"
+# grafana.tf - Actualizado para usar private endpoint
+module "grafana" {
+  source = "./terraform/modules/monitoring/grafana"
+  
+  count = contains(["dev", "pprd"], var.environment) ? 1 : 0
 
-#   name                = var.grafana.name
-#   resource_group_name = var.resource_group_name
-#   location            = var.location
+  name                = var.grafana.name
+  resource_group_name = var.resource_group_name
+  location            = var.location
 
-#   Configuración básica
-#   sku_name                          = var.grafana.sku_name
-#   grafana_version                   = var.grafana.grafana_version
-#   api_key_enabled                   = var.grafana.api_key_enabled
-#   deterministic_outbound_ip_enabled = var.grafana.deterministic_outbound_ip_enabled
-#   public_network_access_enabled     = var.grafana.public_network_access_enabled
-#   zone_redundancy_enabled           = var.grafana.zone_redundancy_enabled
-#   private_endpoint_enabled          = var.grafana.private_endpoint_enabled
+  # Basic configuration
+  sku_name                          = var.grafana.sku_name
+  grafana_version                   = var.grafana.grafana_version
+  api_key_enabled                   = var.grafana.api_key_enabled
+  deterministic_outbound_ip_enabled = var.grafana.deterministic_outbound_ip_enabled
+  public_network_access_enabled     = false  # Forzar a false para usar private endpoint
+  zone_redundancy_enabled           = var.grafana.zone_redundancy_enabled
+  
+  # Private Endpoint configuration
+  private_endpoint_enabled = true
+  subnet_id                = module.networking.subnet_ids["snet_gpt_pe_${var.environment}"]
+  private_dns_zone_ids     = [module.private_dns_zone["privatelink.grafana.azure.com"].id]
 
-#   Identidad
-#   identity_type = var.grafana.identity_type
+  # Identity - system assigned doesn't require permissions
+  identity_type = var.grafana.identity_type
 
-#   Integración con Azure Monitor (opcional)
-#   azure_monitor_workspace_id = lookup(var.grafana, "azure_monitor_workspace_id", null)
+  # Don't provide any principal IDs to avoid role assignments
+  admin_principal_ids = []
+  editor_principal_ids = []
+  viewer_principal_ids = []
 
-#   Asignación de roles
-#   admin_principal_ids  = lookup(var.grafana, "admin_principal_ids", [])
-#   editor_principal_ids = lookup(var.grafana, "editor_principal_ids", [])
-#   viewer_principal_ids = lookup(var.grafana, "viewer_principal_ids", [])
+  tags = merge(var.tags, lookup(var.grafana, "tags", {}))
+}
 
-#   tags = merge(var.tags, lookup(var.grafana, "tags", {}))
-# }
-
-# 6. Asignación de roles para Grafana
-# resource "azurerm_role_assignment" "grafana_monitoring_reader" {
-#   scope                = module.aks.cluster_id
-#   role_definition_name = "Monitoring Reader"
-#   principal_id         = module.grafana.identity[0].principal_id
-# }
-
-# resource "azurerm_role_assignment" "grafana_monitoring_data_reader" {
-#   scope                = azurerm_monitor_workspace.prometheus.id
-#   role_definition_name = "Monitoring Data Reader"
-#   principal_id         = module.grafana.identity[0].principal_id
-# }
-
-# 7. Acceso a datos de Azure Monitor a nivel de suscripción
-# resource "azurerm_role_assignment" "grafana_monitor_reader" {
-#   scope                = "/subscriptions/${data.azurerm_client_config.current.subscription_id}"
-#   role_definition_name = "Monitoring Reader"
-#   principal_id         = module.grafana.identity[0].principal_id
-# }
+# Secret para guardar el endpoint de Grafana en Key Vault
+resource "azurerm_key_vault_secret" "grafana_endpoint" {
+  count = contains(["dev", "pprd"], var.environment) ? 1 : 0
+  
+  name         = "grafana-endpoint"
+  value        = module.grafana[0].endpoint
+  key_vault_id = module.key_vault.kv_id
+  
+  depends_on = [
+    module.grafana
+  ]
+}

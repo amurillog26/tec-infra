@@ -79,4 +79,8 @@ resource "azurerm_federated_identity_credential" "service_credentials" {
   issuer              = local.oidc_issuer
   parent_id           = module.service_managed_identities["aks-services-wi"].id
   subject             = "system:serviceaccount:${each.value.namespace}:${each.value.sa_name}"
+
+  lifecycle {
+    ignore_changes = [issuer]
+  }
 }

@@ -60,6 +60,12 @@ resource "azurerm_cosmosdb_account" "tec_cosmos_ac" {
   ip_range_filter = ["189.139.13.89","187.188.76.17","187.189.69.17","201.145.55.195","187.189.188.17"]
 
   tags = var.tags
+
+  lifecycle {
+    ignore_changes = [
+      ip_range_filter
+    ]
+  }
 }
 
 # Private Endpoint Configuration

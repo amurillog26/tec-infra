@@ -14,11 +14,11 @@ resource "azurerm_cdn_endpoint" "cdn_endpoint_static" {
   profile_name        = azurerm_cdn_profile.cdn_profile.name
   location            = var.location
   resource_group_name = var.resource_group_name
-  origin_host_header  = "stgpt${var.environment}01.blob.core.windows.net"
+  origin_host_header  = "${var.cdn_storage_account_name}.blob.core.windows.net"
 
   origin {
     name      = "static-origin"
-    host_name = "stgpt${var.environment}01.blob.core.windows.net"
+    host_name = "${var.cdn_storage_account_name}.blob.core.windows.net"
   }
 
   is_compression_enabled = true

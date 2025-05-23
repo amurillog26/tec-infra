@@ -18,8 +18,9 @@ resource "azurerm_key_vault_access_policy" "service_identities_policies" {
   tenant_id    = var.tenant_id
   object_id    = each.value.principal_id
 
-  key_permissions    = ["Get", "List"]
-  secret_permissions = ["Get", "List"]
+  key_permissions    = ["Get", "List", "Update", "Create", "Import", "Delete", "Backup", "Restore", "Recover", "Encrypt", "Decrypt", "Sign", "Verify", "WrapKey", "UnwrapKey"]
+  secret_permissions = ["Get", "List", "Set"]
+  certificate_permissions = ["Get", "List"]
 }
 
 # Política para la identidad kubelet de AKS

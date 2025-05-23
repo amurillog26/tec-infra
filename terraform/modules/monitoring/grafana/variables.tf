@@ -93,8 +93,22 @@ variable "tags" {
   default     = {}
 }
 
+# Añadir estas variables al archivo variables.tf existente
+
 variable "private_endpoint_enabled" {
-  description = "Indica si se habilita el acceso a través de un punto de conexión privado"
+  description = "Habilitar private endpoint para Grafana"
   type        = bool
   default     = false
+}
+
+variable "subnet_id" {
+  description = "ID de la subnet para el private endpoint"
+  type        = string
+  default     = null
+}
+
+variable "private_dns_zone_ids" {
+  description = "IDs de las zonas DNS privadas para el private endpoint"
+  type        = list(string)
+  default     = []
 }

@@ -66,9 +66,9 @@ resource "azurerm_monitor_data_collection_rule" "prometheus_dcr" {
 }
 
 # 5. Asociación entre DCR y AKS
-# resource "azurerm_monitor_data_collection_rule_association" "prometheus_dcra" {
-#   name                    = "dcra-${var.kubernetes.cluster_name}-prometheus"
-#   target_resource_id      = module.aks.cluster_id
-#   data_collection_rule_id = azurerm_monitor_data_collection_rule.prometheus_dcr.id
-#   description             = "Asociación de Prometheus con AKS"
-# }
+resource "azurerm_monitor_data_collection_rule_association" "prometheus_dcra" {
+  name                    = "dcra-${var.kubernetes.cluster_name}-prometheus"
+  target_resource_id      = module.aks.cluster_id
+  data_collection_rule_id = azurerm_monitor_data_collection_rule.prometheus_dcr.id
+  description             = "Asociación de Prometheus con AKS"
+}

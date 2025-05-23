@@ -652,7 +652,7 @@ windows_vm = {
 grafana = {
   name                            = "grafana-gpt-dev"
   sku_name                        = "Standard"
-  grafana_version                 = "10"
+  grafana_version                 = "11"
   api_key_enabled                 = true
   deterministic_outbound_ip_enabled = true
   public_network_access_enabled   = false
@@ -818,3 +818,5 @@ security_contacts = [
 
 cdn_name = "cdn-gpt-api-dev-01"
 cdn_profile_name = "cdn-gpt-static-dev-01"
+
+cdn_storage_account_name = "stgptdev01"

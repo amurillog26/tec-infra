@@ -15,7 +15,7 @@ resource "azurerm_security_center_subscription_pricing" "defender_plans" {
 
 # Para API Management, que requiere un subplan, usamos un recurso separado
 resource "azurerm_resource_group_template_deployment" "api_defender" {
-  count               = contains(keys(var.defender_plans), "Api") ? 1 : 0
+  count               = var.api_defender_enabled ? 1 : 0
   name                = "api-defender-deployment"
   resource_group_name = var.resource_group_name
   deployment_mode     = "Incremental"
@@ -37,6 +37,11 @@ resource "azurerm_resource_group_template_deployment" "api_defender" {
   ]
 }
 TEMPLATE
+
+  lifecycle {
+    # Ignorar cambios en subPlan para evitar reconstrucción
+    ignore_changes = [template_content]
+  }
 }
 
 # Configuración de contactos de seguridad

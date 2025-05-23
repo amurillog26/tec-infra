@@ -627,6 +627,9 @@ private_dns_zones = {
   },
   "privatelink.search.windows.net" = {
     name = "privatelink.search.windows.net"
+  },
+  "privatelink.loadtest.azure.com" = {
+    name = "privatelink.loadtest.azure.com"
   }
 }
 
@@ -653,7 +656,7 @@ windows_vm = {
 grafana = {
   name                            = "grafana-gpt-pprd"
   sku_name                        = "Standard"
-  grafana_version                 = "10"
+  grafana_version                 = "11"
   api_key_enabled                 = true
   deterministic_outbound_ip_enabled = true
   public_network_access_enabled   = false
@@ -820,3 +823,5 @@ security_contacts = [
 
 cdn_name = "cdn-gpt-api-pprd"
 cdn_profile_name = "cdn-gpt-static-pprd"
+
+cdn_storage_account_name = "stgptpprd"

@@ -72,3 +72,9 @@ variable "enable_log_analytics_integration" {
   type        = bool
   default     = false
 }
+
+variable "api_defender_enabled" {
+  description = "Whether to enable Defender for APIs template deployment"
+  type        = bool
+  default     = true
+}
