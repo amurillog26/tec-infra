@@ -115,7 +115,7 @@ cosmos_account_offer_type  = "Standard"
 cosmos_account_kind       = "GlobalDocumentDB"
 cosmos_public_access      = true  # true for pprd, false for prod
 cosmos_failover_az_region = "eastus"  # región secundaria para failover
-cosmos_capabilities       = ["EnableServerless"]
+cosmos_capabilities       = ["DisableRateLimitingResponses"]
 
 cosmos_sql_databases = [
   {
@@ -151,7 +151,7 @@ private_dns_zone_id        = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377
 # Container Registry
 acr_name           = "crgptoaipprd"  # Debe ser globalmente único
 acr_admin_enabled  = true           # Habilitado para desarrollo
-acr_public         = true           # Público para desarrollo
+acr_public         = false
 acr_zone_redundancy_enabled = false
 acr_enable_identity = true
 acr_identity_type   = "UserAssigned"
@@ -690,7 +690,7 @@ grafana = {
 kubernetes = {
   cluster_name       = "aks-gpt-pprd-001"
   dns_prefix         = "aks-gpt-pprd"
-  kubernetes_version = "1.31.7"  # Ajusta a la versión deseada
+  kubernetes_version = "1.31.8"
   availability_zones = ["1"]
   
   # Habilitar clúster privado

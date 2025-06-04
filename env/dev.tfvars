@@ -56,7 +56,7 @@ subnets = {
   "snet_gpt_agw_dev" = {
     address_prefixes = ["10.97.174.0/27"]     # 32 IPs: 10.97.174.0 - 10.97.174.31
     service_endpoints = ["Microsoft.Web"]
-    private_endpoint_network_policies = "Enabled"
+    private_endpoint_network_policies = "Disabled"
   },
   "snet_gpt_apim_dev" = {
     address_prefixes = ["10.97.174.32/27"]    # 32 IPs: 10.97.174.32 - 10.97.174.63
@@ -150,7 +150,7 @@ private_dns_zone_id        = "/subscriptions/49b8793e-f25e-49ab-8fc2-1190c08f377
 # Container Registry
 acr_name           = "crgptoaidev01"  # Debe ser globalmente único
 acr_admin_enabled  = true           # Habilitado para desarrollo
-acr_public         = true           # Público para desarrollo
+acr_public         = false
 acr_zone_redundancy_enabled = false
 acr_enable_identity = true
 acr_identity_type   = "UserAssigned"
@@ -686,7 +686,7 @@ grafana = {
 kubernetes = {
   cluster_name       = "aks-gpt-dev-001"
   dns_prefix         = "aks-gpt-dev"
-  kubernetes_version = "1.31.7"  # Ajusta a la versión deseada
+  kubernetes_version = "1.31.8"  # Ajusta a la versión deseada
   availability_zones = ["1", "2", "3"]
   
   # Habilitar clúster privado

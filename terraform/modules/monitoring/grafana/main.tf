@@ -28,7 +28,8 @@ resource "azurerm_dashboard_grafana" "grafana" {
 
   lifecycle {
     ignore_changes = [
-      grafana_major_version
+      grafana_major_version,
+      identity
     ]
   }
 }

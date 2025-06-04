@@ -13,7 +13,7 @@ module "grafana" {
   grafana_version                   = var.grafana.grafana_version
   api_key_enabled                   = var.grafana.api_key_enabled
   deterministic_outbound_ip_enabled = var.grafana.deterministic_outbound_ip_enabled
-  public_network_access_enabled     = false  # Forzar a false para usar private endpoint
+  public_network_access_enabled     = false
   zone_redundancy_enabled           = var.grafana.zone_redundancy_enabled
   
   # Private Endpoint configuration

@@ -13,10 +13,10 @@ module "defender" {
       tier = "Standard" # Para AKS y Container Registry
     }
     ContainerRegistry = {
-      tier = "Standard" # Se encontró en el plan existente
+      tier = "Free" # Se encontró en el plan existente
     }
     KubernetesService = {
-      tier = "Standard" # Específico para AKS
+      tier = "Free" # Específico para AKS
     }
     KeyVaults = {
       tier = "Standard" # Para Key Vault
@@ -25,7 +25,7 @@ module "defender" {
       tier = "Standard" # Para App Services/Bastion
     }
     Dns = {
-      tier = "Standard" # Para Azure DNS
+      tier = "Free" # Para Azure DNS
     }
     CosmosDbs = {
       tier = "Standard" # Para Cosmos DB
@@ -35,12 +35,52 @@ module "defender" {
     }
     VirtualMachines = {
       tier = "Standard" # Para VMs
+      extension = {
+        additional_extension_properties = {
+          "ExclusionTags" = jsonencode([])
+        }
+        name = "AgentlessVmScanning"
+      }
+      extension = {
+        additional_extension_properties = {}
+        name = "AgentlessVmScanning"
+      }
     }
     StorageAccounts = {
       tier = "Standard" # Para Table Storage
+      extension = {
+        additional_extension_properties = {}
+        name = "SensitiveDataDiscovery"
+      }
     }
     CloudPosture = {
       tier = "Standard" # Se encontró en el plan existente
+      extension = {
+        additional_extension_properties = {
+            "ExclusionTags" = jsonencode([])
+          }
+        name                            = "AgentlessVmScanning"
+      }
+      extension = {
+        additional_extension_properties = {}
+        name                            = "AgentlessDiscoveryForKubernetes"
+      }
+      extension = {
+        additional_extension_properties = {}
+        name                            = "ApiPosture"
+      }
+      extension = {
+        additional_extension_properties = {}
+        name                            = "ContainerRegistriesVulnerabilityAssessments"
+      }
+      extension = {
+        additional_extension_properties = {}
+        name                            = "EntraPermissionsManagement"
+      }
+      extension = {
+        additional_extension_properties = {}
+        name                            = "SensitiveDataDiscovery"
+      }
     }
     OpenSourceRelationalDatabases = {
       tier = "Standard" # Se encontró en el plan existente

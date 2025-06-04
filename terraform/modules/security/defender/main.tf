@@ -6,9 +6,20 @@ resource "azurerm_security_center_subscription_pricing" "defender_plans" {
 
   tier          = each.value.tier
   resource_type = each.key
+
+  # Agregar extensiones dinámicamente si existen
+  dynamic "extension" {
+    for_each = lookup(each.value, "extensions", [])
+    content {
+      name = extension.value.name
+      additional_extension_properties = lookup(extension.value, "additional_extension_properties", {})
+    }
+  }
+
   lifecycle {
     ignore_changes = [
-      subplan
+      subplan,
+      extension  # Ignorar cambios en extensiones para evitar eliminación
     ]
   }
 }
@@ -42,18 +53,6 @@ TEMPLATE
     # Ignorar cambios en subPlan para evitar reconstrucción
     ignore_changes = [template_content]
   }
-}
-
-# Configuración de contactos de seguridad
-resource "azurerm_security_center_contact" "security_contact" {
-  count = length(var.security_contacts) > 0 ? 1 : 0
-  
-  name  = "security-contact"
-  email = var.security_contacts[0].email
-  phone = lookup(var.security_contacts[0], "phone", null)
-  
-  alert_notifications = lookup(var.security_contacts[0], "alert_notifications", true)
-  alerts_to_admins    = lookup(var.security_contacts[0], "alerts_to_admins", true)
 }
 
 # Conexión con Log Analytics usando un recurso nulo y CLI de Azure

@@ -4,33 +4,11 @@ variable "defender_plans" {
   description = "Map of Microsoft Defender plans to enable"
   type = map(object({
     tier = string
+    extensions = optional(list(object({
+      name = string
+      additional_extension_properties = optional(map(string), {})
+    })), [])
   }))
-  default = {
-    Containers = {
-      tier = "Standard"
-    }
-    KeyVaults = {
-      tier = "Standard"
-    }
-    AppServices = {
-      tier = "Standard"
-    }
-    Dns = {
-      tier = "Standard"
-    }
-    OpenSourceRelationalDatabases = {
-      tier = "Standard"
-    }
-    CosmosDbs = {
-      tier = "Standard"
-    }
-    Arm = {
-      tier = "Standard"
-    }
-    VirtualMachines = {
-      tier = "Standard"
-    }
-  }
 }
 
 variable "api_defender_subplan" {
