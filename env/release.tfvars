@@ -106,6 +106,12 @@ subnets = {
       }
     ]
   },
+  # "AzureBastionSubnet" = {
+  #   address_prefixes = ["10.97.196.224/27"]   # 32 IPs: 10.97.196.224 - 10.97.196.255
+  #   service_endpoints = []
+  #   private_endpoint_network_policies = "Enabled"
+  #   # Azure Bastion subnet no puede tener delegaciones
+  # },
 }
 
 ########## cosmosdb ##########
@@ -825,3 +831,16 @@ cdn_name = "cdn-gpt-api-pprd"
 cdn_profile_name = "cdn-gpt-static-pprd"
 
 cdn_storage_account_name = "stgptpprd"
+
+# Azure Bastion Configuration
+bastion_enabled = true
+
+bastion_config = {
+  sku_name               = "Standard"  # Standard para pre-producción
+  copy_paste_enabled     = true
+  file_copy_enabled      = true       # Habilitado con Standard SKU
+  scale_units            = 3          # Mayor escala para pprd
+  shareable_link_enabled = true       # Habilitado con Standard SKU
+  tunneling_enabled      = true       # Habilitado con Standard SKU
+  ip_connect_enabled     = true       # Habilitado con Standard SKU
+}

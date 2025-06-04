@@ -712,3 +712,31 @@ variable "cdn_storage_account_name" {
   type        = string
   description = "Nombre de la cuenta de almacenamiento para CDN"
 }
+
+variable "bastion_enabled" {
+  description = "Enable Azure Bastion deployment"
+  type        = bool
+  default     = false
+}
+
+variable "bastion_config" {
+  description = "Azure Bastion configuration"
+  type = object({
+    sku_name               = string
+    copy_paste_enabled     = bool
+    file_copy_enabled      = bool
+    scale_units            = number
+    shareable_link_enabled = bool
+    tunneling_enabled      = bool
+    ip_connect_enabled     = bool
+  })
+  default = {
+    sku_name               = "Basic"
+    copy_paste_enabled     = true
+    file_copy_enabled      = false
+    scale_units            = 2
+    shareable_link_enabled = false
+    tunneling_enabled      = false
+    ip_connect_enabled     = false
+  }
+}

@@ -105,6 +105,12 @@ subnets = {
       }
     ]
   },
+  # "AzureBastionSubnet" = {
+  #   address_prefixes = ["10.97.174.224/27"]   # 32 IPs: 10.97.174.224 - 10.97.174.255
+  #   service_endpoints = []
+  #   private_endpoint_network_policies = "Enabled"
+  #   # Azure Bastion subnet no puede tener delegaciones
+  # },
 }
 
 ########## cosmosdb ##########
@@ -820,3 +826,16 @@ cdn_name = "cdn-gpt-api-dev-01"
 cdn_profile_name = "cdn-gpt-static-dev-01"
 
 cdn_storage_account_name = "stgptdev01"
+
+# Azure Bastion Configuration
+bastion_enabled = true
+
+bastion_config = {
+  sku_name               = "Basic"  # Basic o Standard
+  copy_paste_enabled     = true
+  file_copy_enabled      = false    # Requiere Standard SKU
+  scale_units            = 2         # 2-50
+  shareable_link_enabled = false     # Requiere Standard SKU
+  tunneling_enabled      = false     # Requiere Standard SKU
+  ip_connect_enabled     = false     # Requiere Standard SKU
+}
