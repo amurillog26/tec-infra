@@ -51,42 +51,42 @@ tenant_id = "c65a3ea6-0f7c-400b-8934-5a6dc1705645"
 
 
 vnet_name           = "vnet_gpt_net_prod"
-address_space       = ["10.97.196.0/22"]  # Mantiene el rango 10.97.196.0 - 10.97.175.255
+address_space       = ["10.97.192.0/22"]  # Mantiene el rango 10.97.192.0 - 10.97.175.255
 
 subnets = {
   "snet_gpt_agw_prod" = {
-    address_prefixes = ["10.97.196.0/27"]     # 32 IPs: 10.97.196.0 - 10.97.196.31
+    address_prefixes = ["10.97.192.0/27"]     # 32 IPs: 10.97.192.0 - 10.97.192.31
     service_endpoints = ["Microsoft.Web"]
     private_endpoint_network_policies = "Enabled"
   },
   "snet_gpt_apim_prod" = {
-    address_prefixes = ["10.97.196.32/27"]    # 32 IPs: 10.97.196.32 - 10.97.196.63
+    address_prefixes = ["10.97.192.32/27"]    # 32 IPs: 10.97.192.32 - 10.97.192.63
     service_endpoints = ["Microsoft.Web", "Microsoft.ContainerRegistry"]
     private_endpoint_network_policies = "Disabled"
   },
   "snet_gpt_aks_prod" = {
-    address_prefixes = ["10.97.197.0/24"]     # 256 IPs: 10.97.175.0 - 10.97.175.255 (subnet más grande en otro segmento)
+    address_prefixes = ["10.97.193.0/24"]     # 256 IPs: 10.97.175.0 - 10.97.175.255 (subnet más grande en otro segmento)
     service_endpoints = ["Microsoft.ContainerRegistry"]
     private_endpoint_network_policies = "Enabled"
   },
   "snet_gpt_int_prod" = {
-    address_prefixes = ["10.97.196.128/27"]   # 32 IPs: 10.97.196.128 - 10.97.196.159
+    address_prefixes = ["10.97.192.128/27"]   # 32 IPs: 10.97.192.128 - 10.97.192.159
     service_endpoints = ["Microsoft.Web"]
     private_endpoint_network_policies = "Enabled"
   },
   "snet_gpt_vm_prod" = {
-    address_prefixes = ["10.97.196.160/27"]
+    address_prefixes = ["10.97.192.160/27"]
     service_endpoints = ["Microsoft.Web"]
     private_endpoint_network_policies = "Enabled"
   },
   "snet_gpt_pe_prod" = {
-    address_prefixes = ["10.97.196.192/27"]   # 32 IPs: 10.97.196.192 - 10.97.196.223
+    address_prefixes = ["10.97.192.192/27"]   # 32 IPs: 10.97.192.192 - 10.97.192.223
     service_endpoints = ["Microsoft.Web", "Microsoft.Storage", "Microsoft.KeyVault", "Microsoft.ContainerRegistry", "Microsoft.AzureCosmosDB"]
     private_endpoint_network_policies = "Enabled"
     private_endpoint_network_policies_enabled = false
   },
   "snet_gpt_app_prod" = {
-    address_prefixes = ["10.97.196.64/27"]  # Elige un rango disponible
+    address_prefixes = ["10.97.192.64/27"]  # Elige un rango disponible
     service_endpoints = ["Microsoft.Web", "Microsoft.Storage", "Microsoft.KeyVault", "Microsoft.ContainerRegistry"]
     private_endpoint_network_policies = "Enabled"
     delegation = [
@@ -97,7 +97,7 @@ subnets = {
     ]
   },
   "snet_gpt_github_actions" = {
-    address_prefixes = ["10.97.196.96/27"]
+    address_prefixes = ["10.97.192.96/27"]
     service_endpoints = ["Microsoft.Web"]
     delegation = [
       {
@@ -534,7 +534,7 @@ private_endpoints = {
   #   ip_configurations = [
   #     {
   #       name               = "apim"
-  #       private_ip_address = "10.97.196.36"
+  #       private_ip_address = "10.97.192.36"
   #       subresource_name   = "Gateway"
   #       member_name        = "Gateway"
   #     }

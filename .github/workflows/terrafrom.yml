@@ -97,8 +97,8 @@ jobs:
             if [[ "${{ github.base_ref }}" == "main" ]]; then
               echo "ENVIRONMENT=prd" >> $GITHUB_ENV
               echo "KEY=prd.tfstate" >> $GITHUB_ENV
-              echo "RG_NAME=rg_gpt_oai_prd" >> $GITHUB_ENV
-              echo "STORAGE_ACCOUNT=tfstateprdgptoai" >> $GITHUB_ENV
+              echo "RG_NAME=rg_gpt_oai_prod" >> $GITHUB_ENV
+              echo "STORAGE_ACCOUNT=tfstateprodgptoai" >> $GITHUB_ENV
             elif [[ "${{ github.base_ref }}" == "release" ]]; then
               echo "ENVIRONMENT=release" >> $GITHUB_ENV
               echo "KEY=release.tfstate" >> $GITHUB_ENV
@@ -114,8 +114,8 @@ jobs:
             if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
               echo "ENVIRONMENT=prd" >> $GITHUB_ENV
               echo "KEY=prd.tfstate" >> $GITHUB_ENV
-              echo "RG_NAME=rg_gpt_oai_prd" >> $GITHUB_ENV
-              echo "STORAGE_ACCOUNT=tfstateprdgptoai" >> $GITHUB_ENV
+              echo "RG_NAME=rg_gpt_oai_prod" >> $GITHUB_ENV
+              echo "STORAGE_ACCOUNT=tfstateprodgptoai" >> $GITHUB_ENV
             elif [[ "${{ github.ref }}" == "refs/heads/release" ]]; then
               echo "ENVIRONMENT=release" >> $GITHUB_ENV
               echo "KEY=release.tfstate" >> $GITHUB_ENV
@@ -131,8 +131,8 @@ jobs:
             echo "ENVIRONMENT=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
             if [[ "${{ github.event.inputs.environment }}" == "prd" ]]; then
               echo "KEY=prd.tfstate" >> $GITHUB_ENV
-              echo "RG_NAME=rg_gpt_oai_prd" >> $GITHUB_ENV
-              echo "STORAGE_ACCOUNT=tfstateprdgptoai" >> $GITHUB_ENV
+              echo "RG_NAME=rg_gpt_oai_prod" >> $GITHUB_ENV
+              echo "STORAGE_ACCOUNT=tfstateprodgptoai" >> $GITHUB_ENV
             elif [[ "${{ github.event.inputs.environment }}" == "release" ]]; then
               echo "KEY=release.tfstate" >> $GITHUB_ENV
               echo "RG_NAME=rg_gpt_oai_pprd" >> $GITHUB_ENV
@@ -209,8 +209,8 @@ jobs:
             if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
               echo "ENVIRONMENT=prd" >> $GITHUB_ENV
               echo "KEY=prd.tfstate" >> $GITHUB_ENV
-              echo "RG_NAME=rg_gpt_oai_prd" >> $GITHUB_ENV
-              echo "STORAGE_ACCOUNT=tfstateprdgptoai" >> $GITHUB_ENV
+              echo "RG_NAME=rg_gpt_oai_prod" >> $GITHUB_ENV
+              echo "STORAGE_ACCOUNT=tfstateprodgptoai" >> $GITHUB_ENV
             elif [[ "${{ github.ref }}" == "refs/heads/release" ]]; then
               echo "ENVIRONMENT=release" >> $GITHUB_ENV
               echo "KEY=release.tfstate" >> $GITHUB_ENV
@@ -226,8 +226,8 @@ jobs:
             echo "ENVIRONMENT=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
             if [[ "${{ github.event.inputs.environment }}" == "prd" ]]; then
               echo "KEY=prd.tfstate" >> $GITHUB_ENV
-              echo "RG_NAME=rg_gpt_oai_prd" >> $GITHUB_ENV
-              echo "STORAGE_ACCOUNT=tfstateprdgptoai" >> $GITHUB_ENV
+              echo "RG_NAME=rg_gpt_oai_prod" >> $GITHUB_ENV
+              echo "STORAGE_ACCOUNT=tfstateprodgptoai" >> $GITHUB_ENV
             elif [[ "${{ github.event.inputs.environment }}" == "release" ]]; then
               echo "KEY=release.tfstate" >> $GITHUB_ENV
               echo "RG_NAME=rg_gpt_oai_pprd" >> $GITHUB_ENV
