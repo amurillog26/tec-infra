@@ -14,14 +14,14 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Ambiente para desplegar (develop/release/prd)'
+        description: 'Ambiente para desplegar (develop/release/prod)'
         required: true
         default: 'dev'
         type: choice
         options:
           - dev
           - release
-          - prd
+          - prod
 
 jobs:
   terraform-validate:
@@ -74,10 +74,10 @@ jobs:
     if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || github.event_name == 'push'
     
     environment:
-      name: ${{ github.event.inputs.environment || (github.event_name == 'pull_request' && (github.base_ref == 'main' && 'prd' || (github.base_ref == 'release' && 'release' || 'develop'))) || (github.event_name == 'push' && (github.ref == 'refs/heads/main' && 'prd' || (github.ref == 'refs/heads/release' && 'release' || 'develop'))) || 'develop' }}
+      name: ${{ github.event.inputs.environment || (github.event_name == 'pull_request' && (github.base_ref == 'main' && 'prod' || (github.base_ref == 'release' && 'release' || 'develop'))) || (github.event_name == 'push' && (github.ref == 'refs/heads/main' && 'prod' || (github.ref == 'refs/heads/release' && 'release' || 'develop'))) || 'develop' }}
     
     concurrency:
-      group: terraform-${{ github.event.inputs.environment || (github.event_name == 'pull_request' && (github.base_ref == 'main' && 'prd' || (github.base_ref == 'release' && 'release' || 'develop'))) || (github.event_name == 'push' && (github.ref == 'refs/heads/main' && 'prd' || (github.ref == 'refs/heads/release' && 'release' || 'develop'))) || 'develop' }}
+      group: terraform-${{ github.event.inputs.environment || (github.event_name == 'pull_request' && (github.base_ref == 'main' && 'prod' || (github.base_ref == 'release' && 'release' || 'develop'))) || (github.event_name == 'push' && (github.ref == 'refs/heads/main' && 'prod' || (github.ref == 'refs/heads/release' && 'release' || 'develop'))) || 'develop' }}
       cancel-in-progress: false
 
     steps:
@@ -95,8 +95,8 @@ jobs:
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
             if [[ "${{ github.base_ref }}" == "main" ]]; then
-              echo "ENVIRONMENT=prd" >> $GITHUB_ENV
-              echo "KEY=prd.tfstate" >> $GITHUB_ENV
+              echo "ENVIRONMENT=prod" >> $GITHUB_ENV
+              echo "KEY=prod.tfstate" >> $GITHUB_ENV
               echo "RG_NAME=rg_gpt_oai_prod" >> $GITHUB_ENV
               echo "STORAGE_ACCOUNT=tfstateprodgptoai" >> $GITHUB_ENV
             elif [[ "${{ github.base_ref }}" == "release" ]]; then
@@ -112,8 +112,8 @@ jobs:
             fi
           elif [[ "${{ github.event_name }}" == "push" ]]; then
             if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-              echo "ENVIRONMENT=prd" >> $GITHUB_ENV
-              echo "KEY=prd.tfstate" >> $GITHUB_ENV
+              echo "ENVIRONMENT=prod" >> $GITHUB_ENV
+              echo "KEY=prod.tfstate" >> $GITHUB_ENV
               echo "RG_NAME=rg_gpt_oai_prod" >> $GITHUB_ENV
               echo "STORAGE_ACCOUNT=tfstateprodgptoai" >> $GITHUB_ENV
             elif [[ "${{ github.ref }}" == "refs/heads/release" ]]; then
@@ -129,8 +129,8 @@ jobs:
             fi
           elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "ENVIRONMENT=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
-            if [[ "${{ github.event.inputs.environment }}" == "prd" ]]; then
-              echo "KEY=prd.tfstate" >> $GITHUB_ENV
+            if [[ "${{ github.event.inputs.environment }}" == "prod" ]]; then
+              echo "KEY=prod.tfstate" >> $GITHUB_ENV
               echo "RG_NAME=rg_gpt_oai_prod" >> $GITHUB_ENV
               echo "STORAGE_ACCOUNT=tfstateprodgptoai" >> $GITHUB_ENV
             elif [[ "${{ github.event.inputs.environment }}" == "release" ]]; then
@@ -186,10 +186,10 @@ jobs:
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     
     environment:
-      name: ${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prd' || (github.ref == 'refs/heads/release' && 'release' || 'develop')) }}
+      name: ${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || (github.ref == 'refs/heads/release' && 'release' || 'develop')) }}
     
     concurrency:
-      group: terraform-apply-${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prd' || (github.ref == 'refs/heads/release' && 'release' || 'develop')) }}
+      group: terraform-apply-${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || (github.ref == 'refs/heads/release' && 'release' || 'develop')) }}
       cancel-in-progress: false
 
     steps:
@@ -207,8 +207,8 @@ jobs:
         run: |
           if [[ "${{ github.event_name }}" == "push" ]]; then
             if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-              echo "ENVIRONMENT=prd" >> $GITHUB_ENV
-              echo "KEY=prd.tfstate" >> $GITHUB_ENV
+              echo "ENVIRONMENT=prod" >> $GITHUB_ENV
+              echo "KEY=prod.tfstate" >> $GITHUB_ENV
               echo "RG_NAME=rg_gpt_oai_prod" >> $GITHUB_ENV
               echo "STORAGE_ACCOUNT=tfstateprodgptoai" >> $GITHUB_ENV
             elif [[ "${{ github.ref }}" == "refs/heads/release" ]]; then
@@ -224,8 +224,8 @@ jobs:
             fi
           elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "ENVIRONMENT=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
-            if [[ "${{ github.event.inputs.environment }}" == "prd" ]]; then
-              echo "KEY=prd.tfstate" >> $GITHUB_ENV
+            if [[ "${{ github.event.inputs.environment }}" == "prod" ]]; then
+              echo "KEY=prod.tfstate" >> $GITHUB_ENV
               echo "RG_NAME=rg_gpt_oai_prod" >> $GITHUB_ENV
               echo "STORAGE_ACCOUNT=tfstateprodgptoai" >> $GITHUB_ENV
             elif [[ "${{ github.event.inputs.environment }}" == "release" ]]; then
