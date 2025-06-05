@@ -21,3 +21,12 @@ terraform {
 #     key                  = "release.tfstate"
 #   }
 # }
+
+# terraform {
+#   backend "azurerm" {
+#     resource_group_name  = "rg_gpt_oai_prod" # El resource group donde está tu storage account
+#     storage_account_name = "tfstateprodgptoai"
+#     container_name       = "tfstate"
+#     key                  = "prod.tfstate"
+#   }
+# }
