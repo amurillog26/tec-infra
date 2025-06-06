@@ -7,7 +7,7 @@ resource "azurerm_cognitive_account" "speech_services" {
   resource_group_name   = var.resource_group_name
   kind                  = "SpeechServices"
   sku_name              = "S0"
-  custom_subdomain_name = "cs-speech-${var.environment}"
+  custom_subdomain_name = var.environment == "prod" ? "cs-speech-${var.environment}-ogpt" : "cs-speech-${var.environment}"
 
   public_network_access_enabled = false
   

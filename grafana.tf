@@ -2,7 +2,7 @@
 module "grafana" {
   source = "./terraform/modules/monitoring/grafana"
   
-  count = contains(["dev", "pprd"], var.environment) ? 1 : 0
+  count = contains(["dev", "pprd", "prod"], var.environment) ? 1 : 0
 
   name                = var.grafana.name
   resource_group_name = var.resource_group_name
