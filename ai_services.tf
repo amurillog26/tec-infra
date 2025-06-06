@@ -10,7 +10,7 @@ resource "azurerm_cognitive_account" "speech_services" {
   custom_subdomain_name = var.environment == "prod" ? "cs-speech-${var.environment}-ogpt" : "cs-speech-${var.environment}"
 
   public_network_access_enabled = false
-  
+
   network_acls {
     default_action = "Deny"
     ip_rules       = []
@@ -46,7 +46,7 @@ resource "azurerm_private_endpoint" "speech_services_pe" {
 # 2. Azure OpenAI Service en East US
 resource "azurerm_cognitive_account" "openai" {
   name                  = "tecgpt-account-${var.environment}"
-  location              = "eastus"  # Región donde están disponibles los modelos
+  location              = "eastus" # Región donde están disponibles los modelos
   resource_group_name   = var.resource_group_name
   kind                  = "OpenAI"
   sku_name              = "S0"
@@ -54,11 +54,11 @@ resource "azurerm_cognitive_account" "openai" {
 
   # Para permitir la conexión privada entre regiones
   public_network_access_enabled = false
-  
+
   network_acls {
     default_action = "Deny"
     ip_rules       = []
- }
+  }
 
   tags = merge(var.tags, {
     service = "openai"
@@ -76,7 +76,7 @@ resource "azurerm_cognitive_deployment" "dalle" {
   }
 
   sku {
-    name     = "Standard"
+    name = "Standard"
   }
 }
 
@@ -139,7 +139,7 @@ resource "azurerm_key_vault_secret" "openai_dalle_endpoint" {
 # Recurso para el servicio OpenAI de Whisper
 resource "azurerm_cognitive_account" "whisper_openai" {
   name                  = "tecgpt-whisper-${var.environment}"
-  location              = "eastus2"  # Región específica para Whisper
+  location              = "eastus2" # Región específica para Whisper
   resource_group_name   = var.resource_group_name
   kind                  = "OpenAI"
   sku_name              = "S0"
@@ -147,14 +147,14 @@ resource "azurerm_cognitive_account" "whisper_openai" {
 
   # Configuración de acceso de red privado
   public_network_access_enabled = false
-  
+
   network_acls {
     default_action = "Deny"
     ip_rules       = []
   }
 
   tags = merge(var.tags, {
-    service = "whisper-openai"
+    service     = "whisper-openai"
     environment = var.environment
   })
 }
@@ -166,7 +166,7 @@ resource "azurerm_cognitive_deployment" "whisper" {
   model {
     format  = "OpenAI"
     name    = "whisper"
-    version = "001"  # Versión del modelo Whisper
+    version = "001" # Versión del modelo Whisper
   }
   sku {
     name = "Standard"

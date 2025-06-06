@@ -485,18 +485,18 @@ variable "public_ips" {
 
 variable "additional_private_endpoints" {
   type = map(object({
-    name                 = string
-    resource_id          = string
-    subnet_key           = optional(string)
-    subnet_id            = optional(string)
-    subresource_names    = list(string)
-    is_manual_connection = optional(bool, false)
-    private_dns_zone_ids = optional(list(string))
-    custom_network_interface_name = optional(string)
+    name                            = string
+    resource_id                     = string
+    subnet_key                      = optional(string)
+    subnet_id                       = optional(string)
+    subresource_names               = list(string)
+    is_manual_connection            = optional(bool, false)
+    private_dns_zone_ids            = optional(list(string))
+    custom_network_interface_name   = optional(string)
     private_service_connection_name = optional(string)
-    private_dns_zone_group_name = optional(string)
-    ip_configurations = optional(list(map(string)))
-    tags = optional(map(string), {})
+    private_dns_zone_group_name     = optional(string)
+    ip_configurations               = optional(list(map(string)))
+    tags                            = optional(map(string), {})
   }))
   description = "Mapa de private endpoints adicionales a crear (además de los generados dinámicamente)"
   default     = {}
@@ -519,7 +519,7 @@ variable "windows_vm" {
     admin_username = string
     admin_password = string
     hostname       = string
-    sku       = string
+    sku            = string
     tags           = map(string)
   })
   default = {
@@ -681,16 +681,16 @@ variable "security_contacts" {
 
 variable "private_endpoints" {
   type = map(object({
-    name                 = string
-    subnet_key           = string
-    resource_id          = string
-    subresource_names    = list(string)
-    private_dns_zone_ids = list(string)
-    custom_network_interface_name = optional(string)
+    name                            = string
+    subnet_key                      = string
+    resource_id                     = string
+    subresource_names               = list(string)
+    private_dns_zone_ids            = list(string)
+    custom_network_interface_name   = optional(string)
     private_service_connection_name = optional(string)
-    private_dns_zone_group_name = optional(string)
-    ip_configurations = optional(list(map(string)))
-    tags = optional(map(string), {})
+    private_dns_zone_group_name     = optional(string)
+    ip_configurations               = optional(list(map(string)))
+    tags                            = optional(map(string), {})
   }))
   description = "Mapa de private endpoints a crear"
   default     = {}
@@ -699,13 +699,13 @@ variable "private_endpoints" {
 variable "cdn_name" {
   type        = string
   description = "Nombre del CDN"
-  
+
 }
 
 variable "cdn_profile_name" {
   type        = string
   description = "Nombre del perfil de CDN"
-  
+
 }
 
 variable "cdn_storage_account_name" {

@@ -9,7 +9,7 @@ locals {
 resource "azurerm_private_endpoint" "keyvault_pe" {
   # Usar una condición basada en variables conocidas, no en outputs computados
   count = var.kv_name != "" ? 1 : 0
-  
+
   name                = "pe-kv-gpt-oai-${var.environment}"
   location            = var.location
   resource_group_name = var.resource_group_name
@@ -38,7 +38,7 @@ resource "azurerm_private_endpoint" "keyvault_pe" {
 resource "azurerm_private_endpoint" "cosmosdb_pe" {
   # Usar una condición basada en variables conocidas
   count = var.cosmos_account_name != "" ? 1 : 0
-  
+
   name                = "pe-cosmos-gpt-db-${var.environment}-01"
   location            = var.location
   resource_group_name = var.resource_group_name
@@ -59,7 +59,7 @@ resource "azurerm_private_endpoint" "cosmosdb_pe" {
   tags = merge(var.tags, {
     workload = "oai"
   })
-  
+
   depends_on = [module.cosmos_db, module.networking, module.private_dns_zone]
 }
 
@@ -67,7 +67,7 @@ resource "azurerm_private_endpoint" "cosmosdb_pe" {
 resource "azurerm_private_endpoint" "storage_table_pe" {
   # Usar una condición basada en si existe la configuración de storage
   count = contains(keys(var.storage_accounts), local.storage_account_name) ? 1 : 0
-  
+
   name                = "pe-${local.storage_account_name}-table"
   location            = var.location
   resource_group_name = var.resource_group_name
@@ -88,7 +88,7 @@ resource "azurerm_private_endpoint" "storage_table_pe" {
   tags = merge(var.tags, {
     workload = "oai"
   })
-  
+
   depends_on = [module.storage, module.networking, module.private_dns_zone]
 }
 
@@ -96,7 +96,7 @@ resource "azurerm_private_endpoint" "storage_table_pe" {
 resource "azurerm_private_endpoint" "storage_blob_pe" {
   # Usar una condición basada en si existe la configuración de storage
   count = contains(keys(var.storage_accounts), local.storage_account_name) ? 1 : 0
-  
+
   name                = "pe-${local.storage_account_name}-blob-cdn"
   location            = var.location
   resource_group_name = var.resource_group_name
@@ -115,7 +115,7 @@ resource "azurerm_private_endpoint" "storage_blob_pe" {
   }
 
   tags = var.tags
-  
+
   depends_on = [module.storage, module.networking, module.private_dns_zone]
 }
 
@@ -128,7 +128,7 @@ resource "azurerm_private_endpoint" "redis_pe" {
     for k, v in var.redis_cache : k => v
     if k == "redis_gpt_cache_${var.environment}" && !lookup(v, "is_enterprise", false)
   }
-  
+
   name                = "pe-redis-gpt-cache-${var.environment}-01"
   location            = var.location
   resource_group_name = var.resource_group_name
@@ -149,7 +149,7 @@ resource "azurerm_private_endpoint" "redis_pe" {
   tags = merge(var.tags, {
     workload = "oai"
   })
-  
+
   depends_on = [module.redis, module.networking, module.private_dns_zone]
 }
 
@@ -157,7 +157,7 @@ resource "azurerm_private_endpoint" "redis_pe" {
 resource "azurerm_private_endpoint" "acr_pe" {
   # Usar una condición basada en variables conocidas
   count = var.acr_name != "" ? 1 : 0
-  
+
   name                = "pe-${var.acr_name}"
   location            = var.location
   resource_group_name = var.resource_group_name
@@ -178,7 +178,7 @@ resource "azurerm_private_endpoint" "acr_pe" {
   tags = merge(var.tags, {
     workload = "oai"
   })
-  
+
   depends_on = [module.container_registry, module.networking, module.private_dns_zone]
 }
 

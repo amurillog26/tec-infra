@@ -18,8 +18,8 @@ resource "azurerm_key_vault_access_policy" "service_identities_policies" {
   tenant_id    = var.tenant_id
   object_id    = each.value.principal_id
 
-  key_permissions    = ["Get", "List", "Update", "Create", "Import", "Delete", "Backup", "Restore", "Recover", "Encrypt", "Decrypt", "Sign", "Verify", "WrapKey", "UnwrapKey"]
-  secret_permissions = ["Get", "List", "Set"]
+  key_permissions         = ["Get", "List", "Update", "Create", "Import", "Delete", "Backup", "Restore", "Recover", "Encrypt", "Decrypt", "Sign", "Verify", "WrapKey", "UnwrapKey"]
+  secret_permissions      = ["Get", "List", "Set"]
   certificate_permissions = ["Get", "List"]
 }
 
@@ -44,13 +44,13 @@ resource "azurerm_key_vault_access_policy" "aks_kubelet_policy" {
 # Aplicamos esta política DESPUÉS de que el módulo APIM ha sido creado
 resource "null_resource" "apim_keyvault_policy_trigger" {
   count = var.apim != null ? 1 : 0
-  
+
   # Cualquier cambio en APIM o KeyVault triggereará esto
   triggers = {
     apim_id = module.apim.id
     kv_id   = module.key_vault.kv_id
   }
-  
+
   # Usamos provisioner local-exec para aplicar la política DESPUÉS de que APIM y KeyVault están creados
   # provisioner "local-exec" {
   #   command = <<-EOT
@@ -63,7 +63,7 @@ resource "null_resource" "apim_keyvault_policy_trigger" {
   #       --certificate-permissions Get List
   #   EOT
   # }
-  
+
   depends_on = [
     module.apim,
     module.key_vault

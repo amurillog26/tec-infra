@@ -10,7 +10,7 @@
 #   custom_subdomain_name = "cs-bing-search-${var.environment}"
 
 #   public_network_access_enabled = false
-  
+
 #   # Configuración de red para permitir acceso desde la vnet
 #   network_acls {
 #     default_action = "Deny"
@@ -54,7 +54,7 @@
 #   custom_subdomain_name = "cs-speech-${var.environment}"
 
 #   public_network_access_enabled = false
-  
+
 #   # Configuración de red para permitir acceso desde la vnet
 #   network_acls {
 #     default_action = "Deny"

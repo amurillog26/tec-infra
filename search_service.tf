@@ -3,11 +3,11 @@ resource "azurerm_search_service" "search_service" {
   name                = "tecgpt-search-${var.environment}"
   resource_group_name = var.resource_group_name
   location            = var.location
-  sku                 = "standard"  # Opciones: free, basic, standard, standard2, standard3, storage_optimized_l1, storage_optimized_l2
+  sku                 = "standard" # Opciones: free, basic, standard, standard2, standard3, storage_optimized_l1, storage_optimized_l2
   replica_count       = 1
   partition_count     = 1
-  hosting_mode        = "default"  # Default o HighDensity
-  
+  hosting_mode        = "default" # Default o HighDensity
+
   # Configuración de red privada
   public_network_access_enabled = false
 
@@ -17,7 +17,7 @@ resource "azurerm_search_service" "search_service" {
   }
 
   tags = merge(var.tags, {
-    service = "search-service"
+    service     = "search-service"
     environment = var.environment
   })
 }
@@ -35,10 +35,10 @@ resource "azurerm_private_endpoint" "search_pe" {
     is_manual_connection           = false
     subresource_names              = ["searchService"]
   }
-  
+
   # Usamos el recurso de zona DNS directamente en vez del módulo
   # Aplicaremos la configuración de DNS posteriormente
-  
+
   tags = var.tags
 }
 
@@ -49,7 +49,7 @@ resource "azurerm_private_dns_a_record" "search_dns_record" {
   resource_group_name = var.resource_group_name
   ttl                 = 300
   records             = [azurerm_private_endpoint.search_pe.private_service_connection[0].private_ip_address]
-  
+
   # Necesitamos que exista la zona DNS privada
   depends_on = [
     module.private_dns_zone

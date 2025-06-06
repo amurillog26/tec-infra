@@ -43,23 +43,23 @@ module "defender" {
       }
       extension = {
         additional_extension_properties = {}
-        name = "AgentlessVmScanning"
+        name                            = "AgentlessVmScanning"
       }
     }
     StorageAccounts = {
       tier = "Standard" # Para Table Storage
       extension = {
         additional_extension_properties = {}
-        name = "SensitiveDataDiscovery"
+        name                            = "SensitiveDataDiscovery"
       }
     }
     CloudPosture = {
       tier = "Standard" # Se encontró en el plan existente
       extension = {
         additional_extension_properties = {
-            "ExclusionTags" = jsonencode([])
-          }
-        name                            = "AgentlessVmScanning"
+          "ExclusionTags" = jsonencode([])
+        }
+        name = "AgentlessVmScanning"
       }
       extension = {
         additional_extension_properties = {}
@@ -95,12 +95,12 @@ module "defender" {
 
   # Configuración para Defender for APIs
   api_defender_subplan = "P1" # P1 para desarrollo
-  
+
   # Asegurar que el API defender esté habilitado para mantener el template deployment
-  api_defender_enabled = true  # Añade esta línea si tu módulo lo soporta
+  api_defender_enabled = true # Añade esta línea si tu módulo lo soporta
 
   # Configuración para Log Analytics
-  log_analytics_workspace_id = module.log_analytics.workspace_id
+  log_analytics_workspace_id       = module.log_analytics.workspace_id
   enable_log_analytics_integration = true
 
   # Configurar contactos para alertas

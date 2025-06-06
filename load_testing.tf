@@ -8,7 +8,7 @@ resource "azurerm_load_test" "tecgpt_load_test" {
   name                = "lt-tecgpt-${var.environment}"
   resource_group_name = var.resource_group_name
   location            = var.location
-  
+
   # Asignar una identidad administrada al servicio
   identity {
     type = "SystemAssigned"
@@ -19,7 +19,7 @@ resource "azurerm_load_test" "tecgpt_load_test" {
     environment = var.environment
     workload    = "api-performance"
   })
-  
+
   lifecycle {
     ignore_changes = [
       tags["created_date"],
@@ -31,11 +31,11 @@ resource "azurerm_load_test" "tecgpt_load_test" {
 # Secret para guardar el Load Test Endpoint en Key Vault (solo en pprd)
 resource "azurerm_key_vault_secret" "load_test_endpoint" {
   count = var.environment == "pprd" ? 1 : 0
-  
+
   name         = "load-test-endpoint"
   value        = azurerm_load_test.tecgpt_load_test[0].data_plane_uri
   key_vault_id = module.key_vault.kv_id
-  
+
   depends_on = [
     azurerm_load_test.tecgpt_load_test
   ]
