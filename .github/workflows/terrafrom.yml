@@ -71,14 +71,12 @@ jobs:
     name: Terraform Plan
     runs-on: ubuntu-latest
     needs: [terraform-validate, security-scan]
-    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || github.event_name == 'push'
+    # Solo ejecutar plan en pull requests
+    if: github.event_name == 'pull_request'
     
+    # Para PR, usar el environment de la rama destino para obtener secrets
     environment:
-      name: ${{ github.event.inputs.environment || (github.event_name == 'pull_request' && (github.base_ref == 'main' && 'prod' || (github.base_ref == 'release' && 'release' || 'develop'))) || (github.event_name == 'push' && (github.ref == 'refs/heads/main' && 'prod' || (github.ref == 'refs/heads/release' && 'release' || 'develop'))) || 'develop' }}
-    
-    concurrency:
-      group: terraform-${{ github.event.inputs.environment || (github.event_name == 'pull_request' && (github.base_ref == 'main' && 'prod' || (github.base_ref == 'release' && 'release' || 'develop'))) || (github.event_name == 'push' && (github.ref == 'refs/heads/main' && 'prod' || (github.ref == 'refs/heads/release' && 'release' || 'develop'))) || 'develop' }}
-      cancel-in-progress: false
+      name: ${{ github.base_ref }}
 
     steps:
       - name: Checkout código
@@ -88,109 +86,63 @@ jobs:
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.5.0
-          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
-      - name: Determinar ambiente y configuración backend
-        id: env_selection
+      - name: Set Environment Variables
         run: |
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            if [[ "${{ github.base_ref }}" == "main" ]]; then
-              echo "ENVIRONMENT=prod" >> $GITHUB_ENV
-              echo "KEY=prod.tfstate" >> $GITHUB_ENV
-              echo "RG_NAME=rg_gpt_oai_prod" >> $GITHUB_ENV
+          # Determinar configuración basada en la rama destino del PR
+          case "${{ github.base_ref }}" in
+            main)
+              echo "TF_ENV=prod" >> $GITHUB_ENV
               echo "STORAGE_ACCOUNT=tfstateprodgptoai" >> $GITHUB_ENV
-            elif [[ "${{ github.base_ref }}" == "release" ]]; then
-              echo "ENVIRONMENT=release" >> $GITHUB_ENV
-              echo "KEY=release.tfstate" >> $GITHUB_ENV
-              echo "RG_NAME=rg_gpt_oai_pprd" >> $GITHUB_ENV
+              echo "RESOURCE_GROUP=rg_gpt_oai_prod" >> $GITHUB_ENV
+              echo "STATE_KEY=prod.tfstate" >> $GITHUB_ENV
+              ;;
+            release)
+              echo "TF_ENV=release" >> $GITHUB_ENV
               echo "STORAGE_ACCOUNT=tfstatepprdgptoai" >> $GITHUB_ENV
-            else
-              echo "ENVIRONMENT=dev" >> $GITHUB_ENV
-              echo "KEY=dev.tfstate" >> $GITHUB_ENV
-              echo "RG_NAME=rg_gpt_oai_dev" >> $GITHUB_ENV
+              echo "RESOURCE_GROUP=rg_gpt_oai_pprd" >> $GITHUB_ENV
+              echo "STATE_KEY=release.tfstate" >> $GITHUB_ENV
+              ;;
+            *)
+              echo "TF_ENV=dev" >> $GITHUB_ENV
               echo "STORAGE_ACCOUNT=stgpttfstates01" >> $GITHUB_ENV
-            fi
-          elif [[ "${{ github.event_name }}" == "push" ]]; then
-            if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-              echo "ENVIRONMENT=prod" >> $GITHUB_ENV
-              echo "KEY=prod.tfstate" >> $GITHUB_ENV
-              echo "RG_NAME=rg_gpt_oai_prod" >> $GITHUB_ENV
-              echo "STORAGE_ACCOUNT=tfstateprodgptoai" >> $GITHUB_ENV
-            elif [[ "${{ github.ref }}" == "refs/heads/release" ]]; then
-              echo "ENVIRONMENT=release" >> $GITHUB_ENV
-              echo "KEY=release.tfstate" >> $GITHUB_ENV
-              echo "RG_NAME=rg_gpt_oai_pprd" >> $GITHUB_ENV
-              echo "STORAGE_ACCOUNT=tfstatepprdgptoai" >> $GITHUB_ENV
-            else
-              echo "ENVIRONMENT=dev" >> $GITHUB_ENV
-              echo "KEY=dev.tfstate" >> $GITHUB_ENV
-              echo "RG_NAME=rg_gpt_oai_dev" >> $GITHUB_ENV
-              echo "STORAGE_ACCOUNT=stgpttfstates01" >> $GITHUB_ENV
-            fi
-          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "ENVIRONMENT=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
-            if [[ "${{ github.event.inputs.environment }}" == "prod" ]]; then
-              echo "KEY=prod.tfstate" >> $GITHUB_ENV
-              echo "RG_NAME=rg_gpt_oai_prod" >> $GITHUB_ENV
-              echo "STORAGE_ACCOUNT=tfstateprodgptoai" >> $GITHUB_ENV
-            elif [[ "${{ github.event.inputs.environment }}" == "release" ]]; then
-              echo "KEY=release.tfstate" >> $GITHUB_ENV
-              echo "RG_NAME=rg_gpt_oai_pprd" >> $GITHUB_ENV
-              echo "STORAGE_ACCOUNT=tfstatepprdgptoai" >> $GITHUB_ENV
-            else
-              echo "KEY=dev.tfstate" >> $GITHUB_ENV
-              echo "RG_NAME=rg_gpt_oai_dev" >> $GITHUB_ENV
-              echo "STORAGE_ACCOUNT=stgpttfstates01" >> $GITHUB_ENV
-            fi
-          fi
+              echo "RESOURCE_GROUP=rg_gpt_oai_dev" >> $GITHUB_ENV
+              echo "STATE_KEY=dev.tfstate" >> $GITHUB_ENV
+              ;;
+          esac
         
       - name: Terraform Init
-        id: init
         env:
           ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-          TF_LOG: INFO
         run: |
           terraform init \
-            -backend-config="resource_group_name=${RG_NAME}" \
-            -backend-config="storage_account_name=${STORAGE_ACCOUNT}" \
-            -backend-config="key=${KEY}"
+            -backend-config="resource_group_name=${{ env.RESOURCE_GROUP }}" \
+            -backend-config="storage_account_name=${{ env.STORAGE_ACCOUNT }}" \
+            -backend-config="key=${{ env.STATE_KEY }}"
 
       - name: Terraform Plan
-        id: plan
         env:
           ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-          TF_LOG: INFO
         run: |
-          terraform plan \
-            -var-file=env/${ENVIRONMENT}.tfvars \
-            -out=tfplan
-
-      - name: Publicar Plan de Terraform como Artefacto
-        if: always()
-        uses: actions/upload-artifact@v4.6.1
-        with:
-          name: terraform-plan-${{ env.ENVIRONMENT }}
-          path: tfplan
-          retention-days: 7
+          terraform plan -var-file=env/${{ env.TF_ENV }}.tfvars
 
   terraform-apply:
     name: Terraform Apply
     runs-on: ubuntu-latest
-    needs: terraform-plan
+    needs: [terraform-validate, security-scan]
+    # Ejecutar apply en push (merge) o workflow_dispatch
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     
+    # Para push, usar el nombre de la rama como environment
+    # Para workflow_dispatch, mapear el input a la rama correspondiente
     environment:
-      name: ${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || (github.ref == 'refs/heads/release' && 'release' || 'develop')) }}
-    
-    concurrency:
-      group: terraform-apply-${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || (github.ref == 'refs/heads/release' && 'release' || 'develop')) }}
-      cancel-in-progress: false
+      name: ${{ github.event_name == 'push' && github.ref_name || (github.event.inputs.environment == 'prod' && 'main' || github.event.inputs.environment == 'dev' && 'develop' || 'release') }}
 
     steps:
       - name: Checkout código
@@ -200,88 +152,60 @@ jobs:
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.5.0
-          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
-      - name: Determinar ambiente y configuración backend
-        id: env_selection
+      - name: Set Environment Variables
         run: |
+          # Para push, usar la rama actual
           if [[ "${{ github.event_name }}" == "push" ]]; then
-            if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-              echo "ENVIRONMENT=prod" >> $GITHUB_ENV
-              echo "KEY=prod.tfstate" >> $GITHUB_ENV
-              echo "RG_NAME=rg_gpt_oai_prod" >> $GITHUB_ENV
-              echo "STORAGE_ACCOUNT=tfstateprodgptoai" >> $GITHUB_ENV
-            elif [[ "${{ github.ref }}" == "refs/heads/release" ]]; then
-              echo "ENVIRONMENT=release" >> $GITHUB_ENV
-              echo "KEY=release.tfstate" >> $GITHUB_ENV
-              echo "RG_NAME=rg_gpt_oai_pprd" >> $GITHUB_ENV
-              echo "STORAGE_ACCOUNT=tfstatepprdgptoai" >> $GITHUB_ENV
-            else
-              echo "ENVIRONMENT=dev" >> $GITHUB_ENV
-              echo "KEY=dev.tfstate" >> $GITHUB_ENV
-              echo "RG_NAME=rg_gpt_oai_dev" >> $GITHUB_ENV
-              echo "STORAGE_ACCOUNT=stgpttfstates01" >> $GITHUB_ENV
-            fi
-          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "ENVIRONMENT=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
-            if [[ "${{ github.event.inputs.environment }}" == "prod" ]]; then
-              echo "KEY=prod.tfstate" >> $GITHUB_ENV
-              echo "RG_NAME=rg_gpt_oai_prod" >> $GITHUB_ENV
-              echo "STORAGE_ACCOUNT=tfstateprodgptoai" >> $GITHUB_ENV
-            elif [[ "${{ github.event.inputs.environment }}" == "release" ]]; then
-              echo "KEY=release.tfstate" >> $GITHUB_ENV
-              echo "RG_NAME=rg_gpt_oai_pprd" >> $GITHUB_ENV
-              echo "STORAGE_ACCOUNT=tfstatepprdgptoai" >> $GITHUB_ENV
-            else
-              echo "KEY=dev.tfstate" >> $GITHUB_ENV
-              echo "RG_NAME=rg_gpt_oai_dev" >> $GITHUB_ENV
-              echo "STORAGE_ACCOUNT=stgpttfstates01" >> $GITHUB_ENV
-            fi
+            BRANCH="${{ github.ref_name }}"
+          # Para workflow_dispatch, mapear el input
+          else
+            case "${{ github.event.inputs.environment }}" in
+              prod) BRANCH="main" ;;
+              release) BRANCH="release" ;;
+              *) BRANCH="develop" ;;
+            esac
           fi
+          
+          # Configurar variables basadas en la rama
+          case "$BRANCH" in
+            main)
+              echo "TF_ENV=prod" >> $GITHUB_ENV
+              echo "STORAGE_ACCOUNT=tfstateprodgptoai" >> $GITHUB_ENV
+              echo "RESOURCE_GROUP=rg_gpt_oai_prod" >> $GITHUB_ENV
+              echo "STATE_KEY=prod.tfstate" >> $GITHUB_ENV
+              ;;
+            release)
+              echo "TF_ENV=release" >> $GITHUB_ENV
+              echo "STORAGE_ACCOUNT=tfstatepprdgptoai" >> $GITHUB_ENV
+              echo "RESOURCE_GROUP=rg_gpt_oai_pprd" >> $GITHUB_ENV
+              echo "STATE_KEY=release.tfstate" >> $GITHUB_ENV
+              ;;
+            *)
+              echo "TF_ENV=dev" >> $GITHUB_ENV
+              echo "STORAGE_ACCOUNT=stgpttfstates01" >> $GITHUB_ENV
+              echo "RESOURCE_GROUP=rg_gpt_oai_dev" >> $GITHUB_ENV
+              echo "STATE_KEY=dev.tfstate" >> $GITHUB_ENV
+              ;;
+          esac
 
       - name: Terraform Init
-        id: init
         env:
           ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-          TF_LOG: INFO
         run: |
           terraform init \
-            -backend-config="resource_group_name=${RG_NAME}" \
-            -backend-config="storage_account_name=${STORAGE_ACCOUNT}" \
-            -backend-config="key=${KEY}"
-
-      - name: Terraform Plan
-        id: plan
-        env:
-          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-          TF_LOG: INFO
-        run: |
-          terraform plan \
-            -var-file=env/${ENVIRONMENT}.tfvars \
-            -out=tfplan
+            -backend-config="resource_group_name=${{ env.RESOURCE_GROUP }}" \
+            -backend-config="storage_account_name=${{ env.STORAGE_ACCOUNT }}" \
+            -backend-config="key=${{ env.STATE_KEY }}"
 
       - name: Terraform Apply
-        id: apply
         env:
           ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-          TF_LOG: INFO
         run: |
-          terraform apply tfplan
-
-      - name: Publicar Estado de Terraform como Artefacto
-        uses: actions/upload-artifact@v4.6.1
-        with:
-          name: terraform-state-${{ env.ENVIRONMENT }}-${{ github.run_id }}
-          path: |
-            terraform.tfstate
-            terraform.tfstate.backup
-          retention-days: 30
+          terraform apply -var-file=env/${{ env.TF_ENV }}.tfvars -auto-approve

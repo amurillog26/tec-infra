@@ -5,10 +5,9 @@ locals {
   aks_mc_resource_group = "MC_rg_gpt_oai_${var.environment}_aks-gpt-${var.environment}-001_southcentralus"
 }
 
-# Data source para listar TODOS los NSGs en el resource group de AKS
 data "azurerm_resources" "aks_nsgs" {
   depends_on = [module.aks]
-
+  
   resource_group_name = local.aks_mc_resource_group
   type                = "Microsoft.Network/networkSecurityGroups"
 }
@@ -16,14 +15,14 @@ data "azurerm_resources" "aks_nsgs" {
 # Data source para obtener detalles del primer NSG que empiece con "aks-agentpool"
 data "azurerm_network_security_group" "aks_nsg" {
   depends_on = [data.azurerm_resources.aks_nsgs]
-
+  
   # Buscar el primer NSG que coincida con el patrón
   name = [
-    for nsg in data.azurerm_resources.aks_nsgs.resources :
-    nsg.name
+    for nsg in data.azurerm_resources.aks_nsgs.resources : 
+    nsg.name 
     if can(regex("^aks-agentpool-.*-nsg$", nsg.name))
   ][0]
-
+  
   resource_group_name = local.aks_mc_resource_group
 }
 
@@ -58,11 +57,11 @@ resource "azurerm_network_security_rule" "allow_apim_to_aks" {
 
 # Outputs para debugging
 output "aks_nsg_discovered_name" {
-  value       = data.azurerm_network_security_group.aks_nsg.name
+  value = data.azurerm_network_security_group.aks_nsg.name
   description = "Nombre del NSG de AKS descubierto dinámicamente"
 }
 
 output "aks_nsg_list" {
-  value       = [for nsg in data.azurerm_resources.aks_nsgs.resources : nsg.name]
+  value = [for nsg in data.azurerm_resources.aks_nsgs.resources : nsg.name]
   description = "Lista de todos los NSGs en el resource group de AKS"
 }
